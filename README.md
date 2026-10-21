@@ -49,7 +49,7 @@ v2 当前是预览版。Clash 配置按标准目录、YAML 结构和目标字段
 
 - `BehindRose.Core`：修复计划、快照模型、状态与事务回滚；不访问真实注册表。
 - `BehindRose.Windows`：固定目标文件与注册表适配、受保护备份、版本识别、提权工作进程。
-- `BehindRose.Desktop`：WPF 界面、普通权限操作编排、WebView2 检测及受限状态桥。
+- `BehindRose.Desktop`：WebView2 承载与开发模式相同的完整工作台，内置仅回环地址的普通权限接口，无需 Node.js；负责窗口和更新生命周期。
 - `BehindRose.DevHost`：浏览器开发模式的本机服务，通过标准输入输出接收固定命令，复用同一配置核心与提权进程。
 - `BehindRose.Tests`：故障注入、幂等、字段保留、恢复冲突及真实文件原子写入测试。
 

@@ -15,6 +15,7 @@
 | flag-icons / Lobe icons | 国旗、服务图标 | 对应 `licenses/flag-icons-LICENSE.txt`、`licenses/lobe-icons-LICENSE.txt` 与图标目录许可证 |
 | DB-IP | 本地国家信息数据 | 随包目录与页面署名保留；使用数据版本的 CC-BY 条款 |
 | .NET、WebView2、YamlDotNet | Windows 运行时与解析器 | `licenses/` 中对应许可证及第三方说明 |
+| ASP.NET Core 10.0.12 | EXE 内置的回环工作台服务；随自包含包分发 | MIT 及第三方说明；`licenses/aspnetcore-LICENSE.txt`、`licenses/aspnetcore-THIRD-PARTY-NOTICES.txt` |
 | Velopack 1.2.161 | 程序更新、安装与重启；项目本地 vpk 工具版本一致 | MIT；`licenses/Velopack-LICENSE.txt`；来源版本提交 `92d6a1c91716729d449034df5c50307dcce39493` |
 
 React Bits 上游允许将组件作为应用、网站或产品的一部分分发，同时限制分发组件本身（包括单独、成包或移植版本）。本项目将其作为网络工具应用的 UI 集成，保留原条款，不作为独立组件产品发布。它不是纯 MIT，也不属于 OSI 意义的开源许可证，不能重新标记为项目非商业许可、MIT 或 AGPL。见 [上游许可证](https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md) 和 [Commons Clause 说明](https://commonsclause.com/)。

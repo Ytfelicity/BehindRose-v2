@@ -9,7 +9,16 @@
   const automaticOptions = 1 | 2 | 4 | 8 | 32;
   const networkSections = { 'browser-network': '网络检测', connectivity: '网络检测', 'ip-quality': '网络检测' };
   let token, ready = false, busy = false, submitting = false, planning = false, health, lastOperation, page, toastTimer, statusPending = false, healthPending = false;
-  let frameLoaded = false, frameObserver;
+  let frameLoaded = false, frameObserver, desktop = false;
+  async function desktopUpdateStatus() {
+    if (!desktop) return;
+    const response = await fetch('/api/update-status', { cache: 'no-store' });
+    if (!response.ok) return;
+    const state = await response.json();
+    $('app-version').textContent = `当前版本 ${state.version}`;
+    $('desktop-update-status').textContent = state.status;
+    $('desktop-update-check').disabled = !state.enabled || state.checking;
+  }
   function syncDarkTheme() {
     document.documentElement.dataset.theme = 'dark';
     if (frameLoaded) $('network-frame').contentDocument.documentElement.dataset.theme = 'dark';
@@ -26,6 +35,11 @@
     return result.data;
   }
   const attempt = action => async event => { notice(); try { await action(event); } catch (error) { notice(error.message); } };
+  $('desktop-update-check').addEventListener('click', attempt(async () => {
+    const response = await fetch('/api/update-check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-BehindRose-Token': token }, body: '{}' });
+    if (!response.ok) throw Error('更新检查未能启动，请稍后重试。');
+    await desktopUpdateStatus();
+  }));
   function controls() {
     for (const id of ['health-refresh', 'backups-refresh', 'copy-report', 'open-clash']) $(id).disabled = !ready || busy;
     $('protect-now').disabled = !ready || busy || planning || !health || protectionState().blocked;
@@ -79,6 +93,8 @@
     if (location.hash === '#repair') history.replaceState(null, '', '#overview');
     const target = location.hash.slice(1); page = titles[target] ? target : 'network';
     document.body.dataset.page = page;
+    $('desktop-updates').hidden = !desktop || page !== 'settings';
+    if (desktop && page === 'settings') desktopUpdateStatus().catch(() => {});
     document.querySelectorAll('.page').forEach(section => section.hidden = section.id !== 'page-' + page);
     document.querySelectorAll('a[data-page],button[data-page]').forEach(link => link.dataset.page === page ? link.setAttribute('aria-current', 'page') : link.removeAttribute('aria-current'));
     const label = page === 'network' ? networkSections[target] || networkSections['browser-network'] : titles[page];
@@ -224,6 +240,13 @@
     try {
       const response = await fetch('/api/session'); if (!response.ok) throw Error('无法连接本机服务。');
       const session = await response.json(); token = session.token; ready = session.ready; controls();
+      desktop = session.desktop === true;
+      if (desktop) {
+        $('dev-state').textContent = `桌面应用 · ${session.version}`;
+        document.querySelector('.development-details').hidden = true;
+        $('desktop-updates').hidden = page !== 'settings';
+        await desktopUpdateStatus();
+      }
       if (!ready) { $('health-title').textContent = session.error || '正在准备 DNS 防护…'; setTimeout(connect, 1800); return; }
       const status = await api('status'); displayOperation(status.operation);
       if (!busy) { await checkHealth(); if (page === 'backups') await loadBackups(); }
@@ -232,7 +255,7 @@
   setInterval(async () => {
     if (!ready || statusPending) return;
     statusPending = true;
-    try { displayOperation((await api('status')).operation); }
+    try { displayOperation((await api('status')).operation); if (desktop && page === 'settings') await desktopUpdateStatus(); }
     catch (error) { ready = false; controls(); notice(error.message); setTimeout(connect, 2000); }
     finally { statusPending = false; }
   }, 1800);

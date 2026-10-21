@@ -4,6 +4,8 @@
     <ProjectReference Include="../BehindRose.Windows/BehindRose.Windows.csproj" />
     <Compile Include="../BehindRose.Desktop/DemoEnvironment.cs" Link="DemoEnvironment.cs" />
     <Compile Include="../BehindRose.Desktop/IpPureBrowserClient.cs" Link="IpPureBrowserClient.cs" />
+    <Compile Include="../BehindRose.Desktop/WorkbenchApp.cs" Link="WorkbenchApp.cs" />
+    <Compile Include="../BehindRose.Desktop/WorkbenchRequest.cs" Link="WorkbenchRequest.cs" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
   </ItemGroup>
 </Project>

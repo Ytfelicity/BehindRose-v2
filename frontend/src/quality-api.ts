@@ -4,7 +4,7 @@ export type QualityState = { state: string; id: string | null; family: number; r
 export type LocalProxyPorts = { candidates: { port: number; sources: string[]; loopbackOnly: boolean }[]; notes: string[] };
 export const idleQuality: QualityState = { state: 'idle', id: null, family: 4, route: 'proxy', stage: '尚未开始', current: 0, total: 1, startedAt: null, finishedAt: null, report: null, error: null };
 type WebView = { postMessage(message: unknown): void; addEventListener(name: string, listener: (event: { data: Record<string, unknown> }) => void): void };
-const native = (window as unknown as { chrome?: { webview?: WebView } }).chrome?.webview;
+const native = location.hostname === 'diagnostics.behindrose.invalid' ? (window as unknown as { chrome?: { webview?: WebView } }).chrome?.webview : undefined;
 let epoch = '';
 const callbacks = new Map<string, { resolve: (data: unknown) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>();
 native?.addEventListener('message', event => {

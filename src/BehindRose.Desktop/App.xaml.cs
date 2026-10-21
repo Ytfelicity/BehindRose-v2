@@ -30,7 +30,8 @@ public partial class App : Application
         {
             MessageBox.Show("操作未完成：" + args.Exception.Message + "\n如有配置操作中断，请重新打开程序检查备份记录。", "操作未完成"); args.Handled = true;
         };
-        var window = new MainWindow(demo, smoke, updateTest); MainWindow = window; window.Show();
+        Window window = e.Args.Contains("--legacy-ui") ? new MainWindow(demo, smoke, updateTest) : new WorkbenchWindow(demo, smoke, updateTest);
+        MainWindow = window; window.Show();
     }
     protected override void OnExit(ExitEventArgs e) { instance?.Dispose(); base.OnExit(e); }
 }

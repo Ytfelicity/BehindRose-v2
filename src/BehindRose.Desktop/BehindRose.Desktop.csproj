@@ -16,5 +16,7 @@
     <EmbeddedResource Include="Assets/diagnostics/**/*" Watch="false" /><EmbeddedResource Include="Assets/avatar-source.png" />
     <Watch Include="**/*.xaml" Exclude="**/bin/**;**/obj/**" />
     <Resource Include="Assets/avatar.ico" />
+    <EmbeddedResource Include="Assets/workbench/**/*" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

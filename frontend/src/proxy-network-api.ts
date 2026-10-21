@@ -4,7 +4,7 @@ export type ProxyNetworkReport = { version: string; scope: string; identity: { i
 export type ProxyNetworkState = { state: string; id: string | null; proxyPort: number; profile: string; includeSpeed: boolean; stage: string; current: number; total: number; startedAt: string | null; finishedAt: string | null; report: ProxyNetworkReport | null; error: string | null };
 type Fields = { proxyPort: number; profile: string; includeSpeed: boolean };
 type WebView = { postMessage(value: unknown): void; addEventListener(name: string, listener: (event: { data: Record<string, unknown> }) => void): void };
-const native = (window as unknown as { chrome?: { webview?: WebView } }).chrome?.webview;
+const native = location.hostname === 'diagnostics.behindrose.invalid' ? (window as unknown as { chrome?: { webview?: WebView } }).chrome?.webview : undefined;
 let epoch = '';
 const callbacks = new Map<string, { resolve: (data: ProxyNetworkState) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>();
 native?.addEventListener('message', event => {
