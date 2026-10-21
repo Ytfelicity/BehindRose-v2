@@ -18,6 +18,7 @@ internal sealed partial class WorkbenchWindow : Window
     private readonly WorkbenchServer server;
     private readonly WorkbenchUpdater updater;
     private readonly bool smoke;
+    private int externalSmokeRequests;
     private bool disposed;
     public WorkbenchWindow(bool demo, bool smoke, bool updateTest)
     {
@@ -50,6 +51,18 @@ internal sealed partial class WorkbenchWindow : Window
             core.Settings.AreDefaultContextMenusEnabled = DevelopmentMode.Enabled;
             core.PermissionRequested += (_, e) => { e.State = CoreWebView2PermissionState.Deny; e.Handled = true; };
             core.DownloadStarting += (_, e) => e.Cancel = true;
+            if (smoke)
+            {
+                core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
+                core.WebResourceRequested += (_, e) =>
+                {
+                    if (Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" && !IsLocal(e.Request.Uri))
+                    {
+                        externalSmokeRequests++;
+                        e.Response = environment.CreateWebResourceResponse(null, 403, "Offline UI verification", "");
+                    }
+                };
+            }
             core.NavigationStarting += (_, e) =>
             {
                 if (IsLocal(e.Uri) && new Uri(e.Uri).AbsolutePath is "/" or "/index.html") return;

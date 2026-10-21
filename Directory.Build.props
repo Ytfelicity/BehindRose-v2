@@ -6,7 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
     <Version>2.0.0-preview.1</Version>
-    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.2</ReleaseVersion>
+    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.3</ReleaseVersion>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <Company>身后红玫瑰</Company>

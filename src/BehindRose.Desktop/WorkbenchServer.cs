@@ -1,6 +1,5 @@
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -75,7 +74,7 @@ internal sealed class WorkbenchServer(LocalApp local) : IAsyncDisposable
         if (Regex.IsMatch(path, @"^/flags/[a-z]{2}\.svg$|^/service-icons/[a-z-]+\.svg$|^/fonts/(figtree-latin-(400|500|600|700)-normal|eb-garamond-latin-400-normal)\.woff2$")) asset = "diagnostics" + path;
         if (asset == null) { response.StatusCode = 404; return; }
         byte[] bytes;
-        try { bytes = ReadAsset(asset); }
+        try { bytes = AppAssets.Read(asset); }
         catch (IOException) { response.StatusCode = 404; return; }
         response.Headers.ContentSecurityPolicy = path == "/network"
             ? Csp.Replace("connect-src 'self';", "connect-src 'self' https: stun:;").Replace("frame-src 'self'", "frame-src 'none'").Replace("frame-ancestors 'none'", "frame-ancestors 'self'") : Csp;
@@ -136,15 +135,6 @@ internal sealed class WorkbenchServer(LocalApp local) : IAsyncDisposable
         context.Response.StatusCode = status; context.Response.ContentType = "application/json; charset=utf-8";
         context.Response.ContentLength = bytes.Length;
         return context.Response.Body.WriteAsync(bytes, context.RequestAborted).AsTask();
-    }
-    private static byte[] ReadAsset(string asset)
-    {
-        if (DevelopmentMode.Assets is string source) return File.ReadAllBytes(Path.Combine(source, asset));
-        var assembly = Assembly.GetExecutingAssembly();
-        string suffix = ".Assets." + asset.Replace('/', '.');
-        var name = assembly.GetManifestResourceNames().SingleOrDefault(name => name.EndsWith(suffix, StringComparison.Ordinal)) ?? throw new FileNotFoundException();
-        using var stream = assembly.GetManifestResourceStream(name)!;
-        using var bytes = new MemoryStream(); stream.CopyTo(bytes); return bytes.ToArray();
     }
     public async ValueTask DisposeAsync()
     {

@@ -10,6 +10,8 @@
 
 样式分别位于 `dashboard4-theme.css`、`dashboard4-workbench.css`、`dashboard4-network.css`。本机服务使用其它端口时，浏览器回归通过 `BEHINDROSE_TEST_URL` 指定地址。
 
+网站品牌图标、国旗、字体与界面图片随程序本地分发，打开页面不请求第三方图标服务。服务 SVG 的来源、版本与原始字节哈希记录在 `Assets/diagnostics/service-icons/manifest.json`；YouTube、微信使用 Font Awesome Free 6.7.2，其余图形来自既有 Lobe icons。字符图标和自定义网站的通用图标直接由本地组件渲染。发布资源使用显式逻辑路径，保留目录连字符，避免 SDK 命名空间改写导致 EXE 内的图标与国家数据库无法读取。
+
 ## 一键配置入口
 
 侧栏只保留“网络检测 / 一键配置 / 恢复记录”，帮助与关于位于底部。原配置概览和 DNS 配置统一到 `#overview`；旧 `#repair` 链接自动转到同一页面，不再展示范围勾选或另一套配置页。

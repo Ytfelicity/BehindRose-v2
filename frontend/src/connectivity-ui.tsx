@@ -20,6 +20,12 @@ const labels: Record<ProbeResult['state'], string> = { idle: '未检测', runnin
 function loadSites(): Website[] { try { return importWebsites(localStorage.getItem(storageKey) || '[]', []); } catch { return []; } }
 function publishState(running: boolean, cancelled = false) { window.dispatchEvent(new CustomEvent('connectivity-state', { detail: { running, cancelled } })); }
 
+function ServiceIcon({ site }: { site: Website }) {
+  const [failed, setFailed] = useState(false);
+  if (site.icon && !failed) return <img src={`/service-icons/${site.icon}.svg`} alt="" width="28" height="28" onError={() => setFailed(true)}/>;
+  return site.id === 'characterai' ? <span>c.ai</span> : <Globe2 size={24}/>;
+}
+
 export function Connectivity() {
   const [custom, setCustom] = useState(loadSites);
   const [group, setGroup] = useState<Group>('reference');
@@ -124,7 +130,7 @@ export function Connectivity() {
       {sites.map(site => { const result = results[site.id] || idleResult(); const StateIcon = result.state === 'running' ? LoaderCircle : ['reachable', 'slow'].includes(result.state) ? CircleCheck : ['failed', 'timeout'].includes(result.state) ? CircleHelp : Clock3;
         return <tr key={site.id} className="connectivity-row" data-state={result.state} aria-label={site.name}>
           <td className="connectivity-service"><div className="service-title">
-          <div className="service-brand" aria-hidden="true">{site.icon ? <img src={`/service-icons/${site.icon}.svg`} alt="" width="28" height="28"/> : site.id === 'characterai' ? <span>c.ai</span> : <Globe2 size={24}/>}</div>
+          <div className="service-brand" aria-hidden="true"><ServiceIcon site={site}/></div>
           <div className="service-name"><strong>{site.name}</strong><small title={site.url}>{new URL(site.url).hostname}</small></div>
           </div></td>
           <td><span className="connectivity-latency">{result.ms !== undefined ? <>{result.ms}<small> ms · {result.totalRounds === 1 ? '单次' : '最低'}</small></> : '—'}</span></td>

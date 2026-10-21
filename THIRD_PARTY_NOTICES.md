@@ -13,6 +13,7 @@
 | React / ReactDOM / Scheduler、Motion、Floating UI、clsx、tailwind-merge、lucide-react | 实际捆绑的 UI 运行依赖 | 同安装版本的完整 MIT / ISC 文本保存在 `licenses/frontend/`，对应版本见 `manifest.json` |
 | Figtree / EB Garamond | 随包字体 | SIL OFL；`src/BehindRose.Desktop/Assets/diagnostics/fonts/*-OFL.txt` |
 | flag-icons / Lobe icons | 国旗、服务图标 | 对应 `licenses/flag-icons-LICENSE.txt`、`licenses/lobe-icons-LICENSE.txt` 与图标目录许可证 |
+| Font Awesome Free 6.7.2 | 本地 YouTube、微信品牌 SVG；保留原文件及署名 | SVG 为 CC BY 4.0；`licenses/Font-Awesome-LICENSE.txt`；来源与哈希见 `service-icons/manifest.json`，仅用于标识对应服务，商标归各自权利人 |
 | DB-IP | 本地国家信息数据 | 随包目录与页面署名保留；使用数据版本的 CC-BY 条款 |
 | .NET、WebView2、YamlDotNet | Windows 运行时与解析器 | `licenses/` 中对应许可证及第三方说明 |
 | ASP.NET Core 10.0.12 | EXE 内置的回环工作台服务；随自包含包分发 | MIT 及第三方说明；`licenses/aspnetcore-LICENSE.txt`、`licenses/aspnetcore-THIRD-PARTY-NOTICES.txt` |

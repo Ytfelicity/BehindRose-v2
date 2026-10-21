@@ -71,6 +71,20 @@
     {
       "name": "cloudflare-color",
       "sha256": "cee35d3f0ecb7925ce0a89aeaff8b907cadae7c3fe44a23e4001cc8d5ee57502"
+    },
+    {
+      "name": "youtube",
+      "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/youtube.svg",
+      "version": "6.7.2",
+      "license": "CC BY 4.0",
+      "sha256": "652f1ec4169ebe810803fba8e8a22e993255794e68d8d9cca3bc61d34eec26ab"
+    },
+    {
+      "name": "weixin",
+      "source": "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.7.2/svgs/brands/weixin.svg",
+      "version": "6.7.2",
+      "license": "CC BY 4.0",
+      "sha256": "9b3f7fea6a95c0bd8c798287f05f2e701c482769476670439f28ba9ae9420ee0"
     }
   ]
 }

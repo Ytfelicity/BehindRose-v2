@@ -3,5 +3,6 @@
 vendor/MyIP/** -text
 frontend/src/vendor/** -text
 frontend/src/components/reactbits/** -text
+src/BehindRose.Desktop/Assets/diagnostics/service-icons/** -text
 licenses/react-bits-LICENSE.md text eol=lf
 licenses/GSAP-NOTICE.txt text eol=lf

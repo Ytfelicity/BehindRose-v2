@@ -2,6 +2,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 
@@ -54,8 +55,37 @@ internal sealed partial class WorkbenchWindow
         }
         var health = await Call("health");
         if (!health.GetProperty("demo").GetBoolean()) throw new IOException("Smoke must use in-memory state");
+        using var iconManifest = JsonDocument.Parse(AppAssets.Read("diagnostics/service-icons/manifest.json"));
+        int iconCount = 0;
+        foreach (var icon in iconManifest.RootElement.GetProperty("files").EnumerateArray())
+        {
+            byte[] bytes = await client.GetByteArrayAsync("/service-icons/" + icon.GetProperty("name").GetString() + ".svg");
+            if (!Convert.ToHexString(SHA256.HashData(bytes)).Equals(icon.GetProperty("sha256").GetString(), StringComparison.OrdinalIgnoreCase)) throw new IOException("Packaged icon differs from its source manifest");
+            iconCount++;
+        }
+        foreach (string font in new[] { "figtree-latin-400-normal", "figtree-latin-500-normal", "figtree-latin-600-normal", "figtree-latin-700-normal", "eb-garamond-latin-400-normal" })
+        {
+            byte[] bytes = await client.GetByteArrayAsync("/fonts/" + font + ".woff2");
+            if (bytes.Length < 4 || System.Text.Encoding.ASCII.GetString(bytes, 0, 4) != "wOF2") throw new IOException("Packaged font is missing or invalid");
+        }
+        using var countries = JsonDocument.Parse(AppAssets.Read("diagnostics/country-db/manifest.json"));
+        foreach (var file in countries.RootElement.GetProperty("files").EnumerateArray())
+        {
+            byte[] bytes = await client.GetByteArrayAsync("/country-db/" + file.GetProperty("name").GetString());
+            if (!Convert.ToHexString(SHA256.HashData(bytes)).Equals(file.GetProperty("sha256").GetString(), StringComparison.OrdinalIgnoreCase)) throw new IOException("Packaged country data differs from its manifest");
+        }
+        await client.GetByteArrayAsync("/flags/cn.svg");
         await WaitFor("document.body.classList.contains('dashboard4') && document.getElementById('network-frame')?.contentWindow?.RoseCheck && document.getElementById('dev-state')?.textContent.includes('桌面')");
+        foreach (var (group, expectedImages) in new[] { ("reference", 7), ("ai", 14), ("common", 3) })
+        {
+            await browser.CoreWebView2.ExecuteScriptAsync("(() => { const f=document.getElementById('network-frame'); const select=f.contentDocument.querySelector('select[aria-label=\"网站分组\"]'); select.value='" + group + "'; select.dispatchEvent(new f.contentWindow.Event('change',{bubbles:true})); })()");
+            await WaitFor("(() => { const images=[...document.getElementById('network-frame').contentDocument.querySelectorAll('.service-brand img')]; return images.length === " + expectedImages + " && images.every(img => img.complete && img.naturalWidth > 0 && new URL(img.src).origin === location.origin); })()");
+        }
+        await browser.CoreWebView2.ExecuteScriptAsync("(() => { const f=document.getElementById('network-frame'); const select=f.contentDocument.querySelector('select[aria-label=\"网站分组\"]'); select.value='reference'; select.dispatchEvent(new f.contentWindow.Event('change',{bubbles:true})); })()");
+        await WaitFor("document.getElementById('network-frame').contentDocument.querySelectorAll('.service-brand img').length === 7");
         await Capture("workbench-network.png");
+        await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#connectivity'");
+        await Capture("workbench-icons.png");
         await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#overview'");
         await WaitFor("!document.getElementById('page-overview').hidden && !document.getElementById('protect-now').disabled");
         await Capture("workbench-configuration.png");
@@ -87,11 +117,13 @@ internal sealed partial class WorkbenchWindow
         await WaitFor("!document.getElementById('desktop-updates').hidden && document.getElementById('app-version').textContent.includes('preview')");
         await browser.CoreWebView2.ExecuteScriptAsync("document.getElementById('desktop-updates').scrollIntoView({block:'center'})");
         await Capture("workbench-updates.png");
+        if (externalSmokeRequests != 0) throw new IOException("UI attempted to load an external resource during offline verification");
         File.WriteAllText(Path.Combine(root, "result.json"), JsonSerializer.Serialize(new
         {
             Passed = true, Interface = "Current React workbench embedded in WebView2; same assets as development mode",
             Configuration = "In-memory plan, apply, backup and restore passed through packaged loopback API",
             Boundaries = "Host, Origin, CSRF, content type, body size, command fields and update reservation passed",
+            LocalAssets = new { serviceIcons = iconCount, fonts = 5, countryDatabases = 2, groupsDecoded = "reference, ai, common", externalRequests = externalSmokeRequests },
             Scope = "No real network probes, configuration writes or update installation"
         }));
         Close();

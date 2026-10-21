@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Threading;
@@ -14,7 +13,7 @@ public sealed class NetworkView : IDisposable
     private const string Origin = "https://diagnostics.behindrose.invalid/";
     // Custom website probes run in this unprivileged browser, never through the native bridge.
     private const string Csp = "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https: stun:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'";
-    private static readonly HashSet<string> ServiceIcons = ["claude-color", "openai", "gemini-color", "deepseek-color", "huggingface-color", "midjourney", "suno", "manus", "mistral-color", "metaai-color", "qwen-color", "kimi", "poe-color", "perplexity-color", "google-color", "github", "cloudflare-color"];
+    private static readonly HashSet<string> ServiceIcons = ["claude-color", "openai", "gemini-color", "deepseek-color", "huggingface-color", "midjourney", "suno", "manus", "mistral-color", "metaai-color", "qwen-color", "kimi", "poe-color", "perplexity-color", "google-color", "github", "cloudflare-color", "youtube", "weixin"];
     private static readonly Dictionary<string, string> Assets = new() { ["/"] = "index.html", ["/index.html"] = "index.html", ["/diagnostics.css"] = "diagnostics.css", ["/diagnostics.js"] = "diagnostics.js", ["/diagnostics-core.js"] = "diagnostics-core.js", ["/network-console.css"] = "network-console.css", ["/network-ui.js"] = "network-ui.js", ["/beui.css"] = "beui.css", ["/avatar.png"] = "avatar-source.png" };
     private static readonly HashSet<string> Links = ["https://db-ip.com/", "https://www.ipify.org/", "https://ipapi.co/api/", "https://bash.ws/dnsleak", "https://ipleak.net/", "https://ippure.com/", "https://ippure.com/MyIP-Info-API", "https://ippure.com/faq", "https://github.com/macvk/dnsleaktest", "https://github.com/jason5ng32/MyIP", "https://developers.cloudflare.com/realtime/turn/"];
     private readonly List<Stream> responseStreams = [];
@@ -153,15 +152,7 @@ public sealed class NetworkView : IDisposable
         }
     }
     private static byte[] ReadAsset(string asset)
-    {
-        if (DevelopmentMode.Assets is string source)
-            return File.ReadAllBytes(asset == "avatar-source.png" ? Path.Combine(source, asset) : Path.Combine(source, "diagnostics", asset));
-        var assembly = Assembly.GetExecutingAssembly();
-        string suffix = asset == "avatar-source.png" ? ".Assets." + asset : ".Assets.diagnostics." + asset.Replace('/', '.');
-        var resource = assembly.GetManifestResourceNames().SingleOrDefault(x => x.EndsWith(suffix, StringComparison.Ordinal)) ?? throw new FileNotFoundException("找不到本地图标或页面资源。");
-        using var input = assembly.GetManifestResourceStream(resource)!;
-        using var bytes = new MemoryStream(); input.CopyTo(bytes); return bytes.ToArray();
-    }
+        => AppAssets.Read(asset == "avatar-source.png" ? asset : "diagnostics/" + asset);
     private void QueueReload(string path)
     {
         if (disposed || !new[] { ".html", ".css", ".js", ".svg" }.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase)) return;

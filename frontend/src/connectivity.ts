@@ -7,7 +7,7 @@ export const WEBSITE_ROUNDS = MYIP_MULTI_ROUNDS;
 export type Website = { id: string; name: string; url: string; icon?: string };
 export type ProbeRound = { round: number; state: 'reachable' | 'slow' | 'failed' | 'timeout' | 'cancelled'; ms?: number; sampledAt?: string };
 export type ProbeResult = { state: 'idle' | 'running' | 'reachable' | 'slow' | 'failed' | 'timeout' | 'cancelled'; ms?: number; note: string; time?: string; rounds?: ProbeRound[]; totalRounds?: number; completedRounds?: number; successfulRounds?: number; finished?: boolean };
-const icons: Record<string, string> = { claude: 'claude-color', chatgpt: 'openai', gemini: 'gemini-color', deepseek: 'deepseek-color', huggingface: 'huggingface-color', midjourney: 'midjourney', suno: 'suno', manus: 'manus', mistral: 'mistral-color', 'meta-ai': 'metaai-color', qwen: 'qwen-color', kimi: 'kimi', poe: 'poe-color', perplexity: 'perplexity-color', google: 'google-color', github: 'github', cloudflare: 'cloudflare-color' };
+const icons: Record<string, string> = { claude: 'claude-color', chatgpt: 'openai', gemini: 'gemini-color', deepseek: 'deepseek-color', huggingface: 'huggingface-color', midjourney: 'midjourney', suno: 'suno', manus: 'manus', mistral: 'mistral-color', 'meta-ai': 'metaai-color', qwen: 'qwen-color', kimi: 'kimi', poe: 'poe-color', perplexity: 'perplexity-color', google: 'google-color', github: 'github', cloudflare: 'cloudflare-color', youtube: 'youtube', wechat: 'weixin' };
 const adaptTargets = (targets: ReadonlyArray<{ id: string; name: string; url: string }>): Website[] => targets.map(({ id, name, url }) => ({ id, name, url, icon: icons[id] }));
 export const siteGroups = {
   ai: { label: 'AI 服务', sites: adaptTargets(MYIP_AI_TARGETS) },
