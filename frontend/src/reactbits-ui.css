@@ -1,0 +1,147 @@
+/* Application composition around unmodified React Bits components. */
+body.product-ui.console-ui.reactbits-ui,
+:root[data-theme="light"] body.product-ui.console-ui.reactbits-ui,
+body.network-console.reactbits-ui {
+  --bg:#f4f7fb; --card:#ffffff; --surface:#eaf0f7; --text:#172b44;
+  --muted:#566c87; --border:#dce5ef; --line:#e6edf5; --rose:#116e66;
+  --rose-ink:#fff; --rose-soft:#e2f3ed; --green:#147956; --green-bg:#e1f3eb;
+  --neutral-bg:#eaf0f7; --amber:#92602a; --amber-bg:#fff2df;
+}
+:root[data-theme="dark"] body.product-ui.console-ui.reactbits-ui,
+:root[data-theme="dark"] body.network-console.reactbits-ui {
+  --bg:#090f18; --card:#101a27; --surface:#142232; --text:#e6eef9;
+  --muted:#9baec5; --border:#263749; --line:#1d2c3e; --rose:#76e8c3;
+  --rose-ink:#07352b; --rose-soft:#143b35; --green:#76e8c3; --green-bg:#15382f;
+  --neutral-bg:#172739; --amber:#f0c989; --amber-bg:#392b19;
+}
+body.reactbits-ui .workspace, body.reactbits-ui .shell { position:relative; }
+body.reactbits-ui .workspace { isolation:isolate; background:var(--bg); }
+body.reactbits-ui main, body.reactbits-ui .hero, body.reactbits-ui .controls-panel,
+body.reactbits-ui .shell>main, body.reactbits-ui .shell>.section-heading { position:relative; z-index:1; }
+body.network-console.reactbits-ui { background:transparent; }
+body.reactbits-ui .rb-background-host { position:absolute; top:90px; left:0; right:0; height:380px; z-index:0; pointer-events:none; overflow:hidden; mask-image:linear-gradient(black 45%,transparent); }
+body.network-console.reactbits-ui .rb-background-host { top:0; height:320px; }
+body[data-page="network"] .workspace>.rb-background-host { display:none; }
+.rb-grid-field { width:100%; height:100%; opacity:.85; }
+.rb-grid-field .dot-grid { padding:0; }
+body.reactbits-ui .topbar { background:color-mix(in srgb,var(--bg) 93%,transparent); backdrop-filter:blur(18px); }
+body.reactbits-ui .console-sidebar-panel { background:var(--bg)!important; }
+body.reactbits-ui .sidebar-brand strong>.rb-brand-gradient { font:inherit; letter-spacing:normal; margin:0; display:inline-block; }
+.rb-brand-gradient .animated-gradient-text { margin:0; border-radius:0; cursor:default; }
+body.reactbits-ui .sidebar-brand-mark { width:32px; height:32px; color:var(--rose)!important; background:var(--rose-soft); border-radius:11px; }
+body.reactbits-ui .workspace-picker { border-radius:14px; background:var(--card); }
+body.reactbits-ui .console-menu-button[aria-current="page"]>span:first-child { background:var(--rose-soft); }
+body.reactbits-ui .console-menu-button[aria-current="page"] { color:var(--rose); }
+body.reactbits-ui .console-tab[aria-selected="true"] { color:var(--rose); }
+body.reactbits-ui .rb-heading { margin:0 0 10px; color:var(--text); font-size:34px; line-height:1.35; font-weight:650; letter-spacing:-1.1px; }
+body.reactbits-ui .rb-heading p { margin:0; font:inherit; letter-spacing:inherit; }
+body.reactbits-ui .page-heading .rb-heading { margin:0; }
+body.reactbits-ui .hero .intro, body.reactbits-ui .page-heading .intro { font-size:13px; line-height:1.8; max-width:620px; }
+body.reactbits-ui .hero { margin-bottom:24px; }
+body.reactbits-ui .eyebrow { color:var(--rose); }
+.rb-spark-actions { position:relative; width:auto; }
+.rb-spark-actions .rb-spark-content { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.rb-spark-actions canvas { z-index:5; }
+.rb-probe-total { display:flex; align-items:center; gap:12px; margin:14px 0 6px; }
+.rb-probe-total>[data-rb-component="CountUp"] { font:600 36px/1.1 'Cascadia Code',Consolas,monospace; color:var(--rose); min-width:30px; }
+.rb-probe-total>span:last-child { font-size:13px; font-weight:500; color:var(--text); }
+.rb-probe-total small { display:block; font-size:11px; font-weight:400; color:var(--muted); margin-top:4px; }
+body.reactbits-ui #context-ui { background:var(--bg); }
+body.reactbits-ui .sample-summary { border:1px solid var(--border); background:var(--card); border-radius:14px; padding:12px; }
+body.reactbits-ui .sample-summary .shiny-text { line-height:1.7; }
+body.reactbits-ui .rb-protection-link { display:block; width:100%; margin:14px 0; }
+body.reactbits-ui .rb-protection-link .inner-content { padding:14px 13px; font-size:13px; text-align:left; }
+.rb-callout-row { display:flex; align-items:center; gap:9px; }
+.rb-callout-row>span:nth-child(2) { flex:1; min-width:0; }
+.rb-callout-row strong { display:block; font-size:13px; font-weight:550; }
+.rb-callout-row small { display:block; font-size:12px; color:var(--muted); margin-top:4px; }
+.rb-surface-motion, .rb-enter { height:100%; min-width:0; }
+body.reactbits-ui .card.rb-surface-host,
+body.reactbits-ui .coverage-card.rb-surface-host,
+body.reactbits-ui .protection-hero.rb-surface-host,
+body.reactbits-ui dialog.rb-surface-host {
+  padding:0; display:block; background:none; border:0; box-shadow:none; border-radius:24px; overflow:visible;
+}
+body.reactbits-ui .rb-card-surface {
+  height:100%; min-width:0; border-color:var(--border); background:var(--card);
+  box-shadow:0 10px 30px #00000009; color:var(--text);
+}
+body.reactbits-ui .rb-native-content { position:relative; z-index:1; }
+body.reactbits-ui .ip-card .rb-native-content,
+body.reactbits-ui .resolver-summary .rb-native-content { display:flex; flex-direction:column; height:100%; }
+body.reactbits-ui .ip-card, body.reactbits-ui .resolver-summary { min-height:210px; }
+body.reactbits-ui .rb-native-content>.card-head { margin-bottom:12px; }
+body.reactbits-ui .ip-card .rb-native-content>.card-head,
+body.reactbits-ui .resolver-summary .rb-native-content>.card-head { margin-bottom:0; }
+body.reactbits-ui .rb-native-content>footer { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+body.reactbits-ui .rb-native-content>footer:has(.timestamp:empty) { display:none; }
+body.reactbits-ui .resolver-summary .rb-native-content>footer { margin-top:auto; justify-content:space-between; }
+body.reactbits-ui .resolver-summary footer a { display:inline-flex; align-items:center; gap:3px; color:var(--muted); }
+body.reactbits-ui .resolver-summary footer .icon { width:11px; height:11px; }
+body.reactbits-ui .rb-count-source { position:absolute!important; width:1px!important; height:1px!important; overflow:hidden!important; clip-path:inset(50%); white-space:nowrap; }
+.rb-count-host { margin:22px 0 14px; }
+.rb-resolver-number { margin:0; display:flex; align-items:baseline; gap:10px; }
+.rb-resolver-number>span:first-child { font:600 38px/1.1 'Cascadia Code',Consolas,monospace; color:var(--rose); }
+.rb-resolver-number>span:last-child { font-size:12px; color:var(--muted); }
+body.reactbits-ui .metric-code { color:var(--rose); background:var(--rose-soft); }
+body.reactbits-ui .controls-panel { background:var(--card); border-radius:14px; border-color:var(--border); }
+body.reactbits-ui .dns-card .resolver-columns { border-radius:8px; padding:12px; background:var(--surface); }
+body.reactbits-ui .dns-groups .empty { min-height:102px; }
+body.reactbits-ui .dns-groups .empty>.icon { color:var(--rose); background:var(--rose-soft); border-color:var(--border); }
+body.reactbits-ui .ip-address { font-size:25px; }
+body.reactbits-ui .ip-address.ipv6 { font-size:17px; }
+body.reactbits-ui .coverage-card .rb-card-surface { padding:24px; }
+body.reactbits-ui .coverage-card .rb-native-content { display:flex; align-items:center; gap:12px; }
+body.reactbits-ui .coverage-card .badge { position:static; margin-left:auto; }
+body.reactbits-ui .protection-hero .rb-card-surface { padding:0; background:radial-gradient(ellipse at 75% 45%,var(--rose-soft),var(--card) 72%); }
+body.reactbits-ui .protection-hero .rb-native-content { display:grid; grid-template-columns:1.2fr 1fr; }
+body.reactbits-ui .protection-copy { padding:34px 0 32px 34px; }
+body.reactbits-ui .protection-art { color:var(--rose); }
+body.reactbits-ui .hero-shield stop { stop-color:var(--rose); }
+body.reactbits-ui .orbit-dot { border-color:var(--rose); background:var(--rose-soft); }
+body.reactbits-ui .mini-dot { background:var(--rose); }
+body.reactbits-ui .protection-cta .rb-native-content { display:flex; flex-direction:column; align-items:flex-start; gap:13px; }
+body.reactbits-ui .option-footer .rb-native-content, body.reactbits-ui .review-actions .rb-native-content,
+body.reactbits-ui .row-actions .rb-native-content { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+body.reactbits-ui [data-rb-spark]>.rb-spark-actions, body.reactbits-ui [data-rb-spark] .rb-spark-content { width:100%; }
+body.reactbits-ui [data-rb-spark] .rb-spark-content>.rb-native-content { width:100%; }
+body.reactbits-ui .protection-connection { padding:14px 26px; }
+body.reactbits-ui .settings-card.rb-surface-host { margin-bottom:18px; }
+body.reactbits-ui .about-card .rb-native-content, body.reactbits-ui .backup-card .rb-native-content { display:flex; align-items:center; gap:18px; }
+body.reactbits-ui .option-card .rb-card-surface { padding:28px; }
+body.reactbits-ui dialog .rb-card-surface { box-shadow:0 28px 90px #0006; padding:28px; }
+body.reactbits-ui dialog.rb-surface-host:not([open]) { display:none!important; }
+body.reactbits-ui dialog::backdrop { background:#020711b8; backdrop-filter:blur(8px); }
+body.reactbits-ui .backup-empty { border-radius:24px; background:var(--card); border-color:var(--border); }
+body.reactbits-ui .backup-summary { border:1px solid var(--border); padding:16px 18px; border-radius:14px; background:var(--card); }
+@media(max-width:760px) {
+  body.reactbits-ui .ip-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body.reactbits-ui .resolver-summary { grid-column:1/-1; min-height:140px; }
+  body.reactbits-ui .resolver-summary .rb-native-content { display:grid; grid-template-columns:1fr auto; column-gap:20px; }
+  body.reactbits-ui .resolver-summary .card-head { grid-column:1; }
+  body.reactbits-ui .resolver-summary .rb-count-host { grid-column:2; grid-row:1/3; margin:6px 0; }
+  body.reactbits-ui .resolver-summary .result-note { grid-column:1; margin-top:8px; }
+  body.reactbits-ui .resolver-summary footer { grid-column:1/-1; }
+}
+@media(min-width:1280px) {
+  body.product-ui.reactbits-ui { --right-width:292px; }
+  body.reactbits-ui .ip-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:767px) {
+  body.reactbits-ui .rb-heading { font-size:27px; letter-spacing:-.6px; }
+  body.reactbits-ui .rb-card-surface { padding:20px; border-radius:20px; }
+  body.reactbits-ui .ip-card { min-height:190px; }
+  body.reactbits-ui .ip-address { font-size:21px; }
+  body.reactbits-ui .ip-address.ipv6 { font-size:15px; }
+  body.reactbits-ui .protection-hero .rb-native-content { display:block; }
+  body.reactbits-ui .protection-copy { padding:26px; }
+  body.reactbits-ui .about-card .rb-native-content, body.reactbits-ui .backup-card .rb-native-content { align-items:flex-start; flex-wrap:wrap; }
+  .rb-spark-actions .rb-spark-content { align-items:flex-start; }
+  .rb-resolver-number>span:first-child { font-size:32px; }
+  body.reactbits-ui .coverage-card .rb-native-content { flex-wrap:wrap; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .rb-grid-field { background-image:radial-gradient(var(--border) 1px,transparent 1px); background-size:24px 24px; }
+  .border-gradient-bottom, .border-gradient-top, .text-content { animation:none!important; }
+  .rb-card-surface::before { display:none; }
+}

@@ -1,0 +1,280 @@
+/* Independently authored workbench shell using this project's beUI controls.
+   Layout follows the visible operations-dashboard reference, with real local
+   state and existing routes. No React Bits Pro implementation is included. */
+body.dashboard4.console-ui {
+  --right-width:0px;
+  --left-width:200px;
+  --sidebar-width:200px;
+  --sidebar-width-mobile:240px;
+  font:13px/1.5 Figtree,'Segoe UI','Microsoft YaHei UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+body.dashboard4.console-ui.reactbits-ui .workspace {
+  margin-left:var(--left-width);
+  margin-right:0;
+  background:var(--bg);
+  min-height:calc(100vh - 27px);
+}
+body.dashboard4.console-ui.reactbits-ui main {
+  max-width:1440px;
+  width:100%;
+  margin:0 auto;
+  padding:28px 32px 36px;
+}
+body.dashboard4.console-ui.reactbits-ui .topbar {
+  height:60px;
+  padding:0 32px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:60px;
+  align-content:start;
+  align-items:center;
+  gap:0 16px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:none;
+}
+body.dashboard4.console-ui.reactbits-ui:not([data-page="network"]) .topbar {
+  display:none;
+}
+body.dashboard4.console-ui.reactbits-ui .network-jump-links { display:flex; align-items:center; gap:20px; min-width:0; overflow-x:auto; scrollbar-width:none; }
+body.dashboard4.console-ui.reactbits-ui .network-jump-links a { display:flex; align-items:center; flex-shrink:0; gap:5px; padding:10px 0; font-size:12px; color:var(--muted); white-space:nowrap; }
+body.dashboard4.console-ui.reactbits-ui .network-jump-links a[aria-current="location"] { color:var(--text); }
+body.dashboard4.console-ui.reactbits-ui .network-jump-number { font-size:10px; color:var(--muted); opacity:.65; }
+body.dashboard4.console-ui.reactbits-ui .console-tabs {
+  grid-column:1;
+  grid-row:1;
+  width:100%;
+  min-height:0;
+  height:44px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+body.dashboard4.console-ui.reactbits-ui .console-tab {
+  min-height:44px;
+  padding:10px 12px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--muted);
+  font:500 13px/1.4 Figtree,'Microsoft YaHei UI',sans-serif;
+  gap:7px;
+}
+body.dashboard4.console-ui.reactbits-ui .console-tab[aria-selected="true"] {
+  color:var(--text);
+  background:transparent;
+}
+body.dashboard4.console-ui.reactbits-ui .console-tab-indicator {
+  height:2px;
+  border-radius:1px;
+  background:var(--text);
+}
+body.dashboard4.console-ui.reactbits-ui .console-tabs button[aria-label^="Scroll tabs"] {
+  border-radius:0;
+  background:var(--bg);
+  color:var(--muted);
+}
+body.dashboard4.console-ui.reactbits-ui .context-trigger-wrapper {
+  position:static!important;
+  grid-column:2;
+  grid-row:1;
+  justify-self:end;
+  width:auto;
+  min-width:112px;
+  max-width:none;
+  white-space:nowrap;
+}
+body.dashboard4.console-ui.reactbits-ui .context-trigger,
+body.dashboard4.console-ui.reactbits-ui .context-close { display:inline-flex!important; }
+body.dashboard4.console-ui.reactbits-ui .context-trigger {
+  min-height:34px;
+  height:34px;
+  width:auto;
+  min-width:112px;
+  max-width:none;
+  padding:7px 11px;
+  gap:7px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--text);
+  font-size:12px;
+  white-space:nowrap;
+}
+body.dashboard4.console-ui.reactbits-ui .context-trigger>span { white-space:nowrap; }
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-panel {
+  background:var(--bg)!important;
+  color:var(--text);
+  border-right:1px solid var(--border);
+}
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand { display:grid; grid-template-columns:minmax(0,1fr) 24px; gap:10px 9px; align-items:center; }
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-header { padding:20px 14px 18px!important; }
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-content { padding:0 10px 12px!important; }
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-footer { padding:12px 10px!important; gap:3px!important; }
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand-mark {
+  width:30px;
+  height:30px;
+  background:var(--surface);
+  color:var(--text)!important;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand-logo { grid-column:1/-1; width:100%; height:auto; border:0; border-radius:0; overflow:hidden; background:transparent; box-shadow:none; }
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand-logo>svg { display:block; width:100%; height:auto; }
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand .sidebar-collapse { grid-column:2; grid-row:2; }
+@media(min-width:768px) {
+  body.dashboard4.console-ui.reactbits-ui[data-sidebar="collapsed"] .sidebar-brand { display:flex; justify-content:center; }
+}
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand>strong { font:600 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif; }
+body.dashboard4.console-ui.reactbits-ui .sidebar-brand strong>span {
+  font:400 11px/1.4 Figtree,'Microsoft YaHei UI',sans-serif;
+  letter-spacing:0;
+  color:var(--muted);
+  margin-top:3px;
+}
+body.dashboard4.console-ui.reactbits-ui .workspace-picker {
+  padding:10px;
+  gap:8px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+}
+body.dashboard4.console-ui.reactbits-ui .workspace-picker strong { font-size:12px; font-weight:500; }
+body.dashboard4.console-ui.reactbits-ui .workspace-picker small { font-size:11px; }
+body.dashboard4.console-ui.reactbits-ui .workspace-icon { background:var(--surface); color:var(--muted); }
+body.dashboard4.console-ui.reactbits-ui .console-menu-button,
+body.dashboard4.console-ui.reactbits-ui .preferences-link {
+  min-height:40px;
+  padding:8px 11px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:var(--muted);
+}
+body.dashboard4.console-ui.reactbits-ui .console-menu-button strong { font-size:13px; font-weight:500; }
+body.dashboard4.console-ui.reactbits-ui .console-menu-button small { font-size:11px; color:var(--muted); }
+body.dashboard4.console-ui.reactbits-ui .console-menu-button[aria-current="page"],
+body.dashboard4.console-ui.reactbits-ui .preferences-link[aria-current="page"] {
+  background:var(--surface);
+  color:var(--text);
+  border-color:var(--border);
+}
+body.dashboard4.console-ui.reactbits-ui :is(.console-menu-button,.preferences-link)>span.absolute {
+  background:var(--surface);
+  border-radius:7px;
+}
+body.dashboard4.console-ui.reactbits-ui .console-menu-button:hover,
+body.dashboard4.console-ui.reactbits-ui .preferences-link:hover { background:var(--surface); color:var(--text); }
+body.dashboard4.console-ui.reactbits-ui .environment-row,
+body.dashboard4.console-ui.reactbits-ui .sidebar-caption { font-size:11px; }
+body.dashboard4.console-ui.reactbits-ui .sidebar-section-label,
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-content [data-slot="sidebar-group-label"] {
+  font:500 10px/1.4 Figtree,'Microsoft YaHei UI',sans-serif;
+  letter-spacing:.04em;
+  color:var(--muted);
+}
+body.dashboard4.console-ui.reactbits-ui .support-sidebar,
+body.dashboard4.console-ui.reactbits-ui .sidebar-theme-button {
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:12px;
+  color:var(--text);
+  background:var(--card);
+}
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-footer .support-sidebar {
+  justify-content:flex-start;
+  padding:8px 11px;
+  border-color:transparent;
+  background:transparent;
+  color:var(--muted);
+  min-height:36px;
+}
+body.dashboard4.console-ui.reactbits-ui .console-sidebar-footer .support-sidebar:hover { background:var(--surface); color:var(--text); }
+body.dashboard4.console-ui.reactbits-ui[data-sidebar="collapsed"] .console-sidebar-footer .support-sidebar { width:48px; justify-content:center; }
+body.dashboard4.console-ui.reactbits-ui #context-ui {
+  display:none;
+  position:fixed;
+  top:12px;
+  right:12px;
+  bottom:39px;
+  z-index:65;
+  width:min(360px,calc(100vw - 24px));
+  padding:0 20px 20px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 24px 80px #0005;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+body.dashboard4.console-ui.reactbits-ui[data-context="open"] #context-ui { display:block; }
+body.dashboard4.console-ui .dashboard4-context-backdrop {
+  position:fixed;
+  inset:0;
+  z-index:60;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:#0006;
+  cursor:default;
+}
+body.dashboard4.console-ui.reactbits-ui .context-heading { min-height:64px; color:var(--text); }
+body.dashboard4.console-ui.reactbits-ui .context-section { padding:18px 0; }
+body.dashboard4.console-ui.reactbits-ui .context-section h2 { font-size:13px; }
+body.dashboard4.console-ui.reactbits-ui :is(.sample-summary,.context-privacy) {
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+}
+body.dashboard4.console-ui.reactbits-ui .context-copy { min-height:34px; border-radius:8px; font-size:12px; }
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link {
+  display:block;
+  padding:13px;
+  margin:18px 0;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+}
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link .rb-callout-row { display:flex; align-items:center; gap:10px; }
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link .rb-callout-row>span:nth-child(2) { flex:1; }
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link strong { display:block; font-size:13px; font-weight:500; }
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link small { display:block; margin-top:4px; font-size:11px; color:var(--muted); }
+body.dashboard4.console-ui.reactbits-ui .dashboard4-protection-link .callout-icon { color:var(--muted); }
+body.dashboard4.console-ui.reactbits-ui .page-heading h1 { font:600 26px/1.3 Figtree,'Microsoft YaHei UI',sans-serif; letter-spacing:-.4px; }
+body.dashboard4.console-ui.reactbits-ui .page-heading .intro { font-size:13px; line-height:1.5; color:var(--muted); }
+body.dashboard4.console-ui.reactbits-ui :is(.card,.protection-hero,.coverage-card,.detection-prompt,.rb-card-surface,.settings-card,.process-card) {
+  border-radius:14px;
+  border-color:var(--border);
+  background:var(--card);
+  box-shadow:none;
+}
+body.dashboard4.console-ui.reactbits-ui #page-overview article.coverage-card { cursor:default; }
+body.dashboard4.console-ui.reactbits-ui .statusbar { background:var(--bg); border-color:var(--border); color:var(--muted); }
+@media(min-width:768px) {
+  body.dashboard4.console-ui[data-sidebar="collapsed"] .workspace { margin-left:68px; margin-right:0; }
+}
+@media(max-width:767px) {
+  body.dashboard4.console-ui.reactbits-ui .workspace { margin-left:0; margin-right:0; }
+  body.dashboard4.console-ui.reactbits-ui main { padding:20px 18px 28px; }
+  body.dashboard4.console-ui.reactbits-ui .topbar { padding:0 18px 0 52px; }
+  body.dashboard4.console-ui.reactbits-ui:not([data-page="network"]) .topbar { display:flex; height:48px; }
+  body.dashboard4.console-ui.reactbits-ui .context-trigger-wrapper { min-width:34px; }
+  body.dashboard4.console-ui.reactbits-ui .context-trigger { width:34px; min-width:34px; padding:8px; }
+  body.dashboard4.console-ui.reactbits-ui .context-trigger>span { display:none; }
+  body.dashboard4.console-ui.reactbits-ui .mobile-menu { top:13px; left:18px; }
+  body.dashboard4.console-ui.reactbits-ui .console-tab { padding-left:10px; padding-right:10px; font-size:12px; }
+}
+@media(max-width:450px) {
+  body.dashboard4.console-ui.reactbits-ui main { padding:18px 14px 24px; }
+  body.dashboard4.console-ui.reactbits-ui .topbar { padding-left:52px; padding-right:14px; }
+  body.dashboard4.console-ui.reactbits-ui .page-heading h1 { font-size:22px; }
+}

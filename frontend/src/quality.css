@@ -1,0 +1,65 @@
+body.network-console.reactbits-ui.scan-ui .ip-quality{padding:0 0 24px;margin:0 0 24px;border-bottom:1px solid var(--ink);color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .quality-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+body.network-console.reactbits-ui.scan-ui .quality-heading h2{display:flex;align-items:center;gap:8px;font:500 20px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;margin:0}
+body.network-console.reactbits-ui.scan-ui .quality-heading svg{color:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .quality-heading>span{font-size:12px;color:var(--charcoal)}
+body.network-console.reactbits-ui.scan-ui .quality-intro{font-size:14px;line-height:1.5;margin:8px 0 16px}
+body.network-console.reactbits-ui.scan-ui .quality-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%}
+body.network-console.reactbits-ui.scan-ui .ip-quality button[data-beui]{min-height:36px;padding:8px 12px;font-size:14px}
+body.network-console.reactbits-ui.scan-ui .quality-controls>button:first-of-type{background:var(--lavender)}
+body.network-console.reactbits-ui.scan-ui .quality-controls select,body.network-console.reactbits-ui.scan-ui .quality-controls input{min-height:36px;border:2px solid var(--ink);border-radius:12px;padding:8px 10px;background:var(--cream);color:var(--ink);font:400 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif}
+body.network-console.reactbits-ui.scan-ui .quality-port{display:flex;align-items:center;gap:6px;font-size:14px}
+body.network-console.reactbits-ui.scan-ui .quality-port input{width:80px}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-picker{display:contents}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-picker-controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px;max-width:100%;min-width:0}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-picker-controls label{max-width:100%;min-width:0}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-picker-controls select{width:290px;max-width:100%;text-overflow:ellipsis}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-picker-controls input{width:135px;max-width:100%}
+body.network-console.reactbits-ui.scan-ui .quality-proxy-hint{flex-basis:100%;order:2;margin:2px 0 0;font-size:12px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere}
+body.network-console.reactbits-ui.scan-ui .quality-progress{display:flex;justify-content:space-between;gap:12px;margin:16px 0 8px;font-size:14px}
+body.network-console.reactbits-ui.scan-ui .quality-message{font-size:14px;color:var(--forest);line-height:1.5;margin:0 0 12px;overflow-wrap:anywhere}
+body.network-console.reactbits-ui.scan-ui .quality-message:empty{display:none}
+body.network-console.reactbits-ui.scan-ui .quality-mismatch{display:flex;align-items:start;gap:8px;padding:12px;background:var(--stone);border-left:4px solid var(--ember);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+body.network-console.reactbits-ui.scan-ui .quality-mismatch svg{flex-shrink:0;margin-top:2px}
+body.network-console.reactbits-ui.scan-ui .quality-tabs{margin:16px 0 24px;max-width:100%}
+body.network-console.reactbits-ui.scan-ui .quality-tabs [role=tab]{font:500 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;padding:10px 12px;border:2px solid var(--stone);border-radius:12px;background:var(--cream);color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .quality-tabs [role=tab][aria-selected=true]{background:var(--lavender);border-color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .quality-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin:0 0 24px}
+body.network-console.reactbits-ui.scan-ui .quality-facts>div{padding:0 0 12px;border-bottom:1px solid var(--stone);min-width:0}
+body.network-console.reactbits-ui.scan-ui .quality-facts dt{font-size:12px;margin-bottom:6px;color:var(--charcoal)}
+body.network-console.reactbits-ui.scan-ui .quality-facts dd{font-size:16px;margin:0;line-height:1.5;overflow-wrap:anywhere}
+body.network-console.reactbits-ui.scan-ui .quality-facts a{font-size:12px;text-decoration:underline;color:var(--forest);white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .quality-region{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .quality-region img{object-fit:contain;border-radius:0;width:24px;height:18px;flex-shrink:0}
+body.network-console.reactbits-ui.scan-ui .ip-quality h3{font:500 16px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;margin:20px 0 12px}
+body.network-console.reactbits-ui.scan-ui .quality-table-scroll{overflow-x:auto;max-width:100%;overscroll-behavior-x:contain}
+body.network-console.reactbits-ui.scan-ui .ip-quality table{border-collapse:collapse;width:100%;font-size:14px}
+body.network-console.reactbits-ui.scan-ui .ip-quality th,body.network-console.reactbits-ui.scan-ui .ip-quality td{border-bottom:1px solid var(--stone);text-align:left;padding:12px 8px;line-height:1.4;white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .ip-quality th{font-weight:500}
+body.network-console.reactbits-ui.scan-ui .ip-quality thead th{font-size:12px;color:var(--charcoal)}
+body.network-console.reactbits-ui.scan-ui .quality-value{display:inline-flex;align-items:center;gap:5px;font-size:13px}
+body.network-console.reactbits-ui.scan-ui .quality-value:before{content:'';width:5px;height:5px;border-radius:50%;background:var(--fog)}
+body.network-console.reactbits-ui.scan-ui .quality-value.ok{color:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .quality-value.ok:before{background:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .quality-value.warning:before{background:var(--ember)}
+body.network-console.reactbits-ui.scan-ui .quality-value.unknown{color:var(--fog)}
+body.network-console.reactbits-ui.scan-ui .quality-score{display:grid;grid-template-columns:120px minmax(80px,1fr) 70px 100px;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--stone);font-size:14px}
+body.network-console.reactbits-ui.scan-ui .quality-score strong{font-weight:500}
+body.network-console.reactbits-ui.scan-ui .quality-meter{height:6px;background:var(--stone);border-radius:4px;overflow:hidden}
+body.network-console.reactbits-ui.scan-ui .quality-meter>span{display:block;height:100%;background:var(--fog)}
+body.network-console.reactbits-ui.scan-ui .quality-meter>.ok{background:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .quality-meter>.warning{background:var(--ember)}
+body.network-console.reactbits-ui.scan-ui .quality-mail-scope{font-size:14px;line-height:1.5;margin:8px 0 12px}
+body.network-console.reactbits-ui.scan-ui .quality-mail-scope small{display:block;font-size:12px;color:var(--charcoal);margin-top:4px}
+body.network-console.reactbits-ui.scan-ui .quality-mail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 24px}
+body.network-console.reactbits-ui.scan-ui .quality-mail-grid>div{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--stone);font-size:14px}
+body.network-console.reactbits-ui.scan-ui .quality-mail-grid strong{font-weight:500}
+body.network-console.reactbits-ui.scan-ui .quality-blacklist{display:flex;flex-wrap:wrap;gap:24px}
+body.network-console.reactbits-ui.scan-ui .quality-blacklist>span{font-size:12px;line-height:1.5}
+body.network-console.reactbits-ui.scan-ui .quality-blacklist strong{display:block;font:500 24px/1.3 Figtree,sans-serif}
+body.network-console.reactbits-ui.scan-ui .quality-footnote,body.network-console.reactbits-ui.scan-ui .quality-about{font-size:12px;line-height:1.5;color:var(--charcoal);margin:16px 0 0}
+body.network-console.reactbits-ui.scan-ui .quality-about summary{cursor:pointer}
+body.network-console.reactbits-ui.scan-ui .quality-about p{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+body.network-console.reactbits-ui.scan-ui .quality-about code{display:block;margin-top:8px;font-size:12px;overflow-wrap:anywhere;white-space:normal}
+body.network-console.reactbits-ui.scan-ui .quality-empty{display:flex;gap:8px 24px;flex-wrap:wrap;padding:12px 0;color:var(--charcoal);font-size:14px}
+@media(max-width:540px){body.network-console.reactbits-ui.scan-ui .quality-facts{grid-template-columns:1fr}body.network-console.reactbits-ui.scan-ui .quality-mail-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}body.network-console.reactbits-ui.scan-ui .quality-score{grid-template-columns:90px minmax(20px,1fr) 55px 65px;gap:8px}body.network-console.reactbits-ui.scan-ui .quality-tabs [role=tab]{font-size:12px;padding:10px 8px}}

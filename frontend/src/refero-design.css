@@ -1,0 +1,268 @@
+/* Wispr Flow / Refero. The single skin shared by the workbench and diagnostics.
+   Source: https://styles.refero.design/style/ac53825c-1e06-4ae0-8489-cace5c5e0339
+   Library implementations remain in components/; application styling lives here. */
+@font-face{font-family:Figtree;font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/figtree-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:Figtree;font-style:normal;font-weight:500;font-display:swap;src:url('/fonts/figtree-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:Figtree;font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/figtree-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:Figtree;font-style:normal;font-weight:700;font-display:swap;src:url('/fonts/figtree-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'EB Garamond';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/eb-garamond-latin-400-normal.woff2') format('woff2')}
+body.product-ui.console-ui.reactbits-ui,
+:root[data-theme] body.product-ui.console-ui.reactbits-ui,
+body.network-console.reactbits-ui,
+:root[data-theme] body.network-console.reactbits-ui {
+  --cream:#ffffeb;--ink:#1a1a1a;--charcoal:#222222;--lavender:#f0d7ff;
+  --forest:#034f46;--ember:#ffa946;--fog:#8a8a80;--stone:#e4e4d0;
+  --bg:var(--cream);--card:var(--cream);--surface:var(--stone);--text:var(--ink);
+  --muted:var(--charcoal);--border:var(--stone);--line:var(--stone);
+  --rose:var(--lavender);--rose-ink:var(--ink);--rose-soft:var(--lavender);
+  --green:var(--forest);--green-bg:var(--forest);--amber:var(--ember);--amber-bg:var(--cream);--neutral-bg:var(--stone);
+  --display:'EB Garamond','Songti SC','SimSun',serif;
+  background:var(--cream);color:var(--ink);font:400 16px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;
+  color-scheme:light;
+}
+body.reactbits-ui *,body.reactbits-ui *::before,body.reactbits-ui *::after{box-sizing:border-box;box-shadow:none!important;background-image:none!important}
+body.reactbits-ui a{color:inherit}
+body.reactbits-ui :focus-visible{outline:2px solid var(--forest);outline-offset:4px}
+body.reactbits-ui .rb-background-host{display:none}
+body.reactbits-ui .rb-card-surface::before,
+body.reactbits-ui .border-gradient-bottom,body.reactbits-ui .border-gradient-top,
+body.reactbits-ui .shield-glow{display:none}
+body.reactbits-ui .gradient-text,body.reactbits-ui .text-content,
+body.reactbits-ui .shiny-text{background:none!important;color:inherit!important;-webkit-text-fill-color:currentColor}
+body.reactbits-ui .workspace{background:var(--cream)}
+body.product-ui.console-ui.reactbits-ui main{padding:32px;max-width:1200px}
+body.product-ui.console-ui.reactbits-ui .topbar{height:112px;padding:16px 24px;grid-template-rows:24px 48px;gap:8px;border:0;background:var(--cream);backdrop-filter:none}
+
+body.reactbits-ui .console-tabs{background:var(--cream);border:2px solid var(--ink);border-radius:9999px;padding:4px 12px;min-height:48px}
+body.reactbits-ui .console-tabs-list{gap:0!important}
+body.reactbits-ui .console-tab{font:500 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;padding:8px 12px;border-radius:9999px;white-space:nowrap;min-height:36px}
+body.reactbits-ui .console-tab[aria-selected=true]{color:var(--ink);background:var(--lavender)}
+body.reactbits-ui .console-tab-indicator{display:none}
+body.reactbits-ui .console-sidebar-panel{background:var(--cream)!important;color:var(--ink)}
+body.reactbits-ui .console-sidebar-header{padding:24px 16px!important;gap:24px!important}
+body.reactbits-ui .sidebar-brand-mark{background:var(--lavender);color:var(--ink)!important;border:2px solid var(--ink);border-radius:12px;width:36px;height:36px}
+body.reactbits-ui .sidebar-brand>strong{font:400 18px/1.3 var(--display)}
+body.reactbits-ui .sidebar-brand strong>span{font-family:Figtree,sans-serif;font-size:10px}
+body.reactbits-ui .sidebar-brand strong>.rb-brand-gradient{font:inherit;color:inherit}
+body.reactbits-ui .workspace-picker{padding:16px 8px;border:2px solid var(--ink);border-radius:12px;gap:8px;background:var(--cream)}
+body.reactbits-ui .workspace-picker strong{font-size:14px}
+body.reactbits-ui .workspace-icon{background:var(--stone);color:var(--ink);border-radius:8px}
+body.reactbits-ui .console-menu-button{border:2px solid transparent;border-radius:12px;padding:12px 8px;color:var(--charcoal);min-height:72px}
+body.reactbits-ui .console-menu-button[aria-current=page]{border-color:var(--ink);background:var(--lavender);color:var(--ink)}
+body.reactbits-ui .console-menu-button[aria-current=page]>span:first-child{background:transparent}
+body.reactbits-ui .console-menu-button strong{font-size:16px}
+body.reactbits-ui .console-menu-button small{font-size:12px;margin-top:8px}
+body.reactbits-ui .console-sidebar-content [data-slot=sidebar-menu]{gap:8px!important}
+/* beUI's default hover pill is 36px tall; our two-line rows size to their content. */
+body.reactbits-ui .console-sidebar-content [data-slot=sidebar-menu-item]>.pointer-events-none{inset-block:0;height:auto}
+body.reactbits-ui .console-sidebar-content [data-slot=sidebar-menu-item]>.pointer-events-none>.pointer-events-none{border-radius:12px}
+body.reactbits-ui .console-sidebar-footer{padding:16px!important;gap:8px!important}
+body.reactbits-ui .environment-row{margin-bottom:16px}
+body.reactbits-ui .tiny-dot,body.reactbits-ui .heading-dot,body.reactbits-ui .status-dot{background:var(--ember);width:6px;height:6px}
+body.reactbits-ui .env-local,body.reactbits-ui .sidebar-edition span{background:var(--forest);color:var(--cream);border:0;border-radius:9999px;padding:4px 8px}
+body.reactbits-ui #context-ui{background:var(--cream);padding:0 24px 24px;box-shadow:none}
+body.reactbits-ui .context-heading{height:80px;font-size:16px}
+body.reactbits-ui .context-section{padding:24px 0}
+body.reactbits-ui .context-section h2{font:500 16px/1.3 Figtree,'Microsoft YaHei UI',sans-serif}
+body.reactbits-ui .context-option{gap:8px;margin:16px 0}
+body.reactbits-ui .context-option strong{font-size:14px}
+body.reactbits-ui .context-option small{font-size:12px;margin-top:4px}
+body.reactbits-ui .rb-probe-total{margin:24px 0 16px}
+body.reactbits-ui .rb-probe-total>[data-rb-component=CountUp],body.reactbits-ui .rb-resolver-number>span:first-child{font:400 48px/.95 var(--display);color:var(--ink)}
+body.reactbits-ui .rb-probe-total small{font-size:12px}
+body.reactbits-ui .context-privacy{background:var(--stone);border-radius:12px;padding:16px;gap:8px}
+body.reactbits-ui .sample-summary{padding:16px;border:0;border-radius:12px;background:var(--stone);font-size:14px}
+body.reactbits-ui .rb-protection-link{padding:0;border:2px solid var(--ink);border-radius:12px;background:var(--cream);margin:24px 0}
+body.reactbits-ui .rb-protection-link .inner-content{background:var(--cream);color:var(--ink);border:0;border-radius:12px;padding:16px;font-size:14px}
+body.reactbits-ui .callout-icon{color:var(--forest)}
+body.reactbits-ui .context-help,body.reactbits-ui .context-source{font-size:12px;line-height:1.5}
+body.reactbits-ui .device-state{color:var(--forest)}
+body.reactbits-ui .context-option small,body.reactbits-ui .context-section>p,
+body.reactbits-ui .context-privacy,body.reactbits-ui .context-help,
+body.reactbits-ui .sample-summary small,body.reactbits-ui .rb-probe-total small,
+body.reactbits-ui .context-source,body.reactbits-ui .console-menu-button small,
+body.reactbits-ui .sidebar-section-label,body.reactbits-ui .sidebar-caption,
+body.reactbits-ui .environment-row,body.reactbits-ui .workspace-picker small,
+body.reactbits-ui .result-note,body.reactbits-ui .ip-note,
+body.reactbits-ui .rb-native-content>footer,body.reactbits-ui .rb-callout-row small{font-size:14px;line-height:1.3}
+body.reactbits-ui .statusbar{background:var(--cream);color:var(--charcoal)}
+/* All actions use the same signature border, radius and label typography. */
+body.reactbits-ui button[data-beui],body.reactbits-ui button.primary,
+body.reactbits-ui button.secondary,body.reactbits-ui a.secondary,
+body.reactbits-ui #dev-reload {
+  height:auto;min-height:56px;padding:16px 24px;border:2px solid var(--ink);border-radius:12px;
+  background:var(--cream);color:var(--ink);font:500 16px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;
+  box-shadow:none;gap:8px;white-space:normal;
+}
+body.reactbits-ui #start,body.reactbits-ui button.primary{background:var(--lavender);color:var(--ink)}
+body.reactbits-ui button[data-beui]:hover,body.reactbits-ui button.primary:hover,body.reactbits-ui button.secondary:hover{filter:none;box-shadow:none;transform:none;border-color:var(--ink);background:var(--stone)}
+body.reactbits-ui #start:hover,body.reactbits-ui button.primary:hover{background:var(--lavender)}
+body.reactbits-ui button:disabled{opacity:.45}
+body.reactbits-ui #stop,body.reactbits-ui #clear,body.reactbits-ui .sidebar-theme-button,
+body.reactbits-ui .text-button{background:transparent;border:0;padding:8px;font:400 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;min-height:36px;box-shadow:none;color:inherit}
+body.reactbits-ui #stop:hover,body.reactbits-ui #clear:hover,body.reactbits-ui .text-button:hover,body.reactbits-ui .scope-link:hover{text-decoration:underline;background:transparent}
+body.reactbits-ui .context-copy,body.reactbits-ui .support-sidebar{padding:14px;min-height:48px;font-size:16px}
+body.reactbits-ui .context-trigger,body.reactbits-ui .context-close{padding:8px;min-height:36px;width:36px;height:36px;border:0;background:transparent}
+body.reactbits-ui .beui-switch button{border:2px solid var(--ink);box-shadow:none;background:var(--stone)}
+body.reactbits-ui .beui-switch button[aria-checked=true]{background:var(--forest)}
+body.reactbits-ui .beui-switch button>span{background:var(--cream)}
+body.reactbits-ui input:not([type=checkbox]),body.reactbits-ui select{border:2px solid var(--ink);border-radius:12px;background:var(--cream);color:var(--ink);font:400 16px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;padding:16px;box-shadow:none;max-width:100%}
+body.reactbits-ui input[type=checkbox]{accent-color:var(--forest)}
+body.reactbits-ui .repair-option input[type=checkbox]{width:48px;height:28px;border:2px solid var(--ink);border-radius:9999px;background:var(--stone)}
+body.reactbits-ui .repair-option input[type=checkbox]::before{width:20px;height:20px;top:2px;left:2px;background:var(--cream);border-radius:9999px;transform:none}
+body.reactbits-ui .repair-option input[type=checkbox]:checked{background:var(--forest)}
+body.reactbits-ui .repair-option input[type=checkbox]:checked::before{background:var(--cream);transform:translateX(20px)}
+body.reactbits-ui .badge,body.reactbits-ui .pill,body.reactbits-ui .console-badge,
+body.reactbits-ui .protection-status{background:var(--forest)!important;color:var(--cream)!important;border:0!important;border-radius:9999px;padding:8px 16px;font:500 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;box-shadow:none}
+body.reactbits-ui .badge::before,body.reactbits-ui .pill::before{background:var(--ember)}
+body.reactbits-ui .eyebrow,body.reactbits-ui .dialog-eyebrow{font:500 14px/1.3 Figtree,sans-serif;letter-spacing:1px;color:var(--charcoal)}
+body.reactbits-ui .rb-heading{font:400 48px/1.1 var(--display);letter-spacing:-1.44px;margin:0 0 16px}
+body.reactbits-ui .hero .intro,body.reactbits-ui .page-heading .intro{font-size:16px;line-height:1.5;max-width:640px;color:var(--charcoal)}
+body.reactbits-ui .hero,body.reactbits-ui .page-heading{margin-bottom:32px}
+body.reactbits-ui .section-heading{margin:32px 0 16px}
+body.reactbits-ui .section-heading h2,body.reactbits-ui .card-head h2,body.reactbits-ui .settings-card h2,body.reactbits-ui .process-card h2{font:400 32px/1.1 var(--display);letter-spacing:-.96px;color:inherit}
+body.reactbits-ui .rb-card-surface,body.reactbits-ui .coverage-card .rb-card-surface,
+body.reactbits-ui .option-card .rb-card-surface,body.reactbits-ui dialog .rb-card-surface{border:2px solid var(--ink);border-radius:32px;padding:32px;background:var(--cream);box-shadow:none;color:var(--ink);overflow:hidden}
+body.reactbits-ui .card.rb-surface-host,body.reactbits-ui .coverage-card.rb-surface-host{border-radius:32px}
+body.reactbits-ui .controls-panel{border:2px solid var(--ink);border-radius:12px;padding:16px 24px;background:var(--cream);margin-bottom:32px}
+body.reactbits-ui #progress-fill{background:var(--forest);box-shadow:none}
+body.reactbits-ui .progress-track{background:var(--stone)}
+body.reactbits-ui .ip-grid{gap:16px}
+body.reactbits-ui .ip-card,body.reactbits-ui .resolver-summary{min-height:256px}
+body.reactbits-ui .ip-address{font:400 32px/1.1 var(--display);color:var(--ink)}
+body.reactbits-ui .ip-address.ipv6{font:400 20px/1.3 Figtree,sans-serif}
+body.reactbits-ui .metric-code,body.reactbits-ui .coverage-icon,body.reactbits-ui .detection-icon,
+body.reactbits-ui .option-symbol,body.reactbits-ui .section-icon{background:var(--lavender);color:var(--ink);border-radius:8px}
+body.reactbits-ui .browser-letter{background:var(--stone);color:var(--ink);border-radius:8px}
+body.reactbits-ui .rb-native-content>footer{font-size:12px;color:var(--charcoal);margin-top:16px;padding-top:16px}
+/* A dark chamber is always bookended by cream. */
+body.reactbits-ui .dns-card .rb-card-surface,
+body.reactbits-ui .protection-hero .rb-card-surface,
+body.reactbits-ui .process-card .rb-card-surface,
+body.reactbits-ui .about-card .rb-card-surface{
+  --text:var(--cream);--muted:var(--cream);--line:var(--forest);--border:var(--forest);
+  --card:var(--ink);--surface:var(--forest);
+  background:var(--ink);color:var(--cream);border-color:var(--ink);border-radius:48px;padding:56px;box-shadow:none;
+}
+body.reactbits-ui .dns-card,body.reactbits-ui .protection-hero{border-radius:48px}
+body.reactbits-ui .dns-card .card-head{gap:16px;flex-wrap:wrap}
+body.reactbits-ui .dns-card .resolver-columns{background:var(--forest);padding:24px;border-radius:32px;margin-top:24px}
+body.reactbits-ui .dns-groups .empty{color:var(--cream);padding:24px 8px;min-height:144px}
+body.reactbits-ui .dns-groups .empty .icon{color:var(--cream);background:var(--forest);border:0;border-radius:8px}
+body.reactbits-ui .dns-card .rb-native-content>footer{color:var(--cream)}
+body.reactbits-ui .dns-card .resolver-group,body.reactbits-ui .dns-card .address-row{background:var(--forest);color:var(--cream);border-color:var(--cream);border-radius:12px}
+body.reactbits-ui .dns-card .result-note,body.reactbits-ui .dns-card .section-icon,body.reactbits-ui .dns-card a{color:var(--cream)}
+body.reactbits-ui .dns-card .section-icon{background:var(--forest)}
+body.reactbits-ui .rtc-list{gap:16px}
+body.reactbits-ui .rtc-item{background:var(--stone);border-radius:12px;padding:16px;border:0;color:var(--ink)}
+body.reactbits-ui .protection-hero .rb-card-surface{padding:0}
+body.reactbits-ui .protection-copy{padding:56px 0 48px 56px}
+body.reactbits-ui .protection-copy h2{font:400 64px/1.05 var(--display);letter-spacing:-1.92px;color:var(--cream);margin:24px 0}
+body.reactbits-ui .protection-copy p,body.reactbits-ui .assurance,body.reactbits-ui .scope-link{color:var(--cream);font-size:14px;line-height:1.5}
+body.reactbits-ui .scope-link{font-size:16px}
+body.reactbits-ui .protection-art{color:var(--cream);transform:none}
+body.reactbits-ui .hero-shield path:first-of-type{fill:var(--forest);stroke:var(--cream)}
+body.reactbits-ui .shield-orbit{border-color:var(--forest)}
+body.reactbits-ui .orbit-label{background:var(--forest);border:1px solid white;color:var(--cream);border-radius:9999px;padding:8px 16px}
+body.reactbits-ui .orbit-dot,body.reactbits-ui .mini-dot{background:var(--ember);border-color:var(--ember)}
+body.reactbits-ui .protection-connection{background:var(--forest);color:var(--cream);padding:24px 32px;border-color:var(--forest);font-size:14px}
+body.reactbits-ui .coverage-grid{gap:16px;margin-top:16px}
+body.reactbits-ui .coverage-card .rb-native-content{flex-wrap:wrap;gap:16px;align-items:flex-start}
+body.reactbits-ui .coverage-card .badge{margin-left:0}
+body.reactbits-ui .coverage-card h3{font-size:20px}
+body.reactbits-ui .coverage-card p,body.reactbits-ui .setting-row p,body.reactbits-ui .repair-option small{font-size:14px;line-height:1.5}
+body.reactbits-ui .scope-heading{margin-top:64px}
+body.network-console.reactbits-ui .section-heading{margin-top:64px;margin-bottom:24px}
+body.reactbits-ui .detection-prompt,body.reactbits-ui .backup-empty,body.reactbits-ui .backup-summary,
+body.reactbits-ui .preview-card{border:2px solid var(--ink);border-radius:32px;padding:32px;background:var(--cream);box-shadow:none;color:var(--ink)}
+body.reactbits-ui .detection-prompt{margin-top:32px}
+body.reactbits-ui .backup-empty>.icon{color:var(--ink);background:var(--lavender);border-radius:8px}
+body.reactbits-ui .backup-empty h2{font:400 32px/1.1 var(--display)}
+body.reactbits-ui .backup-summary>.icon{color:var(--forest)}
+body.reactbits-ui .change-diff>span{border-radius:12px;font-size:14px}
+body.reactbits-ui .change-diff>span:last-child,body.reactbits-ui .finding-mark.ok{background:var(--forest);color:var(--cream)}
+body.reactbits-ui .preview-heading h2{font:400 32px/1.1 var(--display)}
+body.reactbits-ui .preview-caption,body.reactbits-ui .change>strong,body.reactbits-ui .confirm-row,body.reactbits-ui .review-actions span{font-size:14px}
+body.reactbits-ui .preferences-link{border:2px solid transparent;border-radius:12px;padding:8px}
+body.reactbits-ui .preferences-link[aria-current=page]{border-color:var(--ink);background:var(--lavender);color:var(--ink)}
+body.reactbits-ui .repair-layout{gap:64px}
+body.reactbits-ui .repair-option{padding:24px 0;gap:16px}
+body.reactbits-ui .repair-option strong{font-size:16px;font-weight:500}
+body.reactbits-ui .repair-option em{background:var(--forest);color:var(--cream);border-radius:9999px;padding:4px 8px;font-size:12px}
+body.reactbits-ui .option-footer{padding-top:24px;font-size:14px}
+body.reactbits-ui .settings-card.rb-surface-host{margin-bottom:32px}
+body.reactbits-ui .process-card .benefit{width:auto;display:flex;align-items:flex-start;gap:16px;padding:16px 0}
+body.reactbits-ui .process-card .muted,body.reactbits-ui .process-card .process-intro{font-size:14px;line-height:1.5;color:var(--cream)}
+body.reactbits-ui .benefit strong{font-size:16px;color:inherit}
+body.reactbits-ui .benefit p{font-size:14px;color:inherit}
+body.reactbits-ui .setting-row{padding-top:24px;gap:24px}
+body.reactbits-ui .about-card p{color:var(--cream);font-size:14px;line-height:1.5}
+body.reactbits-ui dialog{background:none;border:0;max-width:min(640px,calc(100vw - 32px));padding:0;box-shadow:none;border-radius:32px}
+body.reactbits-ui dialog::backdrop{background:#1a1a1ab3;backdrop-filter:none}
+body.reactbits-ui .dialog-top h2{font:400 32px/1.1 var(--display);letter-spacing:-.96px}
+
+body.reactbits-ui .toast,body.reactbits-ui .notice,body.reactbits-ui .operation{border-radius:12px;border:2px solid var(--ink);background:var(--cream);color:var(--ink);box-shadow:none}
+body.product-ui.console-ui.reactbits-ui #support-dialog{width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px)}
+body.reactbits-ui .support-intro{font-size:16px;line-height:1.5;margin:0 0 24px;color:var(--charcoal)}
+body.reactbits-ui #support-payment{margin:0;text-align:center}
+body.reactbits-ui #support-qr{display:block;width:100%;max-width:280px;height:auto;max-height:calc(100dvh - 300px);object-fit:contain;margin:0 auto;background:white;border:0;border-radius:0}
+body.reactbits-ui #support-payment figcaption,body.reactbits-ui .support-note{font-size:14px;line-height:1.5;margin:16px 0 0;color:var(--charcoal)}
+body.reactbits-ui .support-note{padding-top:16px;border-top:1px solid var(--stone)}
+:root[data-theme=dark] body.reactbits-ui .console-sidebar-panel,
+:root[data-theme=dark] body.reactbits-ui #context-ui{
+  --card:#1a1a1a;--text:#ffffeb;--muted:#ffffeb;--surface:#034f46;--border:#034f46;--line:#034f46;
+  background:var(--ink)!important;color:var(--cream);
+}
+:root[data-theme=dark] body.reactbits-ui .console-sidebar-panel small,
+:root[data-theme=dark] body.reactbits-ui #context-ui .context-section>p,
+:root[data-theme=dark] body.reactbits-ui #context-ui .context-help,
+:root[data-theme=dark] body.reactbits-ui #context-ui .context-source{color:var(--cream)!important}
+:root[data-theme=dark] body.reactbits-ui #context-ui .sample-summary,
+:root[data-theme=dark] body.reactbits-ui #context-ui .context-privacy{background:var(--forest);color:var(--cream)}
+:root[data-theme=dark] body.reactbits-ui .console-menu-button[aria-current=page] small{color:var(--ink)!important}
+:root[data-theme=dark] body.reactbits-ui .sidebar-theme-button{color:var(--cream)}
+:root[data-theme=dark] body.reactbits-ui .rb-probe-total>[data-rb-component=CountUp]{color:var(--cream)}
+/* Resolve state-specific rules inherited from the original workbench. */
+:root[data-theme] body.product-ui.console-ui.reactbits-ui .hero-shield{color:var(--cream)}
+:root[data-theme] body.product-ui.console-ui.reactbits-ui .orbit-label{background:var(--forest);color:var(--cream);border-color:white}
+:root[data-theme] body.product-ui.console-ui.reactbits-ui .protection-connection{background:var(--forest);color:var(--cream)}
+:root[data-theme] body.product-ui.console-ui.reactbits-ui .detection-prompt>span:last-child{color:var(--ink)}
+body.reactbits-ui button.sidebar-theme-button{border:0;background:transparent;min-height:36px;padding:8px;box-shadow:none}
+body.reactbits-ui button.context-trigger,body.reactbits-ui button.context-close{border:0;background:transparent;padding:8px;width:36px;min-height:36px;box-shadow:none}
+:root[data-theme=dark] body.reactbits-ui .console-menu-button{color:var(--cream)}
+:root[data-theme=dark] body.reactbits-ui .console-menu-button[aria-current=page]{color:var(--ink)}
+:root[data-theme=dark] body.reactbits-ui .workspace-picker,
+:root[data-theme=dark] body.reactbits-ui .console-sidebar-panel .workspace-picker small{color:var(--ink)!important}
+:root[data-theme=dark] body.reactbits-ui .sidebar-collapse{color:var(--cream)}
+:root[data-theme=dark] body.reactbits-ui button.sidebar-theme-button{background:transparent;color:var(--cream)}
+:root[data-theme=dark] body.reactbits-ui .rb-protection-link small{color:var(--ink)}
+
+@media(max-width:1279px){body.reactbits-ui .context-trigger-wrapper{top:16px;right:20px}body[data-context=open].reactbits-ui #context-ui{top:112px}body.reactbits-ui .rb-heading{font-size:40px}}
+@media(max-width:767px){
+  body.product-ui.console-ui.reactbits-ui main{padding:24px 16px}
+  body.product-ui.console-ui.reactbits-ui .topbar{padding:16px;height:112px}
+  body.reactbits-ui .console-tabs{padding:4px 8px}
+  body.reactbits-ui .console-tab{font-size:14px;padding:8px}
+  body.reactbits-ui .mobile-menu{top:14px}
+  body.reactbits-ui .hero{flex-wrap:wrap;gap:24px}
+  body.reactbits-ui .hero-actions{width:100%;align-items:flex-start}
+  body.reactbits-ui .rb-spark-actions .rb-spark-content{align-items:flex-start}
+  body.reactbits-ui .rb-heading{font-size:32px;letter-spacing:-.96px;line-height:1.2}
+  body.reactbits-ui .hero .intro,body.reactbits-ui .page-heading .intro{font-size:14px}
+  body.reactbits-ui .rb-card-surface,body.reactbits-ui .coverage-card .rb-card-surface,body.reactbits-ui .option-card .rb-card-surface{padding:24px;border-radius:32px}
+  body.reactbits-ui .ip-grid{grid-template-columns:1fr;gap:16px}
+  body.reactbits-ui .resolver-summary{grid-column:auto}
+  body.reactbits-ui .ip-card{min-height:200px}
+  body.reactbits-ui .dns-card .rb-card-surface,body.reactbits-ui .process-card .rb-card-surface,body.reactbits-ui .about-card .rb-card-surface{padding:32px 24px;border-radius:40px}
+  body.reactbits-ui .dns-card .resolver-columns{padding:16px;border-radius:32px}
+  body.reactbits-ui .protection-copy{padding:40px 24px}
+  body.reactbits-ui .protection-copy h2{font-size:48px}
+  body.reactbits-ui .protection-connection{padding:24px}
+  body.reactbits-ui .detection-prompt,body.reactbits-ui .backup-empty,body.reactbits-ui .backup-summary,body.reactbits-ui .preview-card{padding:24px}
+  body.reactbits-ui .setting-row{flex-wrap:wrap}
+  body.reactbits-ui .rb-native-content>.card-head{gap:12px;flex-wrap:wrap}
+  body.reactbits-ui .dns-groups .empty{grid-template-columns:1fr;text-align:left;padding:16px 0}
+  body.reactbits-ui .dns-groups .empty>.icon{margin-bottom:8px}
+  body.reactbits-ui .dns-groups .empty p{grid-column:auto}
+  body.reactbits-ui .scope-heading{margin-top:64px}
+}

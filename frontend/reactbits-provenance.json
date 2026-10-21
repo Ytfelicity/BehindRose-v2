@@ -1,0 +1,117 @@
+{
+  "license": "MIT + Commons Clause",
+  "reviewedOn": "2026-10-21",
+  "scope": "Components incorporated into this application UI. Raw registry snapshots are local-only, excluded from source distribution. This record contains URLs and hashes, no component code.",
+  "components": [
+    {
+      "name": "AnimatedContent",
+      "registryUrl": "https://reactbits.dev/r/AnimatedContent-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/AnimatedContent/AnimatedContent.tsx",
+          "sha256": "996a7dc12ea54d010b04cf69235a903e3de20c6f2f2ada6a6b3bdb50444ce2af"
+        }
+      ]
+    },
+    {
+      "name": "BlurText",
+      "registryUrl": "https://reactbits.dev/r/BlurText-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/BlurText/BlurText.tsx",
+          "sha256": "476b92e3ec7fee9fdcee177333c1a687106e23767152d663c390355f488ed6f5"
+        }
+      ]
+    },
+    {
+      "name": "ClickSpark",
+      "registryUrl": "https://reactbits.dev/r/ClickSpark-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/ClickSpark/ClickSpark.tsx",
+          "sha256": "74dd39e22b0644c85b3545c4661b059aea0daf068f3276bdf9e7f42fbdd53b69"
+        }
+      ]
+    },
+    {
+      "name": "CountUp",
+      "registryUrl": "https://reactbits.dev/r/CountUp-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/CountUp/CountUp.tsx",
+          "sha256": "abf8eef48056b0d2284d493421c4f2fb4f14edaf437696b956a30b5543759eaf"
+        }
+      ]
+    },
+    {
+      "name": "DotGrid",
+      "registryUrl": "https://reactbits.dev/r/DotGrid-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/DotGrid/DotGrid.css",
+          "sha256": "4bb8a8808e63a966e2da7eb69166654f300a83eb82ee0a33388ce7f6268c3af6"
+        },
+        {
+          "path": "frontend/src/components/reactbits/DotGrid/DotGrid.tsx",
+          "sha256": "c1440e84a4d4ad33223fae8a2ef2179e9eb7af2775d9ce1c10aef01da100fe95"
+        }
+      ]
+    },
+    {
+      "name": "GradientText",
+      "registryUrl": "https://reactbits.dev/r/GradientText-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/GradientText/GradientText.css",
+          "sha256": "d070e5902e9345aed7d52787dc5fa7065926ac4c4292372bc9fbf67879af798d"
+        },
+        {
+          "path": "frontend/src/components/reactbits/GradientText/GradientText.tsx",
+          "sha256": "d9d9dc9a2abf57d69905620578daa9e1a610caeea245a771b12250b5ce90185b"
+        }
+      ]
+    },
+    {
+      "name": "ShinyText",
+      "registryUrl": "https://reactbits.dev/r/ShinyText-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/ShinyText/ShinyText.css",
+          "sha256": "16b7287240738b4851e0d4decd9f91a935d9e40c0174b985cc800682e5c267bb"
+        },
+        {
+          "path": "frontend/src/components/reactbits/ShinyText/ShinyText.tsx",
+          "sha256": "e5db78fb299301de8524905afac921a684c82f9da7ab27ae9b1606b6dbb80a86"
+        }
+      ]
+    },
+    {
+      "name": "SpotlightCard",
+      "registryUrl": "https://reactbits.dev/r/SpotlightCard-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/SpotlightCard/SpotlightCard.css",
+          "sha256": "d2e0a07a5b9edf383c74d7a3ee93d9e0c6cdfff21c861c67dca1ce88902d08f9"
+        },
+        {
+          "path": "frontend/src/components/reactbits/SpotlightCard/SpotlightCard.tsx",
+          "sha256": "77aa064d9646d66de1cf67c8ea60c23a98a59540b82ba8e6b8184a5f90393980"
+        }
+      ]
+    },
+    {
+      "name": "StarBorder",
+      "registryUrl": "https://reactbits.dev/r/StarBorder-TS-CSS.json",
+      "files": [
+        {
+          "path": "frontend/src/components/reactbits/StarBorder/StarBorder.css",
+          "sha256": "a131e112100678b8b1a9f37ef8ca78d50091cfde4135919deca259c1d6cff972"
+        },
+        {
+          "path": "frontend/src/components/reactbits/StarBorder/StarBorder.tsx",
+          "sha256": "b0930e02cf0f0e9d03ed558b62c54fa41cae9ee07b1e903fd61583596f446ffc"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>身后红玫瑰 · DNS 防护</title><link rel="icon" href="/avatar.png"><link rel="stylesheet" href="/diagnostics.css"><link rel="stylesheet" href="/workbench.css"><link rel="stylesheet" href="/beui.css"><link rel="stylesheet" href="/console.css"><script defer src="/beui.js"></script><script defer src="/workbench.js"></script></head>
+<body class="product-ui console-ui dashboard4 reactbits-ui" data-sidebar="expanded"><a class="skip-link" href="#main-content">跳到主内容</a><div id="beui-root"></div><div id="sidebar-ui"></div>
+<div class="workspace">
+  <header class="topbar" id="tabs-ui"></header>
+  <main id="main-content" tabindex="-1">
+    <div id="message" class="notice" role="alert" hidden></div>
+    <section id="operation" class="operation" aria-live="polite" hidden><svg class="icon"><use href="/icons.svg#shield"/></svg><div><strong id="operation-title"></strong><p id="operation-message"></p></div><div id="operation-actions" class="row-actions" hidden><button class="secondary" id="open-clash">打开 Clash</button><a class="secondary" href="#network">检测防护效果</a></div></section>
+
+    <section id="page-overview" class="page" hidden>
+      <div class="page-heading"><div><h1>一键配置</h1><p class="intro">统一配置系统接管与浏览器 DNS，并关闭 Clash IPv6。</p></div><button id="health-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新状态</button></div>
+      <section class="protection-hero" id="protection-hero" data-state="pending" aria-labelledby="health-title">
+        <div class="protection-copy">
+          <span class="protection-status"><span class="status-dot"></span><span id="health-kicker">正在读取防护状态</span></span>
+          <h2 id="health-title">系统接管<br>与 DNS 配置</h2>
+          <p id="health-note">正在读取本机设置，稍后即可开启防护。</p>
+          <div class="protection-cta"><button id="protect-now" class="primary protect-button" disabled><svg class="icon"><use href="/icons.svg#power"/></svg><span id="protect-label">一键配置</span></button></div>
+          <div class="assurance"><span><svg class="icon"><use href="/icons.svg#backup"/></svg>开启前自动备份</span><span><svg class="icon"><use href="/icons.svg#reset"/></svg>支持恢复原设置</span></div>
+        </div>
+        <div class="protection-art" aria-hidden="true">
+          <div class="shield-orbit orbit-outer"></div><div class="shield-orbit orbit-inner"></div><div class="orbit-dot dot-one"></div><div class="orbit-dot dot-two"></div>
+          <div class="shield-glow"></div>
+          <svg class="hero-shield" viewBox="0 0 200 224" fill="none">
+            <defs><linearGradient id="shield-fill" x1="30" y1="20" x2="180" y2="220" gradientUnits="userSpaceOnUse"><stop stop-color="#e68ba5" stop-opacity=".2"/><stop offset="1" stop-color="#e68ba5" stop-opacity=".025"/></linearGradient><linearGradient id="shield-edge" x1="50" y1="18" x2="180" y2="200" gradientUnits="userSpaceOnUse"><stop stop-color="#ffc1d3"/><stop offset="1" stop-color="#a64b6d"/></linearGradient></defs>
+            <path d="M100 12 178 41v67c0 52-51 86-78 104-27-18-78-52-78-104V41Z" fill="url(#shield-fill)" stroke="url(#shield-edge)" stroke-width="2"/>
+            <path d="m100 29 63 24v55c0 40-39 71-63 87-24-16-63-47-63-87V53Z" stroke="currentColor" stroke-opacity=".15"/>
+            <rect x="75" y="94" width="50" height="43" rx="11" stroke="currentColor" stroke-width="3"/>
+            <path d="M85 94V82a15 15 0 0 1 30 0v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="100" cy="113" r="4" fill="currentColor"/><path d="M100 117v6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <span class="orbit-label label-dns"><span class="mini-dot"></span>DNS</span><span class="orbit-label label-route"><svg class="icon"><use href="/icons.svg#route"/></svg>跟随代理</span>
+        </div>
+        <div class="protection-connection"><span class="connection-device"><svg class="icon"><use href="/icons.svg#network"/></svg>Clash Verge Rev <strong id="host-version">—</strong><span id="host-status">等待识别</span></span><span id="health-meta">仅检查本机配置</span></div>
+      </section>
+
+      <div class="section-heading scope-heading"><h2>自动配置范围</h2><span class="muted">统一检查，按需调整</span></div>
+      <div class="coverage-grid">
+        <article class="coverage-card"><span class="coverage-icon"><svg class="icon"><use href="/icons.svg#network"/></svg></span><div><h3>系统接管与 IPv6</h3><p>开启 TUN 与 DNS 接管</p><p id="clash-ipv6-status">Clash IPv6：正在读取</p></div><span id="system-status" class="badge neutral">待确认</span></article>
+        <article class="coverage-card"><span class="coverage-icon"><svg class="icon"><use href="/icons.svg#globe"/></svg></span><div><h3>浏览器 DNS</h3><p id="browser-scope">Chrome · Edge · Firefox</p></div><span id="browser-status" class="badge neutral">待确认</span></article>
+        <a class="coverage-card" href="#backups"><span class="coverage-icon"><svg class="icon"><use href="/icons.svg#backup"/></svg></span><div><h3>配置恢复</h3><p>保留每次调整前的设置</p></div><svg class="icon coverage-arrow"><use href="/icons.svg#chevron"/></svg></a>
+      </div>
+      <a class="detection-prompt" href="#network"><span class="detection-icon"><svg class="icon"><use href="/icons.svg#radar"/></svg></span><div><strong>防护有没有生效？看一眼实际出口。</strong><p>检查 DNS 解析来源，同时查看公网 IP 与 WebRTC 连接。</p></div><span>去检测 <svg class="icon"><use href="/icons.svg#chevron"/></svg></span></a>
+      <details class="configuration-details"><summary><svg class="icon"><use href="/icons.svg#info"/></svg>查看当前配置详情<span id="checked-time"></span><svg class="icon"><use href="/icons.svg#chevron"/></svg></summary><div class="findings" id="findings"><div class="empty">正在读取设置…</div></div></details>
+    </section>
+
+    <section id="page-network" class="page network-page" hidden><iframe id="network-frame" title="DNS 防护检测" hidden></iframe></section>
+
+    <section id="page-backups" class="page" hidden><div class="page-heading"><div><h1>恢复记录</h1><p class="intro">每次开启或调整防护，都为原设置留一份备份。</p></div><button id="backups-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新记录</button></div><div class="backup-summary"><svg class="icon"><use href="/icons.svg#backup"/></svg><span id="backup-count">正在读取记录…</span><small>此设备 · 当前用户</small></div><div id="backup-list"></div><details class="recovery-help"><summary>关于配置恢复</summary><p>恢复前会检查配置是否有后续改动；如有冲突，会保留你的新设置并停止恢复。v1.9 的备份请通过原版本恢复。</p></details></section>
+
+    <section id="page-settings" class="page" hidden><div class="page-heading"><div><h1>帮助与关于</h1><p class="intro">查看工具说明、隐私范围与问题反馈信息。</p></div></div><div class="card settings-card"><h2>帮助与反馈</h2><div class="setting-row"><div><strong>复制配置摘要</strong><p>便于反馈问题，不含订阅、配置原文或公网 IP。</p></div><button class="secondary" id="copy-report"><svg class="icon"><use href="/icons.svg#copy"/></svg>复制摘要</button></div></div><div class="card settings-card about-card"><img src="/avatar.png" width="48" height="48" alt=""><div><h2>身后红玫瑰</h2><p>一键 DNS 防护 · v2.0</p><p>让 DNS 请求跟随你的代理连接。按实际配置结构识别 Clash Verge Rev，版本号仅作参考。</p><details><summary>隐私与许可说明</summary><p>配置在本机处理。防护检测由当前浏览器执行，点击开始后才连接第三方服务。数据来源与检测范围可在检测页底部查看；项目自有代码公开，仅限非商业用途；正式 LICENSE 随项目提供，第三方组件保留各自许可。</p></details></div></div><details class="development-details"><summary>开发信息</summary><p>源码预览 · 保存界面文件后自动刷新</p><div class="dev-status"><span id="dev-state">连接开发服务…</span><button id="dev-reload" type="button">刷新页面</button></div></details></section>
+    <footer class="workspace-footer"><span>身后红玫瑰 · 一键 DNS 防护</span><span>配置仅保存在本机</span></footer>
+  </main>
+</div>
+<aside id="context-ui" aria-label="检测选项与连接状态"></aside><footer id="status-ui" class="statusbar"></footer>
+<dialog id="support-dialog" aria-labelledby="support-title"><div class="dialog-top"><div><p class="dialog-eyebrow">谢谢你的支持</p><h2 id="support-title">赞赏作者</h2></div><button id="close-support" class="text-button" aria-label="关闭赞赏作者">关闭</button></div><p class="support-intro">如果这个工具帮到了你，可以请作者喝杯咖啡。</p><figure id="support-payment"><img id="support-qr" src="/support-qr.png" width="385" height="378" alt="作者微信收款码"><figcaption>打开微信，扫一扫即可赞赏。</figcaption></figure><p class="support-note">自愿赞赏，感谢支持。所有功能都可以直接使用。</p></dialog>
+<dialog id="protection-dialog" aria-labelledby="protection-dialog-title"><div class="dialog-top"><div><p class="dialog-eyebrow">DNS 防护</p><h2 id="protection-dialog-title">确认配置方案</h2></div><button id="close-protection" class="text-button" aria-label="关闭防护确认">关闭</button></div><div id="quick-review"></div></dialog>
+<dialog id="restore-dialog" aria-labelledby="restore-title"><div class="dialog-top"><h2 id="restore-title">恢复原设置</h2><button id="close-restore" class="text-button" aria-label="关闭恢复预览">关闭</button></div><div id="restore-review"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>

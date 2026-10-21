@@ -1,0 +1,21 @@
+{
+  "provider": "DB-IP Lite",
+  "source": "https://db-ip.com/db/download/ip-to-country-lite",
+  "license": "CC BY 4.0",
+  "version": "2.3.2026060120",
+  "generatedAt": "2026-10-02T12:30:41.372Z",
+  "files": [
+    {
+      "name": "country4.bin",
+      "records": 355800,
+      "bytes": 3558000,
+      "sha256": "d29f3c98034ec367baa86c3303e0c4d6bcb28655fbe297b1e512b214d896bd8a"
+    },
+    {
+      "name": "country6.bin",
+      "records": 345868,
+      "bytes": 11759512,
+      "sha256": "4ec01f05edaa454f485b4806ef45593e19d06ec422556c384ae5c89e45523294"
+    }
+  ]
+}

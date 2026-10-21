@@ -1,0 +1,68 @@
+{
+  "repository": "https://github.com/jason5ng32/MyIP",
+  "commit": "a185d1844d28e7535ea3ec5c0277280a77435609",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2026 Jason Ng",
+  "generatedModule": "frontend/src/vendor/myip-dns.mjs",
+  "generatedSha256": "bf5c547d3a6789c3a4e6e29fb45077ac5c6ce52c8b3080ee6be4370c52c566b9",
+  "defaultProviders": [
+    {
+      "id": "ipapi",
+      "name": "ip-api.com"
+    },
+    {
+      "id": "surfshark",
+      "name": "surfsharkdns.com"
+    },
+    {
+      "id": "myipstack",
+      "name": "dns.myipstack.com"
+    },
+    {
+      "id": "fastly",
+      "name": "fastly.com"
+    }
+  ],
+  "standbyProviders": [
+    {
+      "id": "bashws",
+      "name": "bash.ws"
+    },
+    {
+      "id": "browserleaks",
+      "name": "browserleaks.net"
+    },
+    {
+      "id": "ipleak",
+      "name": "ipleak.net"
+    }
+  ],
+  "sourceSha256": {
+    "frontend/components/DnsLeaksTest.vue": "8282716857be42c9578625d17c421666866cd75642b8d55ba29c2dd925cfbddf",
+    "common/fetch-with-timeout.js": "e136cff7937291bdb90a92bdc7fca395c328e6162643be36f052f9042033be76",
+    "common/valid-ip.js": "1065dce225ef7e8d3ea5f701a992b15fe1a35deb14c1739b0dabaa94d848fc3e",
+    "frontend/utils/dnsleaks/index.js": "cafaea8c5e37a057c22db72adcc24f4836dd2f1059724ec90ce6b3e126c4cc18",
+    "frontend/utils/dnsleaks/ipapi.js": "235337be6df8939302474e5dff53ff3c172751e8303f0434283a069b4c09f38f",
+    "frontend/utils/dnsleaks/surfshark.js": "e345d72c2a4ffc314595b04c81a94ae0440a23c3fdaef175faab3e37685af6f1",
+    "frontend/utils/dnsleaks/myipstack.js": "2c2d51b2602dfde1760f4310dec2bb44b57627918cc2b104715cc10af6c309e5",
+    "frontend/utils/dnsleaks/fastly.js": "838cf63c99c6153b39528303a44fc728abe7616448680476f251e6a3c906dfff",
+    "frontend/utils/dnsleaks/bashws.js": "a239efd991f9a3e2fc1b1b93085ea8ce6bd81c862d3d0d5f9d99d2516bf3e0d8",
+    "frontend/utils/dnsleaks/browserleaks.js": "a45641f91d35239994f40081da975fe8f4cd5e252a817a803e5fe35ce18fb180",
+    "frontend/utils/dnsleaks/ipleak.js": "f6d9d08baad2b780fa4c5ac829ea5aa4bbc2261a8e49620524964da9e6cacf77"
+  },
+  "extractedSha256": {
+    "fetchWithTimeout": "aa7e68d8108eba773a3b4e3fccf06d78a97d3713a92a85f7979a6dd0d8c15013",
+    "isValidIP": "5a534b645578bd42bff6bb21d5e625aa1efb66f5f8970febc9de50692c873a99",
+    "runner": "a0815a23b3cfbb5c4120df32090a95cb7e819cf9e82e2284d98897cfb373b0ec",
+    "ipApi": "744705407c2596c143b69931f5878bf3924dccb8fcfb108f1f1214c2380694e1",
+    "surfshark": "dd0b3674c6fe020d9a0b989fdd1dc0839165b22d641b70a2253036c7f3861d1c",
+    "myipstack": "76b8f466570bd0285b34c204626820673dee251a6dc919317293b5f784d1c5cf",
+    "fastly": "13400565e6fd049d577a912b7381cecb9fafe1eabe93e446909e8236575fd720",
+    "bashws": "1add6515760d81248339e2e0dba4c7915d2c0dc70f74f47ee2ede13dc75464f7",
+    "browserleaks": "22389660bf00aeecc2f84affb051f8a862fe431c6c7782473efa9b48877c964d",
+    "ipleak": "51956c3d9a375b3170b576cc91d3c5f656e92904dcaaff6f8ff72002b6ee0a50"
+  },
+  "extraction": "Function bodies unchanged; static ES module imports/exports removed for lexical embedding.",
+  "hostAdaptation": "Per-run fetch injection with parent cancellation and no credentials/referrers; 200ms startup stagger; await full fallback settlement instead of upstream 6s report race.",
+  "metadata": "Resolver IP only. Country/ASN enrichment is the host responsibility; no MyIP MaxMind or authenticated enhanced DNS endpoint."
+}

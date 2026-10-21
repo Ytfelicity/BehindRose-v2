@@ -1,0 +1,27 @@
+{
+  "repository": "https://github.com/jason5ng32/MyIP",
+  "commit": "a185d1844d28e7535ea3ec5c0277280a77435609",
+  "sourcePath": "vendor/MyIP/frontend/components/WebRtcTest.vue",
+  "sourceSha256": "10025daedcd0d63c5841db26155fb2e19e48ce3c945019fbe41b7992af951a06",
+  "handlerSha256": "8fb3cac3d71f221da638469b490b63aceea30ed4966a68c849921c9e24608155",
+  "candidateRegexSha256": "d19b83d77c743fb161740b79b6bed210f250f47393c402d67988d253cc8287c0",
+  "determineNATTypeSha256": "b38b3224f1dacb2f01d33f4968dc35a74412c3ddb15275ff5f0ff4327b6b1cb9",
+  "natTypeCodeOfSha256": "b708a81c9e6ecdc78d68cdbd6f72858fe8898afeffccee86b9a2145de6bbc044",
+  "providerSourceSha256": "515d1f139b23c8335e84863f9411e6cd0a73a5ac5bd95e470fc5e37a8f28cdcd",
+  "license": "MIT",
+  "generatedModule": "frontend/src/vendor/myip-webrtc.mjs",
+  "sampling": {
+    "timeoutMs": 5000,
+    "successCandidates": [
+      "srflx",
+      "prflx"
+    ],
+    "result": "first matching candidate"
+  },
+  "adaptations": [
+    "Vue-free state closure",
+    "AbortSignal closes connections and clears timers",
+    "No online MaxMind enrichment",
+    "Dependency injection for offline tests"
+  ]
+}

@@ -1,0 +1,104 @@
+BehindRose Noncommercial License 1.0
+SPDX-License-Identifier: LicenseRef-BehindRose-Noncommercial-1.0
+
+Copyright (c) 2026 身后红玫瑰 and the respective copyright holders.
+
+1. Scope
+
+This license covers only original material for which a copyright holder has
+the right to grant this license and which that holder offers under this
+license as part of the BehindRose network toolbox (the "Software"). Each
+copyright holder retains ownership of their own contribution. This license
+does not transfer anyone's copyright to the project author or maintainers.
+
+Third-party material, including incorporated or adapted third-party code,
+libraries, fonts, icons and data, is excluded from this license to the extent
+covered by its own terms. Its original license and notices continue to
+govern that material. Consult THIRD_PARTY_NOTICES.md, the licenses directory,
+and file-level notices. Nothing here revokes, narrows or replaces rights
+granted directly by a third-party copyright holder.
+
+2. Noncommercial permission
+
+Subject to the conditions below, the relevant copyright holders permit you
+to use, study, copy and modify the Software, and to distribute its source or
+compiled forms, including your modifications, solely for noncommercial
+purposes and without charging recipients for the Software.
+
+Noncommercial purposes are purposes that are not intended for or directed
+toward commercial advantage, monetary compensation, or the support of
+for-profit business operations.
+
+3. Commercial use is not licensed
+
+You may not use, copy, modify or distribute the Software for commercial
+purposes under this license. Commercial use includes, without limitation:
+
+* selling, renting, licensing for a fee, or otherwise charging for copies of
+  the Software or modified or rebranded versions;
+* incorporating the Software into a commercial product, paid distribution,
+  paid service, subscription, or monetized hosted service;
+* using the Software to perform, operate, deliver or support for-profit
+  business activities, including internal business operations; and
+* offering access, functionality or support based on the Software in
+  exchange for payment, including payment described as a donation when it
+  is required to obtain that access, functionality or support.
+
+Changing the name, interface, packaging or source code does not remove
+these restrictions. No organization is automatically exempt because it is
+educational, charitable, nonprofit, governmental or publicly funded; the
+purpose of the use determines whether it is commercial.
+
+This license grants no commercial permission. Any separate permission must
+come in writing from every copyright holder whose permission is required.
+
+4. Conditions for permitted copying and distribution
+
+When sharing the Software or any substantial portion of it, you must:
+
+* include this license and retain applicable copyright and attribution
+  notices;
+* clearly identify your modifications and avoid representing a modified
+  version as the official, unmodified project;
+* keep the original Software covered by this license, without granting
+  commercial rights you do not own; and
+* preserve and comply with the separate licenses and notices of included
+  third-party material, without applying this license to it.
+
+Recipients obtain permission for the original Software directly from its
+copyright holders under these terms. You cannot sublicense rights beyond
+those granted here. This license does not require a transfer of ownership
+of your changes or require disclosure of unrelated code.
+
+5. Reserved rights and statutory exceptions
+
+All rights not expressly granted are reserved. No permission to use names,
+logos or trademarks in a way that implies official endorsement is granted.
+This license does not restrict uses permitted by applicable law without
+copyright permission, or alter any separate written agreement you have
+with a relevant copyright holder.
+
+6. Termination
+
+Your permissions under this license terminate automatically if you fail to
+comply with its conditions. After termination, further use, copying,
+modification or distribution requiring copyright permission is prohibited
+unless the relevant copyright holders reinstate your permissions in writing.
+Termination does not cancel the permissions of recipients who comply with
+this license.
+
+7. No warranty or liability
+
+To the extent permitted by applicable law, the Software is provided as is,
+without warranties of any kind, including fitness for a particular purpose,
+merchantability or noninfringement. To that same extent, the copyright
+holders and contributors are not liable for loss or damage arising from
+the Software or its use. Mandatory rights and liabilities under applicable
+law are not excluded.
+
+8. License identity
+
+This is a custom, source-available, noncommercial license. It is not the
+MIT, AGPL or PolyForm license and is not an OSI-approved open source license.
+The English text in this file governs; Chinese explanations elsewhere in
+the project are explanatory and do not replace these terms.

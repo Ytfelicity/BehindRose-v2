@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/jason5ng32/MyIP",
+  "commit": "a185d1844d28e7535ea3ec5c0277280a77435609",
+  "sourcePath": "vendor/MyIP/frontend/components/ConnectivityTest.vue",
+  "sourceSha256": "3af0731d3e2a9eb276bb0c01054c7c7c005ef2a07035f5823daeba639608e115",
+  "handlerSha256": "fc796c7a5cd6ef1e17e39a81e5dc4d97b7506307c965bf2596cd02a716b36629",
+  "targetsSha256": "adca3c316dc8bf28bc5ff2e5e0e5224b60ed1302412a24397ab80008339d8ed0",
+  "sampling": {
+    "rounds": 10,
+    "intervalMs": 500,
+    "staggerMs": 50
+  },
+  "license": "MIT",
+  "generatedModule": "frontend/src/vendor/myip-connectivity.mjs"
+}

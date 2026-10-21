@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { build } from 'esbuild';
+const bundle = await build({ entryPoints: ['src/ippure.ts'], bundle: true, write: false, platform: 'node', format: 'esm' });
+const { IPPURE_ENDPOINT, ipFamily, parseIpPureInfo, ipPureRisk } = await import('data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].text).toString('base64'));
+const sample = { ip: '203.0.113.42', asn: 64500, fraudScore: 0, isResidential: false, isBroadcast: false, futureField: { retained: true } };
+assert.equal(parseIpPureInfo(sample), sample);
+for (const [score, label] of [[0,'极度纯净'],[15,'极度纯净'],[15.01,'纯净'],[25,'纯净'],[25.01,'中性'],[40,'中性'],[40.01,'轻度风险'],[50,'轻度风险'],[50.01,'中度风险'],[70,'中度风险'],[70.01,'极度风险'],[100,'极度风险']]) assert.equal(ipPureRisk({ ...sample, fraudScore: score }).label, label);
+assert.equal(ipPureRisk({ ...sample, fraudScore: null }), null);
+assert.equal(ipPureRisk({ ...sample, ip: '2001:db8::1', fraudScore: 20 }), null);
+for (const ip of ['203.0.113.42', '0.0.0.0']) assert.equal(ipFamily(ip), 4);
+assert.equal(ipFamily('2001:db8::1'), 6);
+for (const ip of ['127.1', '256.1.1.1', '1', 'fe80::1%eth0', '<script>', '2001:db8::1/path']) assert.equal(ipFamily(ip), null);
+for (const value of [null, [], {}, { ip: 'bad' }, { ...sample, fraudScore: '0' }, { ...sample, fraudScore: -1 }, { ...sample, fraudScore: 101 }, { ...sample, isResidential: 'false' }, { ...sample, asn: 1.5 }]) assert.throws(() => parseIpPureInfo(value));
+assert.equal(IPPURE_ENDPOINT, 'https://my.ippure.com/v1/info');
+console.log('PASS: IPPure official score boundaries, raw zero/false/null, valid IP families and schema errors. No live provider calls.');

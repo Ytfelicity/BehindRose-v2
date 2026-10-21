@@ -1,0 +1,242 @@
+/* Independently authored dashboard UI derived from the public Dashboard 4
+   preview. This layer preserves BehindRose's live data and interaction hooks;
+   it does not contain React Bits Pro component source or demo measurements. */
+body.network-console.reactbits-ui.scan-ui.dashboard4 {
+  background: var(--bg);
+  color: var(--text);
+  font: 400 13px/1.5 Figtree, 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
+}
+body.network-console.reactbits-ui.scan-ui.dashboard4 > .shell { max-width: 1540px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4:not([data-embedded="true"]) > .shell { padding: 32px !important; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 h1,
+body.network-console.reactbits-ui.scan-ui.dashboard4 h2,
+body.network-console.reactbits-ui.scan-ui.dashboard4 h3 { font-family: Figtree, 'Segoe UI', 'Microsoft YaHei UI', sans-serif; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 a { color: var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:0 0 22px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-header h1 { margin:0; color:var(--text); font-size:25px; font-weight:600; letter-spacing:-.7px; line-height:1.3; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-title > p { display:flex; align-items:center; gap:7px; color:var(--muted); font-size:12px; margin:8px 0 0; flex-wrap:wrap; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-status-dot { width:6px; height:6px; background:var(--muted); border-radius:50%; flex-shrink:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-header-separator { opacity:.5; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .hero-actions { display:block; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rb-spark-content { display:flex; flex-direction:row; align-items:center; gap:8px; flex-wrap:wrap; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .network-secondary-actions { gap:5px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 button[data-beui],
+body.network-console.reactbits-ui.scan-ui.dashboard4 #start,
+body.network-console.reactbits-ui.scan-ui.dashboard4 #copy,
+body.network-console.reactbits-ui.scan-ui.dashboard4 #stop,
+body.network-console.reactbits-ui.scan-ui.dashboard4 #clear { min-height:34px; padding:7px 11px; border-radius:7px; font-size:12px; line-height:1.4; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #start { background:var(--text); color:var(--bg); border:1px solid var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .controls-panel { margin:0 0 20px; padding:13px 15px; background:var(--card); border:1px solid var(--border); border-radius:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .run-controls { border-bottom-color:var(--border); margin:0 0 10px; padding-bottom:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #overall,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .run-meta { font-size:12px; line-height:1.5; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .progress-track { height:3px; background:var(--surface); margin-top:10px; border-radius:3px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #progress-fill { background:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .privacy-note { margin:0 0 18px; font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metrics.ip-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; border:0; margin:0 0 22px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .card,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .card.rb-surface-host { border:1px solid var(--border) !important; border-radius:12px; background:var(--card); padding:19px !important; overflow:hidden; box-shadow:none; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric { display:flex; flex-direction:column; min-width:0; min-height:190px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric > .rb-surface-motion,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric .rb-enter { height:100%; flex:1; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric .rb-native-content { display:flex; flex-direction:column; height:100%; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-card + .ip-card { border-left:1px solid var(--border); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .card-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 14px; min-height:22px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric .card-head { margin:0; flex-wrap:nowrap; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-name { display:flex; align-items:center; gap:7px; min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-name h3 { color:var(--text); font-size:14px; line-height:1.4; font-weight:550; letter-spacing:0; margin:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric .section-name h3 { font-size:12px; color:var(--muted); font-weight:500; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric-icon,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-name h3 > .icon { width:15px; height:15px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .address-line { display:flex; align-items:center; justify-content:space-between; gap:6px; min-height:56px; padding:16px 0 12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-address { color:var(--text); font-size:23px; line-height:1.3; letter-spacing:-.8px; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-address.ipv6 { font-size:17px; letter-spacing:-.4px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .icon-button { min-width:25px; min-height:25px; border-radius:5px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .icon-button .icon { width:13px; height:13px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-facts { display:grid; grid-template-columns:1fr; gap:5px; margin:0; padding:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-facts > div { display:flex; align-items:baseline; gap:8px; min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-facts dt { font-size:11px; color:var(--muted); white-space:nowrap; margin:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-facts dd { font-size:11px; line-height:1.5; color:var(--muted); margin:0; min-height:0; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-place,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-place.unknown { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-place .icon { width:12px; height:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .country-flag { width:18px; height:13px; object-fit:contain; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .result-note,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .geo-detail { font-size:11px; line-height:1.6; color:var(--muted); margin:8px 0 0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric :is(footer,.timestamp) { font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric footer { display:flex; align-items:center; justify-content:space-between; gap:6px; color:var(--muted); margin-top:auto; border:0; padding-top:13px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric footer a { display:flex; align-items:center; gap:3px; color:var(--muted); white-space:nowrap; font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric footer a .icon { width:10px; height:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .resolver-count,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rb-resolver-number,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-rtc-number { margin:19px 0 9px; padding:0; background:none; border-radius:0; color:var(--text); font-size:32px; font-weight:550; line-height:1.2; letter-spacing:-1px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rb-resolver-number { display:flex; align-items:baseline; gap:8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rb-resolver-number > span:first-child { font:550 32px/1.2 Figtree,sans-serif; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .resolver-count > span,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rb-resolver-number > span:last-child,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric-unit { color:var(--muted); font:400 12px/1.5 Figtree,'Microsoft YaHei UI',sans-serif; letter-spacing:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric-description { color:var(--muted); font-size:11px; margin:0 0 12px; line-height:1.6; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(340px,1fr); align-items:start; gap:20px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #connectivity-root { min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-details.details-grid { display:grid; grid-template-columns:1fr; gap:20px; min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-card,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-card { margin:0; min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-card-head { align-items:flex-start; flex-wrap:wrap; gap:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-card-head .section-name { width:auto; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-controls { display:flex; align-items:center; gap:8px; margin-left:auto; width:auto; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .section-run { min-height:29px; padding:5px 8px; font-size:11px; border-radius:6px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 6px; font-size:10px; line-height:1.5; background:var(--surface); color:var(--muted); border-radius:5px; white-space:nowrap; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge .icon { width:12px; height:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge.ok { color:var(--green); background:var(--green-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge:is(.warning,.error) { color:var(--amber); background:var(--amber-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge.active { color:var(--text); background:var(--surface); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .badge:is(.warning,.error) > .icon { fill:none; color:var(--amber); stroke:currentColor; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics { display:flex !important; flex-wrap:wrap; align-items:baseline; gap:5px; color:var(--muted); margin:12px 0; font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics[hidden] { display:none !important; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics strong { color:var(--text); font-size:16px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics span { font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-sources { display:block; margin:8px 0 16px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 14px; border:0; background:none; border-radius:0; padding:0; font-size:12px; line-height:1.6; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source-link { color:var(--text); font-weight:500; text-decoration:underline; text-underline-offset:3px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 :is(.dns-source-method,.dns-source-progress) { color:var(--muted); font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source-progress { margin-left:auto; font-variant-numeric:tabular-nums; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #dns-note[hidden] { display:none !important; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-results { max-width:100%; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-resolver-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr)); gap:14px; margin:0; padding:0; list-style:none; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-resolver-card { min-width:0; padding:8px; border:1px solid var(--border); border-radius:10px; background:var(--surface); box-shadow:0 3px 10px #0000000d; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-ip { display:block; min-height:38px; box-sizing:border-box; padding:7px 10px; border-radius:6px; background:var(--bg); color:var(--green); font-size:17px; line-height:1.4; font-weight:600; text-align:center; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-resolver-body { display:flex; align-items:center; gap:12px; min-height:62px; padding:12px 6px 8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-resolver-body .country-flag { width:40px; height:30px; flex-shrink:0; object-fit:contain; border-radius:2px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-resolver-details { min-width:0; flex:1; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-region { margin:0; color:var(--text); font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-isp { margin:3px 0 0; color:var(--muted); font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-footer { display:flex; align-items:center; gap:8px; min-height:24px; margin:2px 6px 4px; padding-top:8px; border-top:1px solid var(--border); color:var(--muted); font-size:11px; line-height:1.5; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-host { flex:1; min-width:0; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-hits { margin-left:auto; flex-shrink:0; font-variant-numeric:tabular-nums; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-result-lookup { margin:0; color:var(--muted); font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-cards-empty { grid-column:1/-1; padding:22px 14px; border:1px dashed var(--border); border-radius:8px; color:var(--muted); font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .resolver-columns { display:none; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-card[data-state=idle] .dns-groups .empty { display:block; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-groups .empty { padding:4px 0 0; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-groups .empty strong { font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-group { border:0; border-bottom:1px solid var(--line); color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-group > summary { display:grid; grid-template-columns:20px minmax(0,1fr) auto 12px; gap:6px 8px; align-items:center; padding:12px 0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-group > summary:hover { background:var(--surface); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-group > summary > :is(.country-flag,.icon:first-child) { width:18px; height:14px; grid-column:1; grid-row:1/3; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-copy { grid-column:2; grid-row:1; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-provider { font-size:12px; font-weight:550; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-meta { font-size:10px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-region { grid-column:2; grid-row:2; font-size:11px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-preview { grid-column:2/5; grid-row:3; font-size:11px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-preview small { font-size:10px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-count { grid-column:3; grid-row:1; font-size:10px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .group-count strong { font-size:12px; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-group > summary > .icon:last-child { grid-column:4; grid-row:1; width:12px; height:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .address-grid { display:flex; flex-wrap:wrap; gap:5px; padding:0 0 12px 28px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-address { color:var(--text); background:var(--surface); border-radius:4px; font-size:11px; padding:4px 7px; overflow-wrap:anywhere; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-card footer { display:flex; color:var(--muted); padding-top:10px; border:0; font-size:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .explanation { font-size:11px; line-height:1.6; color:var(--muted); margin-top:14px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .explanation p { font-size:11px; line-height:1.7; margin-top:8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-list { display:grid; grid-template-columns:1fr; gap:0; margin-top:14px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-item { display:grid; grid-template-columns:minmax(0,1fr) auto 32px; gap:5px 7px; padding:12px 0; border:0; border-bottom:1px solid var(--line); background:none; border-radius:0; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-provider { grid-column:1; grid-row:1; font-size:12px; font-weight:550; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-addresses { grid-column:1/3; grid-row:2; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-address { font-size:12px; line-height:1.5; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-address-line { gap:5px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-address-line .country-flag { width:16px; height:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-comparison { grid-column:2; grid-row:1; font-size:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-state { grid-column:1/4; grid-row:3; font-size:10px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-host { grid-column:3; grid-row:1; color:var(--muted); font-size:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-host p { border:1px solid var(--border); background:var(--card); color:var(--muted); padding:10px; border-radius:8px; font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .rtc-item.different { border-left:3px solid var(--amber); padding-left:8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-section { padding:19px; margin:0; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-heading { gap:12px; margin:0 0 7px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-heading h2 { color:var(--text); font-size:14px; font-weight:550; line-height:1.4; gap:7px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-heading h2 > svg { color:var(--muted); width:15px; height:15px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-tools { gap:6px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-group select { border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); font-size:11px; min-height:30px; padding:5px 24px 5px 8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-section button[data-beui] { min-height:30px; padding:5px 8px; font-size:11px; border-radius:6px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-description { font-size:11px; color:var(--muted); line-height:1.6; margin:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-summary { font-size:11px; color:var(--muted); gap:4px; margin:14px 0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-summary small { font-size:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-list { display:block; max-width:100%; overflow-x:auto; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table { border-collapse:collapse; width:100%; table-layout:fixed; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table thead { color:var(--muted); font-size:10px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th { font-weight:450; padding:10px 0; border-bottom:1px solid var(--border); text-align:left; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:first-child { width:auto; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:nth-child(2) { width:110px; text-align:right; padding-right:15px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:nth-child(3) { width:95px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:last-child { width:32px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row { display:table-row; padding:0; border:0; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row td { padding:13px 0; border-bottom:1px solid var(--line); vertical-align:middle; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:last-child td { border-bottom:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .service-title { display:flex; align-items:center; gap:10px; min-width:0; padding-right:8px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .service-brand,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .service-brand img { width:25px; height:25px; color:var(--text); flex-shrink:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .service-name strong { color:var(--text); font-size:12px; font-weight:500; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .service-name small { color:var(--muted); font-size:10px; margin-top:3px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-latency { display:block; color:var(--text); text-align:right; font-size:12px; padding-right:15px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-latency small { display:block; font-size:9px; color:var(--muted); line-height:1.4; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-state { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:3px 6px; background:var(--surface); color:var(--muted); border-radius:5px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-state svg { width:11px; height:11px; color:currentColor; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row[data-state=reachable] .connectivity-state { color:var(--green); background:var(--green-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:is([data-state=slow],[data-state=failed],[data-state=timeout]) .connectivity-state { color:var(--amber); background:var(--amber-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:is([data-state=slow],[data-state=failed],[data-state=timeout]) .connectivity-state svg { fill:none; color:currentColor; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row-action { text-align:right; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row button[data-beui] { color:var(--muted); background:none; width:27px; min-height:27px; padding:5px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-footer { gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-footer small { font-size:10px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-method { margin-top:13px; color:var(--muted); font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-method summary { cursor:pointer; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-scope { color:var(--muted); font-size:11px; line-height:1.7; margin:8px 0 0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-manager { border:1px solid var(--border); border-radius:14px; background:var(--card); color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .manager-heading h2 { font:600 20px/1.4 Figtree,'Microsoft YaHei UI',sans-serif; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-manager :is(input,textarea) { border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .observation { margin:0 0 20px; padding:13px 15px; border:1px solid var(--border); border-left:3px solid var(--amber); border-radius:8px; background:var(--card); color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .observation strong { font-size:12px; font-weight:550; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .observation p,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .observation a { color:var(--muted); font-size:11px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-quality { margin-top:22px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .ip-quality { border:1px solid var(--border); border-radius:12px; background:var(--card); padding:20px; margin:0; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-heading h2 { font-size:15px; font-weight:550; color:var(--text); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-heading svg { color:var(--muted); width:16px; height:16px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-intro { color:var(--muted); font-size:12px; margin:9px 0 15px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-controls :is(input,select) { border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--text); font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-controls > button:first-of-type { background:var(--text); color:var(--bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-empty,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-progress { color:var(--muted); font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .quality-tabs [role=tab] { border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--muted); font-size:12px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 #ip-quality .quality-tabs [role=tab][aria-selected=true] { border-color:var(--text); background:var(--text)!important; color:var(--bg)!important; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .country-attribution { margin-top:20px; font-size:11px; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .sources { margin-top:18px; border-top-color:var(--border); color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .sources > details > summary { font-size:11px; padding:14px 0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .sources dd,
+body.network-console.reactbits-ui.scan-ui.dashboard4 .sources p { font-size:12px; line-height:1.7; color:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .page-footer { font-size:11px; color:var(--muted); }
+@media (max-width:1119px) {
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metrics.ip-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-grid { grid-template-columns:1fr; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-details.details-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:680px) {
+  body.network-console.reactbits-ui.scan-ui.dashboard4:not([data-embedded="true"]) > .shell { padding:20px 14px !important; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-header { align-items:flex-start; flex-direction:column; gap:15px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-header h1 { font-size:23px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .hero-actions { width:100%; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metrics.ip-grid { grid-template-columns:1fr; gap:12px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-metric { min-height:170px; display:flex; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .resolver-summary { display:flex; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .dashboard-network-details.details-grid { grid-template-columns:1fr; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .card,
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .card.rb-surface-host { padding:16px !important; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-section { padding:16px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-tools { width:auto; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:nth-child(2) { width:76px; padding-right:9px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-table th:nth-child(3) { width:85px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .service-title { gap:7px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .service-brand,
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .service-brand img { width:22px; height:22px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-latency { padding-right:9px; font-size:11px; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-footer small { margin-left:0; width:100%; }
+  body.network-console.reactbits-ui.scan-ui.dashboard4 .section-controls { gap:7px; }
+}

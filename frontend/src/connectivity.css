@@ -1,0 +1,56 @@
+/* The new tool reuses beUI actions and tooltips, with the existing Refero skin. */
+body.network-console.reactbits-ui.scan-ui .connectivity-section{margin:0 0 24px;padding:0 0 24px;border-bottom:1px solid var(--ink)}
+body.network-console.reactbits-ui.scan-ui .connectivity-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+body.network-console.reactbits-ui.scan-ui .connectivity-heading h2{display:flex;align-items:center;gap:8px;font:500 20px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;margin:0;color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .connectivity-heading h2>svg{color:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .connectivity-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+body.network-console.reactbits-ui.scan-ui .connectivity-section button[data-beui]{min-height:36px;padding:8px 12px;font-size:14px;line-height:1.3;flex-shrink:0}
+body.network-console.reactbits-ui.scan-ui .connectivity-group select{min-height:36px;padding:8px 28px 8px 12px;border:2px solid var(--ink);border-radius:12px;background:var(--cream);color:var(--ink);font:400 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;max-width:100%}
+body.network-console.reactbits-ui.scan-ui .connectivity-description{font-size:14px;line-height:1.5;color:var(--charcoal);margin:0 0 8px}
+body.network-console.reactbits-ui.scan-ui .connectivity-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--charcoal);margin:12px 0}
+body.network-console.reactbits-ui.scan-ui .connectivity-summary small{font-size:12px}
+body.network-console.reactbits-ui.scan-ui .connectivity-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+body.network-console.reactbits-ui.scan-ui .connectivity-row{display:grid;grid-template-columns:28px minmax(0,1fr) 90px 60px 32px;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--stone);color:var(--ink);min-width:0}
+body.network-console.reactbits-ui.scan-ui .service-brand{display:grid;place-items:center;width:28px;height:28px;color:var(--ink);font:600 12px/1 Figtree,sans-serif}
+body.network-console.reactbits-ui.scan-ui .service-brand img{display:block;width:28px;height:28px;object-fit:contain;border-radius:0}
+body.network-console.reactbits-ui.scan-ui .service-name{min-width:0}
+body.network-console.reactbits-ui.scan-ui .service-name strong{display:block;font:500 14px/1.3 Figtree,'Microsoft YaHei UI',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .service-name small{display:block;font:400 11px/1.3 Figtree,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--charcoal);margin-top:4px}
+body.network-console.reactbits-ui.scan-ui .connectivity-state{display:flex;gap:5px;align-items:center;font-size:12px;white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .connectivity-state svg{flex-shrink:0;color:var(--fog)}
+body.network-console.reactbits-ui.scan-ui .connectivity-latency{font:500 16px/1.3 'Cascadia Code',Consolas,monospace;text-align:right;white-space:nowrap}
+body.network-console.reactbits-ui.scan-ui .connectivity-latency small{font:400 11px/1.3 Figtree,sans-serif;color:var(--charcoal)}
+body.network-console.reactbits-ui.scan-ui .connectivity-row button[data-beui],body.network-console.reactbits-ui.scan-ui .connectivity-manager button[aria-label]{width:32px;min-height:32px;padding:6px;border:0;background:transparent;color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .connectivity-row[data-state=reachable] .connectivity-state{color:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .connectivity-row[data-state=reachable] .connectivity-state svg{color:var(--forest)}
+body.network-console.reactbits-ui.scan-ui .connectivity-row:is([data-state=slow],[data-state=failed],[data-state=timeout]) .connectivity-state svg{color:var(--ink);fill:var(--ember)}
+body.network-console.reactbits-ui.scan-ui .connectivity-row[data-state=running] .connectivity-state svg{color:var(--forest);animation:connectivity-spin 1s linear infinite}
+body.network-console.reactbits-ui.scan-ui .connectivity-footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0 0;width:100%}
+body.network-console.reactbits-ui.scan-ui .connectivity-footer small{font-size:12px;color:var(--charcoal);margin-left:auto}
+body.network-console.reactbits-ui.scan-ui .connectivity-scope{font-size:12px;line-height:1.5;color:var(--charcoal);margin:12px 0 0;max-width:760px}
+body.network-console.reactbits-ui.scan-ui .connectivity-empty{padding:16px 0;font-size:14px;color:var(--charcoal)}
+body.network-console.reactbits-ui.scan-ui .connectivity-notice{font-size:14px;color:var(--forest);line-height:1.5;margin:12px 0 0;min-height:21px}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager{width:560px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);overflow:auto;padding:24px;border:2px solid var(--ink);border-radius:32px;background:var(--cream);color:var(--ink)}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager::backdrop{background:#1a1a1a99}
+body.network-console.reactbits-ui.scan-ui .manager-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+body.network-console.reactbits-ui.scan-ui .manager-heading h2{margin:0;font:400 28px/1.3 var(--display)}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager p{font-size:14px;line-height:1.5;margin:12px 0}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager form{display:grid;gap:12px;margin:20px 0}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager label{display:block;font-size:14px;line-height:1.5}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager :is(input,textarea){display:block;width:100%;border:2px solid var(--ink);border-radius:12px;padding:10px 12px;background:var(--cream);color:var(--ink);font:400 14px/1.5 Figtree,'Microsoft YaHei UI',sans-serif;margin-top:6px}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager textarea{resize:vertical;min-height:100px;max-height:260px;font-family:Consolas,monospace}
+body.network-console.reactbits-ui.scan-ui .connectivity-manager form button{justify-self:start;background:var(--lavender)}
+body.network-console.reactbits-ui.scan-ui .custom-sites>div{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--stone);min-width:0}
+body.network-console.reactbits-ui.scan-ui .custom-sites>div>span{min-width:0}
+body.network-console.reactbits-ui.scan-ui .custom-sites strong{display:block;font-size:14px;font-weight:500}
+body.network-console.reactbits-ui.scan-ui .custom-sites small{display:block;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:4px}
+body.network-console.reactbits-ui.scan-ui .connectivity-import{margin-top:20px;font-size:14px;border-top:1px solid var(--stone);padding-top:16px}
+body.network-console.reactbits-ui.scan-ui .connectivity-import summary{cursor:pointer}
+body.network-console.reactbits-ui.scan-ui .connectivity-import>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@keyframes connectivity-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){body.network-console.reactbits-ui.scan-ui .connectivity-row[data-state=running] .connectivity-state svg{animation:none}}
+.connectivity-samples{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;list-style:none;padding:0;margin:16px 0;color:var(--charcoal);font-size:12px}
+.connectivity-samples>li{min-width:0;padding:12px;border:1px solid var(--border);border-radius:8px}.connectivity-samples strong{color:var(--ink)}.connectivity-samples code{display:block;overflow-wrap:anywhere;font-size:11px;margin:5px 0}.connectivity-samples ol{list-style:none;padding:0;margin:10px 0 0}.connectivity-samples ol li{display:flex;gap:10px;flex-wrap:wrap;margin:5px 0}.connectivity-samples time{margin-left:auto;font-variant-numeric:tabular-nums}
+@media(max-width:740px){body.network-console.reactbits-ui.scan-ui .connectivity-list{grid-template-columns:1fr}}
+@media(max-width:540px){body.network-console.reactbits-ui.scan-ui .connectivity-tools{width:100%}body.network-console.reactbits-ui.scan-ui .connectivity-footer small{margin-left:0}body.network-console.reactbits-ui.scan-ui .connectivity-manager{padding:20px 16px}body.network-console.reactbits-ui.scan-ui .connectivity-row{grid-template-columns:24px minmax(0,1fr) 83px 56px 28px;gap:6px}body.network-console.reactbits-ui.scan-ui .service-brand,body.network-console.reactbits-ui.scan-ui .service-brand img{width:24px;height:24px}body.network-console.reactbits-ui.scan-ui .connectivity-row button[data-beui]{width:28px}}
+.connectivity-sample-count{display:block;font-size:10px;line-height:1.3;color:var(--charcoal);font-weight:400}

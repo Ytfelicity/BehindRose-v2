@@ -1,0 +1,16 @@
+GSAP 3.15.0
+Copyright 2008-2026, GreenSock. All rights reserved.
+
+The installed package and its source headers reference the Standard "No Charge"
+GSAP License. It is not an MIT license and is not replaced by this project's
+license. Preserve the upstream copyright and license references.
+
+Official terms: https://gsap.com/community/standard-license/
+Source header reference: https://gsap.com/standard-license
+Terms effective: April 30, 2025. Last modified: May 30, 2025.
+Reference checked: October 18, 2026.
+
+The terms permit GSAP in websites, applications and digital interfaces, subject
+to their conditions, including restrictions concerning competing visual
+animation builders. This file records the installed package's notice and links;
+it is not a replacement or relicense of the official terms.

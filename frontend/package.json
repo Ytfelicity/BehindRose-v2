@@ -1,0 +1,43 @@
+{
+  "name": "behindrose-workbench-ui",
+  "private": true,
+  "license": "LicenseRef-BehindRose-Noncommercial-1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "check": "tsc --noEmit",
+    "test": "node tests/console.test.mjs",
+    "test:connectivity": "node tests/connectivity.test.mjs",
+    "test:connectivity-ui": "node tests/connectivity-ui.test.mjs",
+    "test:quality": "node tests/quality-ui.test.mjs",
+    "test:ippure": "node tests/ippure.test.mjs",
+    "test:myip-diagnostics": "node tests/myip-diagnostics.test.mjs",
+    "test:ipleak-dns": "node tests/ipleak-dns.test.mjs"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.4",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/figtree": "^5.3.0",
+    "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.23.24",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1"
+  },
+  "overrides": {
+    "@parcel/watcher": "2.6.0"
+  },
+  "devDependencies": {
+    "@ip-location-db/dbip-country": "^2.3.2026060120",
+    "@lobehub/icons-static-svg": "^1.95.1",
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/cli": "^4.1.14",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "esbuild": "^0.25.10",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,50 @@
+/* BehindRose's own operations-board palette. This is an independent app
+   composition; no React Bits Pro component source or preview assets are used. */
+:root[data-theme="dark"]:has(body.dashboard4) { background:#0b0b0b; color-scheme:dark; }
+body.dashboard4.console-ui.reactbits-ui,
+body.dashboard4.network-console.reactbits-ui,
+:root[data-theme="dark"] body.dashboard4.console-ui.reactbits-ui,
+:root[data-theme="dark"] body.dashboard4.network-console.reactbits-ui {
+  --bg:#0b0b0b; --card:#151515; --surface:#1b1b1b; --text:#ededed;
+  --muted:#949494; --border:#2a2a2a; --line:#252525; --neutral-bg:#202020;
+  --rose:#ededed; --rose-ink:#0b0b0b; --rose-soft:#232323;
+  --green:#3bd8a3; --green-bg:#142b23; --amber:#e5ae52; --amber-bg:#302616;
+  --red:#e87171; --red-bg:#321d1d; --cream:var(--bg); --ink:var(--text);
+  --charcoal:var(--muted); --lavender:var(--rose-soft); --forest:var(--green);
+  --ember:var(--amber); --fog:var(--muted); --stone:var(--line);
+  background:var(--bg); color:var(--text); font-family:'Figtree','Segoe UI','Microsoft YaHei UI',sans-serif;
+  color-scheme:dark; font-variant-numeric:tabular-nums;
+}
+:root[data-theme="light"] body.dashboard4.console-ui.reactbits-ui,
+:root[data-theme="light"] body.dashboard4.network-console.reactbits-ui {
+  --bg:#f7f7f7; --card:#ffffff; --surface:#f1f1f1; --text:#202020;
+  --muted:#747474; --border:#e0e0e0; --line:#e8e8e8; --neutral-bg:#eeeeee;
+  --rose:#202020; --rose-ink:#ffffff; --rose-soft:#eeeeee;
+  --green:#178c66; --green-bg:#e8f5ef; --amber:#9b6b20; --amber-bg:#fff4df;
+  --red:#c74747; --red-bg:#fff0f0; color-scheme:light;
+}
+body.dashboard4.console-ui.reactbits-ui :is(.rb-card-surface,.console-sidebar-panel,#context-ui),
+body.dashboard4.network-console.reactbits-ui :is(.rb-card-surface,.connectivity-manager) {
+  --card:inherit; --surface:inherit; --text:inherit; --muted:inherit;
+  --border:inherit; --line:inherit; color:var(--text); border-color:var(--border);
+  background:var(--card); box-shadow:none;
+}
+body.dashboard4.console-ui.reactbits-ui #sidebar-ui .console-sidebar-panel { background:var(--bg)!important; }
+body.dashboard4.reactbits-ui :is(.badge,.pill,.console-badge,.env-local,.repair-option em) {
+  color:var(--muted)!important; background:var(--neutral-bg)!important;
+}
+body.dashboard4.reactbits-ui :is(.badge.ok,.pill.ok,.finding-mark.ok) {
+  color:var(--green)!important; background:var(--green-bg)!important;
+}
+body.dashboard4.reactbits-ui .badge.warning { color:var(--amber)!important; background:var(--amber-bg)!important; }
+body.dashboard4.reactbits-ui .badge.error { color:var(--red)!important; background:var(--red-bg)!important; }
+body.dashboard4.reactbits-ui .badge.active { color:var(--text)!important; background:var(--rose-soft)!important; }
+body.dashboard4.reactbits-ui .beui-switch button[aria-checked="true"] { background:var(--text); }
+body.dashboard4.reactbits-ui .beui-switch button[aria-checked="true"]>span { background:var(--bg); }
+body.dashboard4.reactbits-ui .rb-background-host { display:none; }
+body.dashboard4.reactbits-ui .rb-card-surface::before { display:none; }
+body.dashboard4.reactbits-ui .rb-heading { font-family:inherit; letter-spacing:-.5px; }
+body.dashboard4.reactbits-ui :is(.rb-brand-gradient .text-content,.rb-brand-gradient .animated-gradient-text) {
+  background:none!important; color:var(--text)!important; -webkit-text-fill-color:var(--text);
+}
+body.dashboard4.reactbits-ui :focus-visible { outline-color:var(--text); }

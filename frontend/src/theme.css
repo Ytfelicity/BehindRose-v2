@@ -1,0 +1,46 @@
+/* beUI source uses Tailwind semantic colors. Do not apply its reset to the
+   existing diagnostics/configuration islands. */
+@layer theme, base;
+@import "tailwindcss/theme.css" layer(theme);
+@import "./components/reactbits/SpotlightCard/SpotlightCard.css";
+@import "./components/reactbits/DotGrid/DotGrid.css";
+@import "./components/reactbits/GradientText/GradientText.css";
+@import "./components/reactbits/ShinyText/ShinyText.css";
+@import "./components/reactbits/StarBorder/StarBorder.css";
+@import "./reactbits-ui.css";
+/* Utilities must be able to override the inherited legacy page styles. */
+@import "tailwindcss/utilities.css";
+@import "./refero-design.css";
+@import "./network-scan.css";
+@import "./connectivity.css";
+@import "./quality.css";
+@import "./dark-palette.css";
+@import "./dashboard4-theme.css";
+@import "./dashboard4-workbench.css";
+@import "./dashboard4-network.css";
+@import "./network-views.css";
+@source "./";
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@layer base {
+  /* Only reset the browser defaults on beUI controls; do not reset legacy pages. */
+  button[data-beui], .beui-switch button, .console-tab, .sidebar-collapse,
+  .mobile-menu, .console-tabs button[aria-label^="Scroll tabs"] {
+    appearance: button;
+    border: 0 solid;
+    padding: 0;
+    font: inherit;
+    background: transparent;
+  }
+}
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--muted);
+  --color-primary: var(--rose);
+  --color-primary-foreground: var(--rose-ink);
+  --color-border: var(--border);
+  --color-ring: var(--rose);
+  --color-destructive: #d05252;
+}

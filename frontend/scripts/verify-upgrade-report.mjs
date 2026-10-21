@@ -1,0 +1,37 @@
+import { launchCaptureBrowser } from './browser-runtime.mjs';
+import { expect } from '@playwright/test';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+const root = path.resolve('../docs/ui-reactbits-2026-10-02');
+const browser = await launchCaptureBrowser();
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errors = [], requests = [];
+  page.on('pageerror', e=>errors.push(e.message));
+  page.on('request', r=>{ if (/^https?:/.test(r.url())) requests.push(r.url()); });
+  await page.goto(pathToFileURL(path.join(root, 'UI升级对照.html')).href);
+  await expect(page.locator('.component-card')).toHaveCount(9);
+  await expect(page.locator('.view-controls button')).toHaveCount(7);
+  await expect(page.locator('#shot')).toBeVisible();
+  assert.ok(await page.locator('#shot').evaluate(img=>img.complete && img.naturalWidth===1600));
+  await page.screenshot({ path: path.join(root,'evidence/report-desktop.png') });
+  await page.locator('[data-view="auth"]').click();
+  await expect(page.locator('#shot')).toHaveAttribute('alt','设备认证弹窗真实截图');
+  await page.locator('.main-shot').click();
+  await expect(page.locator('#lightbox')).toBeVisible();
+  await page.locator('#close-lightbox').click();
+  await expect(page.locator('#lightbox')).toBeHidden();
+  await page.locator('#component-SpotlightCard').scrollIntoViewIfNeeded();
+  await page.locator('#component-SpotlightCard .pair img').evaluateAll(imgs=>Promise.all(imgs.map(img=>img.decode())));
+  await page.screenshot({ path: path.join(root,'evidence/report-components.png') });
+  await page.locator('#component-SpotlightCard summary').click();
+  await expect(page.locator('#component-SpotlightCard .proof-content')).toBeVisible();
+  assert.equal(await page.locator('.hash-row').count(),14);
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('#screens').scrollIntoViewIfNeeded();
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Report mobile layout must not overflow');
+  await page.screenshot({ path: path.join(root,'evidence/report-mobile.png') });
+  assert.deepEqual(errors,[]); assert.deepEqual(requests,[],'Offline report must not fetch external assets');
+  console.log('PASS: standalone HTML works offline; 7 views, 9 source pairs, 14 hashes, image zoom and mobile layout.');
+} finally { await browser.close(); }

@@ -1,0 +1,37 @@
+{
+  "projectLicense": "LicenseRef-BehindRose-Noncommercial-1.0",
+  "reviewedOn": "2026-10-21",
+  "scope": "Only original material that its copyright holders can license under the project terms; third-party original and adapted material retains its own license.",
+  "thirdPartyReferences": [
+    "THIRD_PARTY_NOTICES.md",
+    "licenses/frontend/manifest.json",
+    "vendor/MyIP/LICENSE"
+  ],
+  "restrictedDependencies": [
+    {
+      "name": "React Bits",
+      "notice": "licenses/react-bits-LICENSE.md",
+      "sourcePaths": [
+        "frontend/src/components/reactbits/",
+        "frontend/reactbits-provenance.json"
+      ],
+      "applicationUse": "UI components incorporated into this network toolbox application; source URLs and exact file hashes record provenance. Duplicate raw registry snapshots are excluded from public source.",
+      "boundary": "Original and adapted component code retains the upstream MIT + Commons Clause terms. Not offered as a standalone component collection; the project noncommercial license does not relicense it.",
+      "terms": "https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md",
+      "noticeSha256": "f4c33af6739191537738662d223b68d77bc226f4b57ea883e16481d8cc5c73c9"
+    },
+    {
+      "name": "GSAP",
+      "version": "3.15.0",
+      "notice": "licenses/GSAP-NOTICE.txt",
+      "sourcePaths": [
+        "frontend/node_modules/gsap/ (dependency, not committed)"
+      ],
+      "applicationUse": "Animation in an ordinary network toolbox application interface.",
+      "boundary": "Retains the GSAP Standard License and copyright references. This application is not a competing visual animation builder. The project noncommercial license does not relicense GSAP.",
+      "terms": "https://gsap.com/community/standard-license/",
+      "noticeSha256": "a7aebe6295e5879e71f76654a9cd42fefbda9902b8c72f1dfb6c7a6264b09ee2"
+    }
+  ],
+  "limitations": "Records current application use and preserved notices, not a guarantee for arbitrary downstream combinations or a legal opinion."
+}

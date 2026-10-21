@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <AssemblyName>BehindRose</AssemblyName><ApplicationIcon>Assets/avatar.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Product>身后红玫瑰 · 网络助手</Product><Description>Windows 网络检测、配置修复与恢复</Description>
+    <Version Condition="'$(ReleaseVersion)' != ''">$(ReleaseVersion)</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+    <AssemblyMetadata Include="UpdateRepository" Value="$(UpdateRepository)" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
+    <ProjectReference Include="../BehindRose.Windows/BehindRose.Windows.csproj" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+    <EmbeddedResource Include="Assets/diagnostics/**/*" Watch="false" /><EmbeddedResource Include="Assets/avatar-source.png" />
+    <Watch Include="**/*.xaml" Exclude="**/bin/**;**/obj/**" />
+    <Resource Include="Assets/avatar.ico" />
+  </ItemGroup>
+</Project>

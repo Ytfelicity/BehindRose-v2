@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <Version>2.0.0-preview.1</Version>
+    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.1</ReleaseVersion>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Company>身后红玫瑰</Company>
+    <Authors>身后红玫瑰</Authors>
+    <UpdateRepository Condition="'$(UpdateRepository)' == ''">https://github.com/Ytfelicity/BehindRose-v2</UpdateRepository>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <NuGetLockFilePath Condition="'$(RuntimeIdentifier)' != ''">$(MSBuildProjectDirectory)/packages.$(RuntimeIdentifier).lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,46 @@
+[
+  {
+    "path": "frontend/components/DnsLeaksTest.vue",
+    "sha256": "8282716857be42c9578625d17c421666866cd75642b8d55ba29c2dd925cfbddf"
+  },
+  {
+    "path": "common/fetch-with-timeout.js",
+    "sha256": "e136cff7937291bdb90a92bdc7fca395c328e6162643be36f052f9042033be76"
+  },
+  {
+    "path": "common/valid-ip.js",
+    "sha256": "1065dce225ef7e8d3ea5f701a992b15fe1a35deb14c1739b0dabaa94d848fc3e"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/index.js",
+    "sha256": "cafaea8c5e37a057c22db72adcc24f4836dd2f1059724ec90ce6b3e126c4cc18"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/ipapi.js",
+    "sha256": "235337be6df8939302474e5dff53ff3c172751e8303f0434283a069b4c09f38f"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/surfshark.js",
+    "sha256": "e345d72c2a4ffc314595b04c81a94ae0440a23c3fdaef175faab3e37685af6f1"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/myipstack.js",
+    "sha256": "2c2d51b2602dfde1760f4310dec2bb44b57627918cc2b104715cc10af6c309e5"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/fastly.js",
+    "sha256": "838cf63c99c6153b39528303a44fc728abe7616448680476f251e6a3c906dfff"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/bashws.js",
+    "sha256": "a239efd991f9a3e2fc1b1b93085ea8ce6bd81c862d3d0d5f9d99d2516bf3e0d8"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/browserleaks.js",
+    "sha256": "a45641f91d35239994f40081da975fe8f4cd5e252a817a803e5fe35ce18fb180"
+  },
+  {
+    "path": "frontend/utils/dnsleaks/ipleak.js",
+    "sha256": "f6d9d08baad2b780fa4c5ac829ea5aa4bbc2261a8e49620524964da9e6cacf77"
+  }
+]

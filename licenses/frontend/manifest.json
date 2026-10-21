@@ -1,0 +1,80 @@
+[
+  {
+    "package": "react",
+    "version": "19.3.0",
+    "license": "MIT",
+    "notice": "react-LICENSE.txt"
+  },
+  {
+    "package": "react-dom",
+    "version": "19.3.0",
+    "license": "MIT",
+    "notice": "react-dom-LICENSE.txt"
+  },
+  {
+    "package": "scheduler",
+    "version": "0.28.0",
+    "license": "MIT",
+    "notice": "scheduler-LICENSE.txt"
+  },
+  {
+    "package": "motion",
+    "version": "12.43.0",
+    "license": "MIT",
+    "notice": "motion-LICENSE.txt"
+  },
+  {
+    "package": "framer-motion",
+    "version": "12.43.0",
+    "license": "MIT",
+    "notice": "framer-motion-LICENSE.txt"
+  },
+  {
+    "package": "motion-dom",
+    "version": "12.43.0",
+    "license": "MIT",
+    "notice": "motion-dom-LICENSE.txt"
+  },
+  {
+    "package": "motion-utils",
+    "version": "12.39.0",
+    "license": "MIT",
+    "notice": "motion-utils-LICENSE.txt"
+  },
+  {
+    "package": "lucide-react",
+    "version": "0.468.0",
+    "license": "ISC",
+    "notice": "lucide-react-LICENSE.txt"
+  },
+  {
+    "package": "clsx",
+    "version": "2.1.1",
+    "license": "MIT",
+    "notice": "clsx-LICENSE.txt"
+  },
+  {
+    "package": "tailwind-merge",
+    "version": "3.7.0",
+    "license": "MIT",
+    "notice": "tailwind-merge-LICENSE.txt"
+  },
+  {
+    "package": "@floating-ui/dom",
+    "version": "1.8.0",
+    "license": "MIT",
+    "notice": "floating-ui--dom-LICENSE.txt"
+  },
+  {
+    "package": "@floating-ui/core",
+    "version": "1.8.0",
+    "license": "MIT",
+    "notice": "floating-ui--core-LICENSE.txt"
+  },
+  {
+    "package": "@floating-ui/utils",
+    "version": "0.2.12",
+    "license": "MIT",
+    "notice": "floating-ui--utils-LICENSE.txt"
+  }
+]

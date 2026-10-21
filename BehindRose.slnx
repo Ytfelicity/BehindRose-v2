@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BehindRose.Core/BehindRose.Core.csproj" />
+    <Project Path="src/BehindRose.Windows/BehindRose.Windows.csproj" />
+    <Project Path="src/BehindRose.Desktop/BehindRose.Desktop.csproj" />
+    <Project Path="src/BehindRose.DevHost/BehindRose.DevHost.csproj" />
+  </Folder>
+  <Folder Name="/tests/"><Project Path="tests/BehindRose.Tests/BehindRose.Tests.csproj" /></Folder>
+</Solution>

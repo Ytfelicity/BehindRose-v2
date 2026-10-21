@@ -1,0 +1,75 @@
+/* A quiet, consistent dark palette for both documents in the workbench. */
+:root[data-theme="dark"] { color-scheme:dark; background:#15171c; }
+:root[data-theme="dark"] body.product-ui.console-ui.reactbits-ui,
+:root[data-theme="dark"] body.network-console.reactbits-ui {
+  --bg:#15171c; --card:#1c1f26; --surface:#252932; --text:#e2e5ec;
+  --muted:#9ea5b3; --border:#343944; --line:#2b3039;
+  --rose:#99b4e4; --rose-ink:#111924; --rose-soft:#263347;
+  --green:#a0c0ad; --green-bg:#22352b;
+  --amber:#d5bb8b; --amber-bg:#332d22; --red:#d8a2a6;
+  --neutral-bg:#252932;
+  --cream:var(--bg); --ink:var(--text); --charcoal:var(--muted);
+  --lavender:var(--rose-soft); --forest:var(--green); --ember:var(--amber);
+  --fog:var(--muted); --stone:var(--surface);
+  background:var(--bg); color:var(--text); color-scheme:dark;
+}
+:root[data-theme="dark"] body.reactbits-ui :is(.rb-card-surface,.console-sidebar-panel,#context-ui) {
+  --card:#1c1f26; --surface:#252932; --text:#e2e5ec; --muted:#9ea5b3;
+  --border:#343944; --line:#2b3039;
+  background:var(--card); color:var(--text); border-color:var(--border);
+}
+:root[data-theme="dark"] body.reactbits-ui :is(.console-sidebar-panel,#context-ui) {
+  background:#191c22!important; color:var(--text);
+}
+:root[data-theme="dark"] body.reactbits-ui :is(.workspace,.topbar,.statusbar,.console-tabs) {
+  background:var(--bg); color:var(--muted);
+}
+:root[data-theme="dark"] body.reactbits-ui :is(.console-tabs,.workspace-picker,.console-menu-button[aria-current="page"],.rb-card-surface,.preview-card,.backup-summary,.backup-empty,.detection-prompt,.rb-protection-link,.connectivity-manager,button[data-beui],button.primary,button.secondary,a.secondary,select,input:not([type="checkbox"]),textarea,.beui-switch button) {
+  border-color:var(--border);
+}
+:root[data-theme="dark"] body.reactbits-ui :is(.console-tab[aria-selected="true"],.console-menu-button[aria-current="page"],.preferences-link[aria-current="page"]) {
+  background:var(--rose-soft); color:var(--rose); border-color:var(--border);
+}
+:root[data-theme="dark"] body.reactbits-ui .console-menu-button { color:var(--text); }
+:root[data-theme="dark"] body.reactbits-ui .console-menu-button[aria-current="page"] { color:var(--rose); }
+:root[data-theme="dark"] body.reactbits-ui .console-menu-button[aria-current="page"] small,
+:root[data-theme="dark"] body.reactbits-ui .console-sidebar-panel small,
+:root[data-theme="dark"] body.reactbits-ui .console-sidebar-panel .workspace-picker small,
+:root[data-theme="dark"] body.reactbits-ui #context-ui :is(.context-section>p,.context-help,.context-source),
+:root[data-theme="dark"] body.reactbits-ui .rb-protection-link small { color:var(--muted)!important; }
+:root[data-theme="dark"] body.reactbits-ui :is(.workspace-picker,.sidebar-collapse,button.sidebar-theme-button,.rb-probe-total>[data-rb-component="CountUp"],.protection-copy h2,.scope-link,.protection-art,.hero-shield,.rb-protection-link .inner-content) { color:var(--text); }
+:root[data-theme="dark"] body.reactbits-ui :is(.protection-copy p,.assurance,.about-card p,.process-card .muted,.process-card .process-intro,.dns-card .result-note,.dns-card .rb-native-content>footer) { color:var(--muted); }
+:root[data-theme="dark"] body.reactbits-ui :is(.sample-summary,.context-privacy,.rtc-item,.orbit-label,.protection-connection,.resolver-columns,.dns-card .resolver-group,.dns-card .address-row) {
+  background:var(--surface); color:var(--text); border-color:var(--border);
+}
+:root[data-theme="dark"] body.reactbits-ui #context-ui :is(.sample-summary,.context-privacy) { background:var(--surface); color:var(--muted); }
+:root[data-theme="dark"] body.product-ui.console-ui.reactbits-ui :is(.orbit-label,.protection-connection) { background:var(--surface); color:var(--text); border-color:var(--border); }
+:root[data-theme="dark"] body.product-ui.console-ui.reactbits-ui .hero-shield { color:var(--rose); }
+:root[data-theme="dark"] body.reactbits-ui .hero-shield path:first-of-type { fill:var(--rose-soft); stroke:var(--rose); }
+:root[data-theme="dark"] body.reactbits-ui .shield-orbit { border-color:var(--border); }
+:root[data-theme="dark"] body.reactbits-ui .dns-groups .empty { color:var(--muted); }
+:root[data-theme="dark"] body.reactbits-ui .dns-groups .empty .icon { background:var(--surface); color:var(--muted); }
+:root[data-theme="dark"] body.reactbits-ui .dns-card .section-icon { background:var(--rose-soft); color:var(--rose); }
+:root[data-theme="dark"] body.reactbits-ui :is(button[data-beui],button.primary,button.secondary,a.secondary,select,input:not([type="checkbox"]),textarea) { background:var(--card); color:var(--text); }
+:root[data-theme="dark"] body.reactbits-ui :is(button[data-beui],button.secondary,a.secondary):hover:not(:disabled) { background:var(--surface); border-color:#485160; }
+:root[data-theme="dark"] body.reactbits-ui :is(#start,button.primary) { background:#3b506d; color:#edf2fa; border-color:#536b8b; }
+:root[data-theme="dark"] body.reactbits-ui :is(#start,button.primary):hover:not(:disabled) { background:#465f81; border-color:#647e9f; }
+:root[data-theme="dark"] body.reactbits-ui :is(#stop,#clear,button.sidebar-theme-button,.text-button,.context-trigger,.context-close) { background:transparent; }
+:root[data-theme="dark"] body.reactbits-ui .beui-switch button[aria-checked="true"],
+:root[data-theme="dark"] body.reactbits-ui .repair-option input[type="checkbox"]:checked { background:#5b7396; }
+:root[data-theme="dark"] body.reactbits-ui .beui-switch button>span,
+:root[data-theme="dark"] body.reactbits-ui .repair-option input[type="checkbox"]::before { background:#d3d9e4; }
+:root[data-theme="dark"] body.reactbits-ui :is(.badge,.pill,.console-badge,.protection-status,.env-local,.sidebar-edition span,.repair-option em) { background:var(--neutral-bg)!important; color:var(--muted)!important; }
+:root[data-theme="dark"] body.reactbits-ui :is(.badge.ok,.pill.ok,.finding-mark.ok,.change-diff>span:last-child) { background:var(--green-bg)!important; color:var(--green)!important; }
+:root[data-theme="dark"] body.reactbits-ui .badge.warning { background:var(--amber-bg)!important; color:var(--amber)!important; }
+:root[data-theme="dark"] body.reactbits-ui .badge.error { background:#35262c!important; color:var(--red)!important; }
+:root[data-theme="dark"] body.reactbits-ui .badge.active { background:var(--rose-soft)!important; color:var(--rose)!important; }
+:root[data-theme="dark"] body.reactbits-ui :focus-visible { outline-color:var(--rose); }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui :is(.ip-grid,.dns-card,.rtc-card,.ip-quality,.connectivity-section,.sources) { border-color:var(--line)!important; }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .badge { background:transparent!important; color:var(--muted)!important; }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .badge.ok { color:var(--green)!important; }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .badge.warning { color:var(--amber)!important; }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .badge.error { color:var(--red)!important; }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .quality-controls>button:first-of-type { background:var(--rose-soft); color:var(--rose); }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .quality-tabs [role="tab"][aria-selected="true"] { background:var(--rose-soft); border-color:var(--border); }
+:root[data-theme="dark"] body.network-console.reactbits-ui.scan-ui .service-brand img:not([src$="-color.svg"]) { filter:invert(.88); }
