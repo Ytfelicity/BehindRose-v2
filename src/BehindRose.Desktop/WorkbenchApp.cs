@@ -174,7 +174,7 @@ sealed class LocalApp(bool demo)
             using var own = Process.GetCurrentProcess();
             var start = new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
             if (string.Equals(Path.GetFileNameWithoutExtension(Environment.ProcessPath), "dotnet", StringComparison.OrdinalIgnoreCase))
-                start.ArgumentList.Add(Assembly.GetExecutingAssembly().Location);
+                start.ArgumentList.Add(Path.Combine(AppContext.BaseDirectory, Assembly.GetExecutingAssembly().GetName().Name + ".dll"));
             foreach (var arg in new[] { "--worker", preview.Action, WindowsState.UserSid, id, own.SessionId.ToString(),
                 preview.Action == "apply" ? ((int)preview.Plan.Options).ToString() : preview.BackupId!,
                 preview.Action == "apply" ? preview.Plan.Fingerprint : "restore" }) start.ArgumentList.Add(arg);

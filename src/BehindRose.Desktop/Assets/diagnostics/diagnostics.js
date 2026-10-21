@@ -12,7 +12,11 @@
   let active = null;
   let websiteRun = null;
   let hostEpoch = '';
-  function tellHost(kind, epoch, statuses) { if (location.hostname === 'diagnostics.behindrose.invalid' && window.chrome && window.chrome.webview) window.chrome.webview.postMessage({ kind, epoch, statuses }); }
+  function tellHost(kind, epoch, statuses) {
+    // Legacy hosts consume sampling summaries; the current workbench disables
+    // web messages and uses the loopback API for commands.
+    try { window.chrome?.webview?.postMessage({ kind, epoch, statuses }); } catch { }
+  }
   let lastTime = '';
   let lastScope = '';
   let copyFeedbackTimer;
@@ -470,7 +474,7 @@
     $('copy-feedback').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('copy-feedback').hidden = true; }, 1800);
   }));
   window.addEventListener('pagehide', () => { if (active) active.controller.abort(); });
-  if (location.hostname === 'diagnostics.behindrose.invalid' && window.chrome && window.chrome.webview) window.chrome.webview.addEventListener('message', event => {
+  if (window.chrome && window.chrome.webview) window.chrome.webview.addEventListener('message', event => {
     const message = event.data;
     if (!message || typeof message !== 'object') return;
     if (message.kind === 'theme') { document.documentElement.dataset.theme = message.light ? 'light' : 'dark'; return; }
