@@ -18,6 +18,13 @@ New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 Push-Location $projectRoot
 try {
     $env:DOTNET_ROOT = Split-Path -Parent (Get-Command $Dotnet).Source
+    if ($Publish) {
+        # Embed production assets rather than a previous development-watch build.
+        & npm --prefix (Join-Path $projectRoot 'frontend') run check
+        if ($LASTEXITCODE -ne 0) { throw 'Frontend type check failed' }
+        & npm --prefix (Join-Path $projectRoot 'frontend') run build
+        if ($LASTEXITCODE -ne 0) { throw 'Frontend production build failed' }
+    }
     & $Dotnet restore 'BehindRose.slnx' --locked-mode @buildProperties
     if ($LASTEXITCODE -ne 0) { throw 'Restore failed' }
     & $Dotnet build 'BehindRose.slnx' -c Release --no-restore @buildProperties
