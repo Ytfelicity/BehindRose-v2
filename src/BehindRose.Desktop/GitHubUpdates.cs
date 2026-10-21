@@ -19,7 +19,9 @@ internal sealed class GitHubUpdates : IUpdateClient
     public bool IsInstalled => manager.IsInstalled;
     public async Task<IUpdatePackage?> CheckAsync(CancellationToken cancellationToken)
     {
-        var update = await manager.CheckForUpdatesAsync().WaitAsync(TimeSpan.FromSeconds(15), cancellationToken);
+        // A feed check includes the GitHub release listing and its feed download.
+        // Keep startup nonblocking while allowing slow, successful network paths.
+        var update = await manager.CheckForUpdatesAsync().WaitAsync(TimeSpan.FromSeconds(90), cancellationToken);
         return update == null ? null : new Package(manager, update, restartArguments);
     }
     private sealed class Package(UpdateManager manager, UpdateInfo update, string[] restartArguments) : IUpdatePackage

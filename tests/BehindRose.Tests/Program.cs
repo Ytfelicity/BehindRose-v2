@@ -4,6 +4,8 @@ using BehindRose.Core;
 using BehindRose.Windows;
 using YamlDotNet.RepresentationModel;
 
+if (args.Contains("--github-update-check")) return LiveUpdateCheck.RunAsync().GetAwaiter().GetResult();
+
 if (args.Contains("--local-read-check"))
 {
     try
