@@ -80,6 +80,8 @@ node tests/ipquality-lifecycle.test.mjs
 
 原生 GUI 验证：运行开发构建 `BehindRose.exe --smoke-test`。只使用内存状态进行修复与恢复，并加载本地 WebView2 页面验证资源；不会修改真实配置或启动网络采样。输出到当前目录的 `ui-smoke`。
 
+需要实际验证网站连通性时，显式运行 `BehindRose.exe --connectivity-check`：配置仍使用内存演示状态，但会对默认七个网站各发起一次真实 HTTPS GET，将实际请求、HTTP 状态、界面耗时和截图保存到 `ui-smoke`。普通离线界面检查不发送这些请求。
+
 可选安装包脚本为 `scripts/installer.iss`。需要已安装的 Inno Setup；本次便携包交付不依赖打包器。可以向构建脚本传入 `-Iscc` 生成安装包。安装包脚本需在实际打包环境单独验收。
 
 仅在用户明确要求发布时，才使用 `scripts/build.ps1 -Publish`。日常修改使用开发入口。

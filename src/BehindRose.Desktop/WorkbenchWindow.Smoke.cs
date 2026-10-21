@@ -4,6 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 using Microsoft.Web.WebView2.Core;
 
 namespace BehindRose.Desktop;
@@ -41,9 +46,9 @@ internal sealed partial class WorkbenchWindow
             }
             throw new TimeoutException("Demo operation did not finish");
         }
-        async Task WaitFor(string condition)
+        async Task WaitFor(string condition, int attempts = 120)
         {
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < attempts; i++)
             { if (await browser.CoreWebView2.ExecuteScriptAsync("Boolean(" + condition + ")") == "true") return; await Task.Delay(50); }
             throw new IOException("Workbench UI did not become ready: " + condition);
         }
@@ -55,6 +60,18 @@ internal sealed partial class WorkbenchWindow
         }
         var health = await Call("health");
         if (!health.GetProperty("demo").GetBoolean()) throw new IOException("Smoke must use in-memory state");
+        if (WindowStyle != WindowStyle.None || WindowChrome.GetWindowChrome(this)?.CaptionHeight != 36) throw new IOException("Native white window chrome is still enabled");
+        maximizeButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+        await Task.Delay(120);
+        if (WindowState != WindowState.Maximized || AutomationProperties.GetName(maximizeButton) != "还原") throw new IOException("Custom maximize action failed");
+        maximizeButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+        await Task.Delay(120);
+        if (WindowState != WindowState.Normal || AutomationProperties.GetName(maximizeButton) != "最大化") throw new IOException("Custom restore action failed");
+        var dpi = VisualTreeHelper.GetDpi(captionBar);
+        var caption = new RenderTargetBitmap((int)(captionBar.ActualWidth * dpi.DpiScaleX), (int)(captionBar.ActualHeight * dpi.DpiScaleY), dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        caption.Render(captionBar);
+        var png = new PngBitmapEncoder(); png.Frames.Add(BitmapFrame.Create(caption));
+        using (var image = File.Create(Path.Combine(root, "window-caption.png"))) png.Save(image);
         using var iconManifest = JsonDocument.Parse(AppAssets.Read("diagnostics/service-icons/manifest.json"));
         int iconCount = 0;
         foreach (var icon in iconManifest.RootElement.GetProperty("files").EnumerateArray())
@@ -86,6 +103,24 @@ internal sealed partial class WorkbenchWindow
         await Capture("workbench-network.png");
         await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#connectivity'");
         await Capture("workbench-icons.png");
+        JsonElement? liveCheck = null;
+        if (liveConnectivitySmoke)
+        {
+            // This explicit opt-in test makes one real GET per built-in target.
+            // All configuration operations still use the in-memory demo state.
+            allowLiveConnectivity = true;
+            await browser.CoreWebView2.ExecuteScriptAsync("(() => { const f=document.getElementById('network-frame'); const select=f.contentDocument.querySelector('select[aria-label=\"采样方式\"]'); select.value='1'; select.dispatchEvent(new f.contentWindow.Event('change',{bubbles:true})); })()");
+            await Task.Delay(100);
+            await browser.CoreWebView2.ExecuteScriptAsync("document.getElementById('network-frame').contentDocument.querySelector('#connectivity .detection-primary-action').click()");
+            await WaitFor("document.getElementById('network-frame').contentWindow.RoseConnectivity.snapshot().total === 7");
+            await WaitFor("(() => { const s=document.getElementById('network-frame').contentWindow.RoseConnectivity.snapshot(); return !s.running && s.completed === 7; })()", 600);
+            string result = await browser.CoreWebView2.ExecuteScriptAsync("(() => { const d=document.getElementById('network-frame').contentDocument; return {summary:d.querySelector('.connectivity-summary').textContent, rows:[...d.querySelectorAll('.connectivity-row')].map(row=>({name:row.getAttribute('aria-label'),state:row.dataset.state,latency:row.querySelector('.connectivity-latency').textContent}))}; })()");
+            using var parsed = JsonDocument.Parse(result); liveCheck = parsed.RootElement.Clone();
+            File.WriteAllText(Path.Combine(root, "live-connectivity.json"), JsonSerializer.Serialize(new { result = liveCheck, requests = liveRequests, responses = liveResponses }));
+            await Capture("workbench-connectivity-live.png");
+            allowLiveConnectivity = false;
+            if (liveRequests.Count == 0 || !liveCheck.Value.GetProperty("rows").EnumerateArray().Any(row => row.GetProperty("state").GetString() is "reachable" or "slow")) throw new IOException("No live website responded; see live-connectivity.json");
+        }
         await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#overview'");
         await WaitFor("!document.getElementById('page-overview').hidden && !document.getElementById('protect-now').disabled");
         await Capture("workbench-configuration.png");
@@ -121,10 +156,12 @@ internal sealed partial class WorkbenchWindow
         File.WriteAllText(Path.Combine(root, "result.json"), JsonSerializer.Serialize(new
         {
             Passed = true, Interface = "Current React workbench embedded in WebView2; same assets as development mode",
+            WindowChrome = "Integrated dark caption; native white frame removed; maximize and restore passed",
             Configuration = "In-memory plan, apply, backup and restore passed through packaged loopback API",
             Boundaries = "Host, Origin, CSRF, content type, body size, command fields and update reservation passed",
             LocalAssets = new { serviceIcons = iconCount, fonts = 5, countryDatabases = 2, groupsDecoded = "reference, ai, common", externalRequests = externalSmokeRequests },
-            Scope = "No real network probes, configuration writes or update installation"
+            LiveConnectivity = liveCheck,
+            Scope = liveConnectivitySmoke ? "Explicit real website GET test; no real configuration writes or update installation" : "No real network probes, configuration writes or update installation"
         }));
         Close();
     }

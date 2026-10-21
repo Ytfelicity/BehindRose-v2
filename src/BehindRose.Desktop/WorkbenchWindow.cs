@@ -18,17 +18,22 @@ internal sealed partial class WorkbenchWindow : Window
     private readonly WorkbenchServer server;
     private readonly WorkbenchUpdater updater;
     private readonly bool smoke;
+    private readonly bool liveConnectivitySmoke;
+    private bool allowLiveConnectivity;
+    private readonly List<string> liveRequests = [];
+    private readonly List<object> liveResponses = [];
     private int externalSmokeRequests;
     private bool disposed;
     public WorkbenchWindow(bool demo, bool smoke, bool updateTest)
     {
-        this.smoke = smoke; local = new LocalApp(demo); server = new WorkbenchServer(local);
+        this.smoke = smoke; liveConnectivitySmoke = smoke && Environment.GetCommandLineArgs().Contains("--connectivity-check");
+        local = new LocalApp(demo); server = new WorkbenchServer(local);
         Title = "身后红玫瑰 · 网络助手 " + MainWindow.AppVersion + (updateTest ? " · 更新测试" : demo ? " · 演示模式" : "");
         Width = 1280; Height = 850; MinWidth = 760; MinHeight = 600;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = new SolidColorBrush(Color.FromRgb(21, 24, 33));
+        Background = new SolidColorBrush(Color.FromRgb(10, 10, 10));
         Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/avatar.ico"));
-        Content = browser;
+        ConfigureChrome();
         updater = new(this, local, StopSamplingAsync, demo, updateTest); updater.Initialize();
         server.UpdateStatus = updater.Snapshot;
         server.CheckUpdates = () => Dispatcher.BeginInvoke(() => { _ = updater.CheckAsync(false); });
@@ -58,9 +63,16 @@ internal sealed partial class WorkbenchWindow : Window
                 {
                     if (Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" && !IsLocal(e.Request.Uri))
                     {
+                        if (allowLiveConnectivity && uri.Scheme == "https" && e.Request.Method == "GET")
+                        { liveRequests.Add(uri.GetLeftPart(UriPartial.Path)); return; }
                         externalSmokeRequests++;
                         e.Response = environment.CreateWebResourceResponse(null, 403, "Offline UI verification", "");
                     }
+                };
+                core.WebResourceResponseReceived += (_, e) =>
+                {
+                    if (allowLiveConnectivity && Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri) && uri.Scheme == "https")
+                        liveResponses.Add(new { url = uri.GetLeftPart(UriPartial.Path), status = e.Response.StatusCode });
                 };
             }
             core.NavigationStarting += (_, e) =>

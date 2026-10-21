@@ -453,7 +453,8 @@ try {
   await expect(frame.locator('#rtc-run')).toBeDisabled();
   await expect(frame.locator('#start')).toBeDisabled();
   await expect(frame.locator('#stop')).toBeEnabled();
-  await expect(frame.locator('#connectivity').getByRole('button', { name: '检测本组', exact: true })).toBeDisabled();
+  await expect(frame.locator('#connectivity').getByRole('button', { name: '检测本组', exact: true })).toBeEnabled();
+  await expect(frame.locator('#connectivity')).toContainText('保留已有结果');
   await expect(frame.locator('#ip4-address')).toHaveText(preserved.ip4);
   await expect(frame.locator('#rtc-list .rtc-item[data-state="ready"]')).toHaveCount(4);
   await expect(frame.locator('#dns-run')).toContainText('检测 DNS');

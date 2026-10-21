@@ -110,7 +110,7 @@ server.listen(port, host, () => {
   bridge = new LocalBridge(project); localApi = createLocalApi(bridge, port);
   console.log(`BehindRose development: ${url}\nReading source files; save to reload. Ctrl+C to stop. No packaging.`);
   const frontend = path.join(project, 'frontend');
-  if (existsSync(path.join(frontend, 'node_modules/esbuild'))) {
+  if (!process.argv.includes('--no-watch') && existsSync(path.join(frontend, 'node_modules/esbuild'))) {
     frontendWatcher = spawn(process.execPath, [path.join(frontend, 'build.mjs'), '--watch'], { cwd: frontend, windowsHide: true, stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
     frontendWatcher.on('error', error => console.error('Frontend watch: ' + error.message));
   }

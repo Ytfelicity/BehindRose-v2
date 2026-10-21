@@ -20,7 +20,7 @@ public partial class App : Application
         base.OnStartup(e);
         if (e.Args.FirstOrDefault() == "--worker") { Shutdown(Worker.Run(e.Args)); return; }
         DevelopmentMode.Configure(e.Args);
-        bool smoke = e.Args.Contains("--smoke-test"), updateTest = e.Args.Contains("--update-test");
+        bool smoke = e.Args.Contains("--smoke-test") || e.Args.Contains("--connectivity-check"), updateTest = e.Args.Contains("--update-test");
         bool demo = smoke || updateTest || e.Args.Contains("--demo");
         if (WindowsState.IsAdministrator && !demo)
         { MessageBox.Show("请普通双击启动。只有应用修复和恢复备份时才需要管理员权限。", "启动方式"); Shutdown(); return; }

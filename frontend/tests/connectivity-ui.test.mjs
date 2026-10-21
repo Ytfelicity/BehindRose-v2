@@ -187,6 +187,33 @@ try {
   await expect(page.locator('#stop')).toBeDisabled();
   await expect(page.locator('.connectivity-row[data-state="cancelled"]')).toHaveCount(15);
   assert.equal(await page.evaluate(() => window.__nativeMessages.findLast(message => message.kind === 'completed').statuses[7]), 'cancelled');
+  // A long browser sampling run must not strand the website action disabled.
+  // A manual website start cancels and joins it before the first HTTPS probe.
+  delayed = false;
+  await page.getByRole('combobox', { name: '网站分组' }).selectOption('reference');
+  await page.getByRole('combobox', { name: '采样方式' }).selectOption('1');
+  await page.evaluate(() => {
+    window.__originalRtcProbe = window.RoseMyIP.probeRtc;
+    window.__heldRtc = 0; window.__releasedRtc = 0;
+    window.RoseMyIP.probeRtc = (_host, signal) => new Promise(resolve => {
+      window.__heldRtc++;
+      const stop = () => { window.__releasedRtc++; resolve({ addresses: [], status: 'cancelled', note: '已停止测试采样' }); };
+      signal.addEventListener('abort', stop, { once: true }); if (signal.aborted) stop();
+    });
+  });
+  await browserAction('rtc-run');
+  await expect.poll(() => page.evaluate(() => window.__heldRtc)).toBe(4);
+  await expect(page.getByRole('button', { name: '检测本组', exact: true })).toBeEnabled();
+  await expect(section).toContainText('保留已有结果');
+  const beforeSwitch = requests.length;
+  await page.getByRole('button', { name: '检测本组', exact: true }).click();
+  await expect(section).toHaveAttribute('data-running', 'false');
+  assert.equal(await page.evaluate(() => window.__releasedRtc), 4, 'All browser probes settle before website sampling');
+  assert.equal(requests.length - beforeSwitch, 7, 'One website click runs the selected seven targets once');
+  await expect(page.locator('#rtc-list .rtc-item[data-state="cancelled"]')).toHaveCount(4);
+  await expect(section.locator('.connectivity-row[data-state="reachable"], .connectivity-row[data-state="slow"]')).toHaveCount(7);
+  await expect(page.getByRole('button', { name: '检测本组', exact: true })).toBeEnabled();
+  await page.evaluate(() => { window.RoseMyIP.probeRtc = window.__originalRtcProbe; });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.getByRole('button', { name: '添加 / 管理网站' }).click();

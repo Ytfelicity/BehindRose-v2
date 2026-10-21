@@ -14,7 +14,10 @@ export interface ConnectivityBridge {
   snapshot(): { running: boolean; total: number; completed: number; incomplete: number };
   report(): string;
 }
-declare global { interface Window { RoseConnectivity: ConnectivityBridge } }
+declare global { interface Window {
+  RoseConnectivity: ConnectivityBridge;
+  RoseBrowserSampling?: { isRunning(): boolean; stop(): Promise<void> };
+} }
 const storageKey = 'behindrose-connectivity-v1';
 const labels: Record<ProbeResult['state'], string> = { idle: '未检测', running: '检测中', reachable: '已响应', slow: '响应较慢', failed: '请求失败', timeout: '未获响应', cancelled: '已停止' };
 function loadSites(): Website[] { try { return importWebsites(localStorage.getItem(storageKey) || '[]', []); } catch { return []; } }
@@ -43,23 +46,38 @@ export function Connectivity() {
   const resultsRef = useRef(results), sitesRef = useRef<Website[]>([]), groupRef = useRef(group), customRef = useRef(custom);
   const sites = group === 'custom' ? custom : siteGroups[group].sites;
   sitesRef.current = sites; groupRef.current = group; customRef.current = custom;
-  const locked = running || coreRunning;
+  const locked = running;
   const update = (site: Website, result: ProbeResult) => { resultsRef.current = { ...resultsRef.current, [site.id]: result }; setResults(resultsRef.current); };
   const run = async (selected: Website[], parent?: AbortSignal, rounds: 1 | 10 = sampleRoundsRef.current) => {
     if (!selected.length) { setNotice('本组没有网站，请先添加'); return 1; }
-    task.current?.abort();
+    if (task.current) return 1;
     batchSites.current = selected;
     const controller = new AbortController(); task.current = controller; setRunning(true); setNotice('');
     const abort = () => controller.abort(); parent?.addEventListener('abort', abort, { once: true });
     if (parent?.aborted) abort();
-    // Clear the previous batch up front so queued sites never show stale successes.
     const updateCurrent = (site: Website, result: ProbeResult) => { if (task.current === controller) update(site, result); };
-    selected.forEach(site => updateCurrent(site, idleResult()));
-    // The diagnostics engine needs the lock before asynchronous probes or React
-    // effects can run, including a second click in the same event turn.
-    publishState(true);
-    try { await runWebsiteBatch(selected, controller.signal, updateCurrent, { rounds }); }
-    finally { parent?.removeEventListener('abort', abort); if (task.current === controller) { task.current = null; setRunning(false); publishState(false, controller.signal.aborted); } }
+    let published = false;
+    try {
+      // A manual website start can take over from a long DNS/RTC run. Wait for
+      // its cancellation to finish before measuring any website traffic. A
+      // parent signal denotes the browser's own combined workflow.
+      if (!parent && window.RoseBrowserSampling?.isRunning()) {
+        setNotice('正在停止浏览器网络采样，已有结果会保留…');
+        await window.RoseBrowserSampling.stop();
+      }
+      if (controller.signal.aborted) return 1;
+      setNotice('');
+      selected.forEach(site => updateCurrent(site, idleResult()));
+      publishState(true); published = true;
+      await runWebsiteBatch(selected, controller.signal, updateCurrent, { rounds });
+    }
+    finally {
+      parent?.removeEventListener('abort', abort);
+      if (task.current === controller) {
+        task.current = null; setRunning(false);
+        if (published) publishState(false, controller.signal.aborted);
+      }
+    }
     return selected.filter(site => resultsRef.current[site.id]?.ms === undefined).length;
   };
   useEffect(() => {
@@ -79,15 +97,12 @@ export function Connectivity() {
         return [`网站连通性：IPCheck.ing / MyIP 固定版本的探测地址与浏览器 GET；默认每站 10 次取最低成功值，站点错峰 50 ms，首轮结束后每 500 ms 启动后续轮次；慢请求可重叠，等待全部计划请求结束，单次 ${WEBSITE_TIMEOUT_MS / 1000} 秒超时。可选单次，单站重测为单次。保留 200 ms 快慢分界；HTTPS 耗时包含 DNS、连接、TLS、跳转与网站处理，不等于节点 Ping。跨域 HTTP 状态不可见，不代表登录或服务权限`, ...known.filter(site => resultsRef.current[site.id]).flatMap(site => { const result = resultsRef.current[site.id]; return [`${site.name} | ${site.url} | ${labels[result.state]}${result.ms !== undefined ? ' | ' + result.ms + ' ms' : ''} | ${result.note}${result.time ? ' | ' + result.time : ''}`, ...(result.rounds ?? []).map(round => `  第 ${round.round} 次 | ${labels[round.state]}${round.ms !== undefined ? ' | ' + round.ms + ' ms' : ''}${round.sampledAt ? ' | ' + round.sampledAt : ''}`)]; })].join('\n');
       },
     };
-    const start = document.getElementById('start') as HTMLButtonElement | null;
-    const observer = new MutationObserver(() => { if (start?.isConnected) setCoreRunning(start.disabled); });
-    if (start?.isConnected) {
-      setCoreRunning(start.disabled);
-      observer.observe(start, { attributes: true, attributeFilter: ['disabled'] });
-    }
+    const readBrowserState = () => setCoreRunning(Boolean(window.RoseBrowserSampling?.isRunning()));
+    readBrowserState();
+    window.addEventListener('browser-sampling-state', readBrowserState);
     const stop = () => task.current?.abort();
     window.addEventListener('pagehide', stop);
-    return () => { observer.disconnect(); window.removeEventListener('pagehide', stop); stop(); };
+    return () => { window.removeEventListener('browser-sampling-state', readBrowserState); window.removeEventListener('pagehide', stop); stop(); };
   }, []);
   const save = (next: Website[]) => {
     let persisted = true;
@@ -124,6 +139,7 @@ export function Connectivity() {
     </div></div>
     <p className="connectivity-description">HTTPS 响应耗时，包含建连、TLS 和网站处理，不等于代理节点延迟。</p>
     <p className="connectivity-description">与 IPCheck.ing 对照时，请使用同一浏览器、相同网站分组和采样方式；首次建连与复用连接的耗时可能不同。</p>
+    {coreRunning && !running && <p className="connectivity-description" role="status">浏览器网络正在采样。点击“检测本组”会停止该采样、保留已有结果，再开始网站检测。</p>}
     <div className="connectivity-summary" role="status" aria-live="polite">{running ? `正在检测 · 已结束 ${summary.completed} / ${summary.planned} 次请求` : summary.finished ? `${summary.reached} 个已响应 · ${summary.finished - summary.reached} 个未获响应或未完成 · ${summary.completed} / ${summary.planned} 次采样` : `本组 ${sites.length} 个网站 · 等待检测`}<small>本组设置：{sampleRounds === 1 ? '每站 1 次 · 错峰并行' : `每站 ${sampleRounds} 次 · 最低成功值`} · 单次 {WEBSITE_TIMEOUT_MS / 1000} 秒超时 · ≥ 200 ms 响应较慢</small></div>
     <div className="connectivity-list">
     <table className="connectivity-table" aria-label="网站连通性检测结果"><thead><tr><th scope="col">网站</th><th scope="col">HTTPS 耗时</th><th scope="col">状态</th><th scope="col"><span className="sr-only">操作</span></th></tr></thead><tbody>

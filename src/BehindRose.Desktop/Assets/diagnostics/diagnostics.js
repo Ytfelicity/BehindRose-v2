@@ -345,6 +345,7 @@
       button.setAttribute('aria-label', stopping ? '停止 ' + name + ' 检测' : '检测 ' + name);
       $(scope + '-run-label').textContent = stopping ? '停止检测' : '检测 ' + name;
     }
+    window.dispatchEvent(new CustomEvent('browser-sampling-state', { detail: { running: Boolean(active) } }));
   }
   function progress(ctx) {
     const percent = ctx.total ? Math.round(ctx.done / ctx.total * 100) : 0;
@@ -384,6 +385,7 @@
     }
     const currentRows = [...(selected.ip ? [ip4, ip6] : []), ...(selected.dns ? [dns] : []), ...(selected.rtc ? rtc : [])];
     const ctx = { controller: new AbortController(), epoch: hostEpoch, scope: single ? scope : 'all', selected, start: performance.now(), done: 0, total: (selected.ip ? 2 : 0) + (selected.dns ? 1 : 0) + (selected.rtc ? providers.length : 0) + (selected.connect ? 1 : 0) };
+    ctx.finished = new Promise(resolve => { ctx.finish = resolve; });
     tellHost('started', ctx.epoch);
     active = ctx; lastTime = new Date().toLocaleString('zh-CN', { hour12: false });
     lastScope = single ? scope === 'dns' ? 'DNS 解析来源' : 'WebRTC 出口对照' : '所选检测项目';
@@ -427,8 +429,20 @@
       active = null; $('browser-progress').dataset.state = 'complete'; $('progress').classList.remove('running'); $('start-label').textContent = '重新检测浏览器网络'; toggleControls(false); render();
       const websiteStatus = !selected.connect ? 'skipped' : ctx.controller.signal.aborted ? 'cancelled' : websiteIncomplete ? 'unavailable' : 'ready';
       tellHost('completed', ctx.epoch, [selected.ip ? ip4.status : 'skipped', selected.ip ? ip6.status : 'skipped', selected.dns ? dns.status : 'skipped', ...rtc.map(row => selected.rtc ? row.status : 'skipped'), websiteStatus]);
+      ctx.finish();
     }
   }
+
+  window.RoseBrowserSampling = {
+    isRunning: () => Boolean(active),
+    stop: () => {
+      const ctx = active;
+      if (!ctx) return Promise.resolve();
+      $('overall').textContent = '正在停止…';
+      ctx.controller.abort();
+      return ctx.finished;
+    },
+  };
 
   function report() {
     const environment = window.chrome && window.chrome.webview ? '桌面版 WebView2' : '当前浏览器（本地开发页面）';
