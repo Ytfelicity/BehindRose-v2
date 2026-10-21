@@ -52,10 +52,7 @@ try {
             if ($resolvedPublish -ne $expectedPublish -or !(Get-Item -LiteralPath $publishDir).PSIsContainer -or ((Get-Item -LiteralPath $publishDir).Attributes -band [IO.FileAttributes]::ReparsePoint) -or !$previousPublish.StartsWith([IO.Path]::GetFullPath($artifacts) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe publish output path' }
             Move-Item -LiteralPath $resolvedPublish -Destination $previousPublish
         }
-        # Keep the self-contained runtime as ordinary files. Live WebView2
-        # checks found stalled system DNS in the single-file publish, while
-        # the equivalent directory publish completed all seven website GETs.
-        & $Dotnet publish 'src\BehindRose.Desktop' -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:DebugType=None -p:DebugSymbols=false -p:RestoreLockedMode=true -o $publishDir @buildProperties
+        & $Dotnet publish 'src\BehindRose.Desktop' -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:RestoreLockedMode=true -o $publishDir @buildProperties
         if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
         $licenseDir = Join-Path $publishDir 'licenses'
         New-Item -ItemType Directory -Path $licenseDir -Force | Out-Null
