@@ -7,12 +7,14 @@ import { createHash } from 'node:crypto';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const staged = process.argv.includes('--staged');
-if (process.argv.slice(2).some(arg => arg !== '--staged')) throw Error('Usage: node scripts/check-public-source.mjs [--staged]');
+const history = process.argv.includes('--history');
+if (process.argv.slice(2).some(arg => !['--staged', '--history'].includes(arg)) || (staged && history)) throw Error('Usage: node scripts/check-public-source.mjs [--staged | --history]');
 const commandOptions = { cwd: root, windowsHide: true, maxBuffer: 64 * 1024 * 1024 };
 const gitRoot = spawnSync('git', ['rev-parse', '--show-toplevel'], { ...commandOptions, encoding: 'utf8' });
 const gitRepository = gitRoot.status === 0;
 if (gitRepository && path.resolve(gitRoot.stdout.trim()) !== root) throw Error('The Git repository root must be this project directory.');
 if (staged && !gitRepository) throw Error('--staged requires a Git repository initialized in this project root.');
+if (history && !gitRepository) throw Error('--history requires a Git repository initialized in this project root.');
 function git(args, options = {}) {
   const result = spawnSync('git', args, { ...commandOptions, ...options });
   if (result.error || result.status !== 0) throw Error('Cannot inspect Git index; check aborted without printing file contents.');
@@ -26,14 +28,14 @@ if (gitRepository) {
     index.set(match[4], { mode: match[1], oid: match[2] });
   }
 }
-const worktreeFiles = staged ? [] : execFileSync('rg', ['--files', '--null', '--hidden', '--no-require-git', '-g', '!.git/**'], {
+const worktreeFiles = staged ? [] : (gitRepository ? git(['ls-files', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }) : execFileSync('rg', ['--files', '--null', '--hidden', '--no-require-git', '-g', '!.git/**'], {
   ...commandOptions, encoding: 'utf8',
-}).split('\0').filter(Boolean).map(file => file.replaceAll('\\', '/'));
+})).split('\0').filter(Boolean).map(file => file.replaceAll('\\', '/'));
 const files = [...new Set([...worktreeFiles, ...index.keys()])].sort();
 const patterns = [
   ['private-key', /-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----/],
   ['github-token', /\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{60,})\b/],
-  ['aws-access-key', /\bAKIA[0-9A-Z]{16}\b/],
+  ['aws-access-key', /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/],
   ['openai-project-key', /\bsk-proj-[A-Za-z0-9_-]{40,}/],
   ['other-api-token', /\b(?:sk-(?:ant-)?[A-Za-z0-9_-]{32,}|xox[baprs]-[A-Za-z0-9-]{20,}|AIza[A-Za-z0-9_-]{30,})\b/],
   ['jwt', /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/],
@@ -44,10 +46,13 @@ const patterns = [
   ['url-userinfo', /\b(?:https?|socks[45]?|postgres(?:ql)?|mysql|redis|mongodb(?:\+srv)?):\/\/([^/\s<>"']+:[^/\s<>"']+)@([^/\s<>"']+)/i],
   ['credential-assignment', /["']?\b(?:[a-z0-9_]*(?:password|passwd|api_?key|access_?token|refresh_?token|admin_?key|admin_?token|client_?secret|private_?key|invite_?code))["']?\s*[:=]\s*["']([^"'\r\n]{6,})["']/i],
   ['unquoted-credential-assignment', /^\s*[a-z0-9_]*(?:password|passwd|api_?key|access_?token|refresh_?token|admin_?key|admin_?token|client_?secret|private_?key|invite_?code)\s*[:=]\s*([a-z0-9][a-z0-9_./+=@!:%-]{7,})\s*(?:#.*)?$/i],
+  ['proxy-subscription', /\b(?:vless|vmess|trojan|ss|ssr|hysteria2|hy2):\/\/[^\s<>"']{12,}/i],
 ].map(([kind, pattern]) => [kind, new RegExp(pattern.source, pattern.flags + 'g')]);
 const placeholder = /^(?:removed|example|sample|dummy|fixture|test|placeholder|redacted|change[-_]?me|your[-_].*|<[^>]+>|\$\{[^}]+\})$/i;
-const textExtensions = new Set(['.cs', '.csproj', '.props', '.targets', '.slnx', '.ts', '.tsx', '.js', '.mjs', '.cjs', '.json', '.yaml', '.yml', '.xml', '.config', '.md', '.txt', '.html', '.css', '.svg', '.ps1', '.cmd', '.py', '.sh', '.go', '.mod', '.sum', '.toml', '.ini', '.env', '.http', '.iss']);
-const isText = file => textExtensions.has(path.extname(file).toLowerCase()) || /(?:^|\/)(?:LICENSE(?:\.md|\.txt)?|\.gitignore|\.gitattributes|\.env(?:\..*)?|pre-commit)$/i.test(file);
+// Unknown extensions and extensionless files must not bypass credential checks.
+// These assets receive a separate image/font/database review before release.
+const binaryExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.woff', '.woff2', '.ttf', '.otf', '.bin']);
+const isText = file => !binaryExtensions.has(path.extname(file).toLowerCase());
 const privatePath = /(?:^|\/)(?:private|artifacts|test-files|ui-smoke|node_modules|bin|obj|\.packages|\.vs|test-results|playwright-report|secrets|local|\.ssh|\.aws|\.azure|\.kube)(?:\/|$)|^server\/simple-auth(?:\/|$)|^docs\/(?:ui-refero-2026-10-02|ui-reactbits-2026-10-02|connectivity-check|proxy-network-check|netquality-check)(?:\/|$)|^docs\/邀请码与设备绑定方案\.md$/i;
 const privateFile = /(?:^|\/)(?:\.git-credentials|\.netrc|_netrc|\.npmrc|\.pypirc|id_(?:rsa|dsa|ecdsa|ed25519)|credentials\.json|service-account[^/]*\.json|cookies\.txt|auth-connection\.json|[^/]*-invite\.txt|[^/]*邀请码[^/]*\.txt)$|\.(?:pem|key|pfx|p12|ppk|p8|pkcs12|jks|keystore|sqlite3?|db(?:-shm|-wal)?|log|user|bak|backup|old|zip|7z|rar|tar|tgz|exe|dll|pdb)$|\.tar\.gz$|\.credentials\.json$|~$/i;
 const privateEnv = file => /(?:^|\/)\.env(?:\..*)?$/i.test(file) && path.posix.basename(file) !== '.env.example';
@@ -59,14 +64,14 @@ if (gitRepository && index.size) {
   for (const file of ignored.stdout.split('\0').filter(Boolean)) indexedIgnored.add(file);
 }
 // Read all text blobs in one process. --staged never substitutes worktree data.
-const indexedContents = new Map();
-const blobs = [...index].filter(([file, entry]) => isText(file) && entry.mode !== '120000' && entry.mode !== '160000');
-if (blobs.length) {
+function readTextBlobs(blobs, source) {
+  const contents = new Map();
+  if (!blobs.length) return contents;
   const sizes = git(['cat-file', '--batch-check'], { input: blobs.map(([, entry]) => entry.oid).join('\n') + '\n', encoding: 'utf8' }).trim().split('\n');
   const readable = blobs.filter(([file], i) => {
     if (!/^[a-f0-9]+ blob \d+$/.test(sizes[i])) throw Error('Unexpected Git object; check aborted.');
     if (Number(sizes[i].split(' ')[2]) <= 4 * 1024 * 1024) return true;
-    findings.push({ kind: 'oversized-text-file', path: file, source: 'index' });
+    findings.push({ kind: 'oversized-text-file', path: file, source });
     return false;
   });
   if (readable.length) {
@@ -77,11 +82,13 @@ if (blobs.length) {
       if (end < 0 || header[0] !== entry.oid || header[1] !== 'blob') throw Error('Unexpected Git batch response; check aborted.');
       const size = Number(header[2]);
       if (!Number.isSafeInteger(size) || size < 0 || end + 1 + size >= output.length || output[end + 1 + size] !== 10) throw Error('Incomplete Git blob; check aborted.');
-      indexedContents.set(file, output.subarray(end + 1, end + 1 + size));
+      contents.set(file, output.subarray(end + 1, end + 1 + size));
       offset = end + size + 2;
     }
   }
+  return contents;
 }
+const indexedContents = readTextBlobs([...index].filter(([file, entry]) => isText(file) && entry.mode !== '120000' && entry.mode !== '160000'), 'index');
 function decodeText(data) {
   if (data[0] === 0xff && data[1] === 0xfe) return new TextDecoder('utf-16le').decode(data);
   if (data[0] === 0xfe && data[1] === 0xff) return new TextDecoder('utf-16be').decode(data);
@@ -102,11 +109,14 @@ function scanText(file, data, source) {
     }
   });
 }
-for (const file of files) {
-  if (privatePath.test(file) || privateFile.test(file) || privateEnv(file) || indexedIgnored.has(file))
-    findings.push({ kind: 'excluded-data-visible', path: file });
+function checkPath(file, source, commit) {
+  if (privatePath.test(file) || privateFile.test(file) || privateEnv(file) || (source !== 'history' && indexedIgnored.has(file)))
+    findings.push({ kind: 'excluded-data-visible', path: file, source, ...(commit ? { commit } : {}) });
   if (/^(?:vendor\/(?:NetQuality|IPQuality)(?:\/|$)|licenses\/(?:NetQuality|IPQuality)-AGPL-|src\/BehindRose\.Windows\/NetQualityRunner\.cs$|frontend\/src\/netquality(?:-|\.)|frontend\/tests\/netquality-|tests\/BehindRose\.Tests\/NetQualityTests\.cs$)/i.test(file))
-    findings.push({ kind: 'retired-agpl-module', path: file });
+    findings.push({ kind: 'retired-agpl-module', path: file, source, ...(commit ? { commit } : {}) });
+}
+for (const file of files) {
+  checkPath(file, staged ? 'index' : 'worktree/index');
   const absolute = path.resolve(root, file);
   if (!absolute.startsWith(root + path.sep)) throw Error('Inventory path leaves the project.');
   const entry = index.get(file);
@@ -120,6 +130,39 @@ for (const file of files) {
     if (info.size > 4 * 1024 * 1024) { findings.push({ kind: 'oversized-text-file', path: file, source: 'worktree' }); continue; }
     scanText(file, await readFile(absolute), 'worktree');
   } else if (!isText(file)) skippedFiles++;
+}
+let historicalCommits = 0, historicalTextBlobs = 0;
+if (history) {
+  if (git(['rev-parse', '--is-shallow-repository'], { encoding: 'utf8' }).trim() !== 'false') throw Error('History check requires a full clone; fetch complete history first.');
+  const commits = git(['rev-list', '--all'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+  historicalCommits = commits.length;
+  const seenPaths = new Set(), historicalBlobs = new Map();
+  for (const commit of commits) {
+    // Walk every committed tree so renames cannot hide forbidden paths.
+    for (const record of git(['ls-tree', '-r', '-z', commit], { encoding: 'utf8' }).split('\0').filter(Boolean)) {
+      const match = /^(\d+) (blob|commit) ([a-f0-9]+)\t([\s\S]+)$/.exec(record);
+      if (!match) throw Error('Cannot inspect historical tree; check aborted.');
+      const [, mode, type, oid, file] = match;
+      const key = mode + ':' + file;
+      if (!seenPaths.has(key)) {
+        seenPaths.add(key); checkPath(file, 'history', commit);
+        if (!['100644', '100755'].includes(mode)) findings.push({ kind: 'unsupported-index-entry', path: file, source: 'history', commit });
+      }
+      if (type === 'blob' && ['100644', '100755'].includes(mode) && isText(file) && !historicalBlobs.has(oid)) historicalBlobs.set(oid, [file, { oid }]);
+    }
+    const metadata = git(['cat-file', 'commit', commit]);
+    scanText('commit:' + commit, metadata, 'history-metadata');
+    const identities = metadata.toString('utf8').split('\n\n')[0].split('\n').filter(line => /^(author|committer) /.test(line));
+    if (identities.some(line => {
+      const email = /<([^<>]+)>/.exec(line)?.[1];
+      return !email || !/^(?:[^@]+@users\.noreply\.github\.com|noreply@github\.com|[^@]+@example\.(?:invalid|com|org|net))$/i.test(email);
+    })) findings.push({ kind: 'personal-commit-email', path: 'commit:' + commit, source: 'history-metadata' });
+  }
+  // Use object IDs as map keys: different revisions of one path must all be read.
+  const entries = [...historicalBlobs].map(([oid]) => [oid, { oid }]);
+  const contents = readTextBlobs(entries, 'history');
+  historicalTextBlobs = contents.size;
+  for (const [oid, data] of contents) scanText(historicalBlobs.get(oid)[0] + '@' + oid.slice(0, 12), data, 'history');
 }
 async function sourceBytes(file) {
   if (staged) {
@@ -153,12 +196,12 @@ try {
   thirdPartyBoundaryDocumented = true;
 } catch { licenseIssues.push('Third-party license records are missing, invalid or inconsistent with recorded hashes; source content withheld.'); }
 const report = {
-  scope: staged ? 'Entire Git index, including forced ignored files; reads indexed blobs, not worktree replacements.' : 'Current non-ignored source tree plus the entire Git index, including forced ignored files.',
-  gitRepository, indexedFiles: index.size, staged,
+  scope: staged ? 'Entire Git index, including forced ignored files; reads indexed blobs, not worktree replacements.' : 'Current non-ignored source tree plus the entire Git index, including forced ignored files.' + (history ? ' Also scans all locally reachable commits and their trees.' : ''),
+  gitRepository, indexedFiles: index.size, staged, history, historicalCommits, historicalTextBlobs,
   inventoryFiles: files.length, scannedTextFiles, skippedBinaryOrLargeFiles: skippedFiles,
   credentialPatterns: patterns.map(([name]) => name), findings,
   releaseReview: { projectLicense, restrictedUiLicense, thirdPartyBoundaryDocumented, licenseIssues, mainLicenseDecisionRequired: !projectLicense, thirdPartyLicenseBoundaryReviewRequired: !thirdPartyBoundaryDocumented },
-  limitations: 'No Git history or remote scan. Patterns cannot prove every secret absent; binary/image metadata needs separate review. Hooks can be bypassed and must be installed per clone. Only project files and Git metadata are read; system configuration is not applied.',
+  limitations: (history ? 'History covers locally reachable refs; no remote-only refs, deleted GitHub content or release assets are fetched. ' : 'No Git history or remote scan; use --history with a full clone. ') + 'Patterns cannot prove every secret absent; binary/image metadata needs separate review. Hooks can be bypassed and must be installed per clone. Only project files and Git metadata are read; system configuration is not applied.',
 };
 process.stdout.write(JSON.stringify(report, null, 2) + '\n');
 process.exitCode = findings.length ? 1 : projectLicense && thirdPartyBoundaryDocumented ? 0 : 2;

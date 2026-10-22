@@ -206,6 +206,7 @@ ClashIpv6Tests.Register(Test);
 ProxyNetworkTests.Register(Test);
 UpdateTests.Register(Test);
 VelopackTests.Register(Test);
+SafeFilesTests.Register(Test);
 int failures=0;
 foreach(var test in tests)
 {

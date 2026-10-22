@@ -53,7 +53,7 @@ public sealed class WindowsState : IStateStore
         if (Targets.IsFile(key))
         {
             string path = Path.Combine(ConfigRoot, key[5..]); SafeFiles.CheckPath(path);
-            if (value.Exists) SafeFiles.AtomicWrite(path, value.Bytes()); else if (File.Exists(path)) File.Delete(path);
+            if (value.Exists) SafeFiles.AtomicWrite(path, value.Bytes()); else if (File.Exists(path)) SafeFiles.Delete(path);
             return;
         }
         EnsurePolicyUnmanaged(key);

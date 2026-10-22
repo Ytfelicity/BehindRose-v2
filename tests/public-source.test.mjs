@@ -111,7 +111,41 @@ try {
   assert.notEqual(commit.status, 0, 'Installed hook must block a commit containing private data.');
   assert.ok((commit.stdout + commit.stderr).includes('excluded-data-visible'), 'Rejection must come from the source guard.');
   assert.notEqual(run('git', ['rev-parse', '--verify', 'HEAD']).status, 0, 'The rejected fixture commit must not create history.');
-  console.log(`PASS: ${checks} source/index scans; normal and forced staging, copied credentials/invites, UTF-16, indexed license checks, safe hook execution and rejected private commit.`);
+  git('rm', '--cached', '--force', '--quiet', '.env');
+  git('-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@example.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Safe initial fixture');
+  for (const file of ['rows.csv', 'settings.conf', 'Dockerfile']) {
+    await put(file, syntheticKey + '\n');
+    git('add', file);
+    assert.ok(scan(1, '--staged').findings.some(finding => finding.kind === 'github-token' && finding.path === file), 'Unusual extensions must not bypass credential detection.');
+    git('rm', '--cached', '--force', '--quiet', file);
+    await put(file, 'Public fixture.\n');
+  }
+  await put('retired.csv', syntheticKey + '\n');
+  git('add', 'retired.csv');
+  // Deliberately bypass the fixture hook to simulate an old accidental commit.
+  git('-c', 'core.hooksPath=unused-hooks', '-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@example.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Historical fixture');
+  git('rm', '--quiet', 'retired.csv');
+  git('-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@example.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Remove historical fixture');
+  scan(0);
+  const historical = scan(1, '--history');
+  assert.equal(historical.historicalCommits, 3);
+  assert.ok(historical.findings.some(finding => finding.kind === 'github-token' && finding.source === 'history' && finding.path.startsWith('retired.csv@')), 'Deleting a credential must not hide it from historical inspection.');
+  await put('nodes.conf', ['vless', '://', syntheticValue, '@example.invalid:443'].join(''));
+  git('add', 'nodes.conf');
+  assert.ok(scan(1, '--staged').findings.some(finding => finding.kind === 'proxy-subscription'));
+  git('rm', '--cached', '--force', '--quiet', 'nodes.conf');
+  await put('nodes.conf', 'Public fixture.\n');
+  git('add', '--force', '.env');
+  git('-c', 'core.hooksPath=unused-hooks', '-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@fixture.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Historical private path fixture');
+  git('rm', '--cached', '--force', '--quiet', '.env');
+  const forbiddenHistory = scan(1, '--history');
+  assert.ok(forbiddenHistory.findings.some(finding => finding.kind === 'excluded-data-visible' && finding.source === 'history' && finding.path === '.env'));
+  assert.ok(forbiddenHistory.findings.some(finding => finding.kind === 'personal-commit-email'));
+  await put('.git/shallow', git('rev-parse', 'HEAD').trim() + '\n');
+  const shallow = run(process.execPath, ['scripts/check-public-source.mjs', '--history']);
+  assert.notEqual(shallow.status, 0);
+  assert.ok(shallow.stderr.includes('History check requires a full clone'));
+  console.log(`PASS: ${checks} source/index/history scans; forced staging, UTF-16, unknown extensions, deleted historical credentials, private paths/emails, shallow-clone rejection, license checks and commit hook.`);
 } finally {
   const resolved = await realpath(fixture);
   if (path.dirname(resolved) !== temporaryRoot || !path.basename(resolved).startsWith('behindrose-public-source-')) throw Error('Refusing to remove an unexpected fixture path.');
