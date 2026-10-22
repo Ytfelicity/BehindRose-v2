@@ -148,8 +148,16 @@ function App() {
       <AnimatedSidebarHeader className="console-sidebar-header">
         <div className="sidebar-brand">
           <a className="sidebar-brand-mark sidebar-brand-logo" href="#network" aria-label="Rose in my wake 首页">
-            <svg viewBox="0 0 220 48" role="img" aria-label="Rose in my wake 品牌 Logo">
-              <text x="0" y="34" fill="currentColor" fontFamily="'EB Garamond', Georgia, serif" fontSize="31">Rose in my wake</text>
+            <svg viewBox="333 345 1569 358" role="img" aria-label="Rose in my wake 品牌 Logo">
+              <defs>
+                <filter id="sidebar-brand-ink" x="0" y="0" width="2236" height="683" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                  {/* Show the source's bright ink only; suppress the dark canvas and gray duplicate without redrawing the lettering. */}
+                  <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.8504 2.8608 0.2888 0 -2" result="letter-alpha"/>
+                  <feFlood floodColor="currentColor" result="letter-color"/>
+                  <feComposite in="letter-color" in2="letter-alpha" operator="in"/>
+                </filter>
+              </defs>
+              <image href="/brand-logo.png" width="2236" height="683" filter="url(#sidebar-brand-ink)"/>
             </svg>
           </a>
           <strong>网络工具箱</strong><AnimatedSidebarTrigger className="sidebar-collapse" aria-label="收起或展开功能侧栏"><PanelLeftClose size={16}/></AnimatedSidebarTrigger>
