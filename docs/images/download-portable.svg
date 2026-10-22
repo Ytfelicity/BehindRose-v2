@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" role="img" aria-labelledby="title desc">
+  <title id="title">下载便携版</title>
+  <desc id="desc">Windows x64 便携包，完整解压后运行，ZIP 格式</desc>
+  <rect width="240" height="64" rx="10" fill="#238636"/>
+  <g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M30 18v20m-7-7 7 7 7-7"/>
+    <path d="M20 39v7h20v-7"/>
+  </g>
+  <g fill="#fff" font-family="Segoe UI,Microsoft YaHei,PingFang SC,sans-serif">
+    <text x="57" y="29" font-size="18" font-weight="700">下载便携版</text>
+    <text x="57" y="49" font-size="12">完整解压后运行 · ZIP</text>
+  </g>
+</svg>

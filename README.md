@@ -2,7 +2,17 @@
 
 一款 Windows 网络工具，帮你查看网络出口、检查网站连通性，并调整 Clash 与浏览器的 DNS 配置。
 
-**[下载预览版](https://github.com/Ytfelicity/BehindRose-v2/releases)** · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
+**Windows x64 · 2.0.0-preview.5（预览版）**
+
+<!-- 发布新版本时，同步更新这里的版本号、两个按钮及下方表格的下载地址。 -->
+<p>
+  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Setup.exe"><img src="docs/images/download-installer.svg" alt="下载安装版（Windows x64，EXE）" width="240" height="64"></a>
+  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Portable.zip"><img src="docs/images/download-portable.svg" alt="下载便携版（Windows x64，ZIP）" width="240" height="64"></a>
+</p>
+
+首次使用可以选 **安装版**；不想安装可以选 **便携版**，完整解压后运行。
+
+[更新说明](https://github.com/Ytfelicity/BehindRose-v2/releases/tag/v2.0.0-preview.5) · [全部版本](https://github.com/Ytfelicity/BehindRose-v2/releases) · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
 
 ![网络检测界面：查看浏览器网络、网站连通性和 IP 质量](docs/images/screenshots/network.png)
 
@@ -19,12 +29,12 @@
 
 适用于 **Windows x64**，目前为预览版。
 
-打开 [GitHub Releases](https://github.com/Ytfelicity/BehindRose-v2/releases)，在最新预览版的 **Assets（附件）** 中选择：
+点击顶部下载按钮，或在下表直接选择。历史版本与完整附件见 [GitHub Releases](https://github.com/Ytfelicity/BehindRose-v2/releases)。
 
 | 你想怎么用 | 下载哪个文件 | 打开方式 |
 | --- | --- | --- |
-| 安装后使用 | `BehindRose.NetworkAssistant-win-Setup.exe` | 双击安装，完成后打开程序 |
-| 解压即用 | `BehindRose.NetworkAssistant-win-Portable.zip` | 完整解压，双击根目录的「身后红玫瑰 · 网络助手.exe」 |
+| 安装后使用 | [下载安装版（EXE）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Setup.exe) | 双击安装，完成后打开程序 |
+| 解压即用 | [下载便携版（ZIP）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Portable.zip) | 完整解压，双击根目录的「身后红玫瑰 · 网络助手.exe」 |
 
 便携版也可运行 `current/BehindRose.exe`。请保留完整目录，不要只取出一个 EXE。`Source code` 是源码，`.nupkg` 等附件供程序更新使用，首次使用下载上表中的文件即可。
 
