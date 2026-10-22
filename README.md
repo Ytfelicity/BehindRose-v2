@@ -8,9 +8,12 @@
 <p>
   <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Setup.exe"><img src="docs/images/download-installer.svg" alt="下载安装版（Windows x64，EXE）" width="240" height="64"></a>
   <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Portable.zip"><img src="docs/images/download-portable.svg" alt="下载便携版（Windows x64，ZIP）" width="240" height="64"></a>
+  <a href="https://github.com/Ytfelicity/BehindRose-v2/tree/download-stats"><img src="https://raw.githubusercontent.com/Ytfelicity/BehindRose-v2/download-stats/downloads.svg" alt="所有版本安装版与便携版累计下载次数" height="40"></a>
 </p>
 
 首次使用可以选 **安装版**；不想安装可以选 **便携版**，完整解压后运行。
+
+累计下载合计所有已发布版本（含预览版）的安装包和便携包，不含更新文件；每小时自动更新，显示可能有缓存延迟，不代表独立用户数。
 
 [更新说明](https://github.com/Ytfelicity/BehindRose-v2/releases/tag/v2.0.0-preview.5) · [全部版本](https://github.com/Ytfelicity/BehindRose-v2/releases) · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
 

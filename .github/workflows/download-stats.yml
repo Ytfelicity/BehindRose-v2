@@ -1,0 +1,93 @@
+name: Download statistics
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: download-statistics
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Test download aggregation
+        run: node --test tests/download-stats.test.mjs
+      - name: Read all published release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/update-download-stats.mjs --repository "$GITHUB_REPOSITORY" --output "$RUNNER_TEMP/download-stats"
+      - name: Publish the badge and data on the statistics branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          import path from 'node:path';
+
+          const repository = process.env.GITHUB_REPOSITORY;
+          const branch = 'download-stats';
+          const prefix = `/repos/${repository}`;
+          async function api(endpoint, { method = 'GET', body, missing = false } = {}) {
+            const response = await fetch(`https://api.github.com${prefix}${endpoint}`, {
+              method,
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GH_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json',
+              },
+              body: body ? JSON.stringify(body) : undefined,
+              signal: AbortSignal.timeout(30000),
+            });
+            if (missing && response.status === 404) return null;
+            if (!response.ok) throw Error(`Statistics publishing failed: ${method} ${endpoint} (${response.status}).`);
+            return response.json();
+          }
+          const directory = path.join(process.env.RUNNER_TEMP, 'download-stats');
+          const files = Object.fromEntries(await Promise.all(['downloads.json', 'downloads.svg'].map(async name => [name, await readFile(path.join(directory, name), 'utf8')])));
+          const current = await api(`/git/ref/heads/${branch}`, { missing: true });
+          if (current) {
+            const previous = await Promise.all(Object.keys(files).map(name => api(`/contents/${name}?ref=${branch}`, { missing: true })));
+            if (previous.every(Boolean)) {
+              const oldData = JSON.parse(Buffer.from(previous[0].content, 'base64').toString('utf8'));
+              const newData = JSON.parse(files['downloads.json']);
+              delete oldData.updatedAt;
+              delete newData.updatedAt;
+              const oldSvg = Buffer.from(previous[1].content, 'base64').toString('utf8');
+              if (JSON.stringify(oldData) === JSON.stringify(newData) && oldSvg === files['downloads.svg']) {
+                console.log('Download counts are unchanged; no statistics commit needed.');
+                process.exit(0);
+              }
+            }
+          }
+          const tree = await api('/git/trees', { method: 'POST', body: {
+            tree: Object.entries(files).map(([name, content]) => ({ path: name, mode: '100644', type: 'blob', content })),
+          } });
+          const commit = await api('/git/commits', { method: 'POST', body: {
+            message: 'Update cumulative release download counts',
+            tree: tree.sha,
+            parents: current ? [current.object.sha] : [],
+            author: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
+          } });
+          if (current) await api(`/git/refs/heads/${branch}`, { method: 'PATCH', body: { sha: commit.sha, force: false } });
+          else await api('/git/refs', { method: 'POST', body: { ref: `refs/heads/${branch}`, sha: commit.sha } });
+          console.log(`Published download statistics to ${branch}: ${commit.sha}`);
+          NODE
