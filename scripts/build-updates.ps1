@@ -21,7 +21,7 @@ try {
     $output = Join-Path $projectRoot 'artifacts\updates'
     $arguments = @('tool', 'run', 'vpk', '--', 'pack', '--packId', 'BehindRose.NetworkAssistant', '--packVersion', $Version,
         '--packDir', (Join-Path $projectRoot 'artifacts\portable'), '--mainExe', 'BehindRose.exe', '--channel', 'win', '--runtime', 'win-x64',
-        '--outputDir', $output, '--packTitle', '身后红玫瑰 · 网络助手', '--packAuthors', '身后红玫瑰',
+        '--outputDir', $output, '--packTitle', 'Rose in my wake', '--packAuthors', 'Rose in my wake',
         '--icon', (Join-Path $projectRoot 'src\BehindRose.Desktop\Assets\avatar.ico'))
     if ($ReleaseNotes) {
         $notesPath = (Resolve-Path -LiteralPath $ReleaseNotes).Path

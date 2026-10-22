@@ -1,10 +1,10 @@
-身后红玫瑰 · 网络助手 2.0.0 预览版
+Rose in my wake · 网络助手 2.0.0 预览版
 
 本程序按当前用户安装。安装与卸载不会自动修改或恢复 Clash、浏览器和系统网络配置。
-需要撤销本工具的配置修改时，请先在程序的“备份与恢复”中操作。
+需要撤销本工具的配置修改时，请先在程序的“恢复记录”中操作。
 
-程序内置 .NET 运行时；网络检测页面还需要 Microsoft Edge WebView2 Runtime。
-如果检测页提示缺少 WebView2，请从微软官方页面安装：https://developer.microsoft.com/microsoft-edge/webview2/
+程序内置 .NET 运行时；完整工作台还需要 Microsoft Edge WebView2 Runtime。
+如果启动时提示缺少 WebView2，请从微软官方页面安装：https://developer.microsoft.com/microsoft-edge/webview2/
 
 Clash 配置按标准目录及实际字段结构识别，版本号仅作参考。结构无法识别时会说明原因，不自动修改。
 请阅读随包的“使用说明”和“验证范围”。预览版尚未数字签名。

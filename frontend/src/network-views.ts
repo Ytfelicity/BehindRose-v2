@@ -8,7 +8,7 @@ function showView(hash: string) {
     if (link.hash === '#' + tool) link.setAttribute('aria-current', 'location');
     else link.removeAttribute('aria-current');
   });
-  document.title = '网络检测 · 身后红玫瑰';
+  document.title = '网络检测 · Rose in my wake';
 }
 showView(location.hash);
 window.addEventListener('network-view', event => {

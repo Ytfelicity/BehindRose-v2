@@ -98,7 +98,7 @@
     document.querySelectorAll('.page').forEach(section => section.hidden = section.id !== 'page-' + page);
     document.querySelectorAll('a[data-page],button[data-page]').forEach(link => link.dataset.page === page ? link.setAttribute('aria-current', 'page') : link.removeAttribute('aria-current'));
     const label = page === 'network' ? networkSections[target] || networkSections['browser-network'] : titles[page];
-    document.title = label + ' · 身后红玫瑰';
+    document.title = label + ' · Rose in my wake';
     if (page === 'network') { network(); focusNetworkSection(); }
     if (page === 'backups' && ready && !busy) try { await loadBackups(); } catch (error) { notice(error.message); }
   }
@@ -230,7 +230,7 @@
   $('open-clash').addEventListener('click', attempt(async () => { const result = await api('open-clash'); toast(result.message); await checkHealth(); }));
   $('copy-report').addEventListener('click', attempt(async () => {
     if (!health) await checkHealth();
-    const report = ['身后红玫瑰 · DNS 防护 v2.0', `体检时间：${new Date(health.checkedAt).toLocaleString('zh-CN')}`, `Clash Verge Rev：${health.host.version}，${health.host.running ? '运行中' : '未运行'}`, ...health.findings.map(item => `${item.title}：${item.state}`)];
+    const report = ['Rose in my wake · DNS 防护 v2.0', `体检时间：${new Date(health.checkedAt).toLocaleString('zh-CN')}`, `Clash Verge Rev：${health.host.version}，${health.host.running ? '运行中' : '未运行'}`, ...health.findings.map(item => `${item.title}：${item.state}`)];
     if (lastOperation?.done) report.push(`最近操作：${lastOperation.action === 'restore' ? '恢复' : '修复'} / ${lastOperation.result?.state || lastOperation.phase}`);
     try { await navigator.clipboard.writeText(report.join('\n')); toast('已复制配置摘要'); }
     catch { throw Error('浏览器未允许复制，请允许剪贴板权限后重试。'); }

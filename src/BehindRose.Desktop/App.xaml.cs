@@ -25,7 +25,7 @@ public partial class App : Application
         if (WindowsState.IsAdministrator && !demo)
         { MessageBox.Show("请普通双击启动。只有应用修复和恢复备份时才需要管理员权限。", "启动方式"); Shutdown(); return; }
         instance = new Mutex(true, @"Local\BehindRose-v2-" + WindowsState.UserSid + (DevelopmentMode.Enabled ? "-dev" : "") + (smoke ? "-smoke" : demo ? "-demo" : ""), out bool first);
-        if (!first) { if (smoke) { Shutdown(1); return; } MessageBox.Show("程序已经打开，请使用原来的窗口。", "身后红玫瑰"); Shutdown(); return; }
+        if (!first) { if (smoke) { Shutdown(1); return; } MessageBox.Show("程序已经打开，请使用原来的窗口。", "Rose in my wake"); Shutdown(); return; }
         DispatcherUnhandledException += (_, args) =>
         {
             MessageBox.Show("操作未完成：" + args.Exception.Message + "\n如有配置操作中断，请重新打开程序检查备份记录。", "操作未完成"); args.Handled = true;

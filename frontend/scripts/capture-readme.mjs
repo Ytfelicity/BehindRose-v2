@@ -199,7 +199,7 @@ try {
   assert.deepEqual(failedLocalResponses, [], 'Every requested current UI asset must load.');
   const sources = {};
   for (const name of ['workbench/index.html', 'workbench/beui.js', 'workbench/workbench.js', 'diagnostics/index.html', 'diagnostics/network-ui.js', 'diagnostics/diagnostics.js'])
-    sources[name] = createHash('sha256').update(await readFile(path.join(assets, name))).digest('hex');
+    sources[name] = createHash('sha256').update((await readFile(path.join(assets, name), 'utf8')).replaceAll('\r\n', '\n')).digest('hex');
   const props = await readFile(path.join(root, 'Directory.Build.props'), 'utf8');
   const provenance = {
     capturedAt: new Date().toISOString(), channel: 'current development checkout',
@@ -209,7 +209,7 @@ try {
     network: 'Not started; non-local HTTP requests blocked',
     viewport, screenshots: captures,
     checks: { pageErrors: 0, externalRequests: 0, failedLocalResponses: 0, inMemoryApplications: 1, restorableExampleBackups: 1 },
-    sourceSha256: sources,
+    sourceHashNormalization: 'UTF-8 text with LF line endings', sourceSha256: sources,
   };
   await writeFile(path.join(output, 'provenance.json'), JSON.stringify(provenance, null, 2) + '\n');
   console.log('README capture passed: four real UI screenshots, one in-memory application and backup, no external requests or page errors.');

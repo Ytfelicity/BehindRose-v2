@@ -34,7 +34,7 @@ public partial class MainWindow : Window
         state = demo ? new DemoState() : new WindowsState(); journals = demo ? new DemoJournals() : protectedJournals;
         InitializeComponent();
         VersionLabel.Text = AppVersion;
-        AboutVersion.Text = "身后红玫瑰 · 网络助手 " + AppVersion;
+        AboutVersion.Text = "Rose in my wake · 网络助手 " + AppVersion;
         InitializeUpdates();
         if (demo) { Title += " · 演示模式"; VersionLabel.Text = "演示模式 · 不改系统"; }
         if (updateTest) { Title += " · 更新测试"; VersionLabel.Text = "更新测试 · " + AppVersion; }
@@ -281,7 +281,7 @@ public partial class MainWindow : Window
         try { SafeFiles.CheckPath(PreferencesPath); Directory.CreateDirectory(Path.GetDirectoryName(PreferencesPath)!); SafeFiles.AtomicWrite(PreferencesPath, JsonSerializer.SerializeToUtf8Bytes(new Preferences(theme, autoProbe))); }
         catch (Exception ex) { StatusText.Text = "偏好设置未保存：" + ex.Message; }
     }
-    private string DiagnosticReport() => "身后红玫瑰 · 本地诊断摘要\n时间：" + DateTimeOffset.Now.ToString("u") + "\n版本：2.0.0-preview.1\n环境：" + (demo ? "演示数据" : "真实本地检查") + "\nClash 版本：" + host.Version + "\nClash 运行：" + host.Running + "\n网络采样：" + networkSummary + "\n最近操作状态：" + lastOperationState + "\n\n不包含订阅、节点、密钥、配置内容、原始错误或网络 IP。网络详细结果请在检测页主动复制。";
+    private string DiagnosticReport() => "Rose in my wake · 本地诊断摘要\n时间：" + DateTimeOffset.Now.ToString("u") + "\n版本：2.0.0-preview.1\n环境：" + (demo ? "演示数据" : "真实本地检查") + "\nClash 版本：" + host.Version + "\nClash 运行：" + host.Running + "\n网络采样：" + networkSummary + "\n最近操作状态：" + lastOperationState + "\n\n不包含订阅、节点、密钥、配置内容、原始错误或网络 IP。网络详细结果请在检测页主动复制。";
     private void Report_Click(object sender, RoutedEventArgs e)
     {
         var text = DiagnosticReport();
@@ -292,7 +292,7 @@ public partial class MainWindow : Window
         panel.Children.Add(new TextBox { Text = text, IsReadOnly = true, TextWrapping = TextWrapping.Wrap, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Margin = new Thickness(0,0,0,12), Background = (Brush)Application.Current.Resources["SurfaceBrush"], Foreground = Foreground });
         save.Click += (_, _) =>
         {
-            var picker = new SaveFileDialog { Filter = "文本文件|*.txt", FileName = "身后红玫瑰-诊断摘要.txt" };
+            var picker = new SaveFileDialog { Filter = "文本文件|*.txt", FileName = "Rose in my wake-诊断摘要.txt" };
             if (picker.ShowDialog(dialog) == true) { try { File.WriteAllText(picker.FileName, text, new UTF8Encoding(false)); dialog.Close(); } catch (Exception ex) { MessageBox.Show(dialog, ex.Message); } }
         };
         dialog.Content = panel; dialog.ShowDialog();

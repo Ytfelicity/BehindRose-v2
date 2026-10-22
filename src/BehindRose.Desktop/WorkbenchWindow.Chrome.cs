@@ -27,7 +27,7 @@ internal sealed partial class WorkbenchWindow
         captionBar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var brand = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
         brand.Children.Add(new Image { Source = Icon, Width = 16, Height = 16, Margin = new Thickness(0, 0, 9, 0) });
-        brand.Children.Add(new TextBlock { Text = "身后红玫瑰", Foreground = Brushes.Gainsboro, FontSize = 12, VerticalAlignment = VerticalAlignment.Center });
+        brand.Children.Add(new TextBlock { Text = "Rose in my wake", Foreground = Brushes.Gainsboro, FontSize = 12, VerticalAlignment = VerticalAlignment.Center });
         brand.Children.Add(new TextBlock { Text = MainWindow.AppVersion, Foreground = new SolidColorBrush(Color.FromRgb(116, 116, 116)), FontSize = 11, Margin = new Thickness(10, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center });
         captionBar.Children.Add(brand);
         var actions = new StackPanel { Orientation = Orientation.Horizontal };

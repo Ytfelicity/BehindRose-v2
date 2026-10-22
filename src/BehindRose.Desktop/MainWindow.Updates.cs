@@ -90,7 +90,7 @@ internal sealed class UpdateProgressWindow : Window
     private bool completed;
     public UpdateProgressWindow(CancellationTokenSource cancellation)
     {
-        Title = "更新身后红玫瑰"; Width = 440; Height = 210; ResizeMode = ResizeMode.NoResize;
+        Title = "更新 Rose in my wake"; Width = 440; Height = 210; ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         Background = (System.Windows.Media.Brush)Application.Current.Resources["BackgroundBrush"];
         Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextBrush"];

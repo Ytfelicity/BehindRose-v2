@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
     <AssemblyName>BehindRose</AssemblyName><ApplicationIcon>Assets/avatar.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Product>身后红玫瑰 · 网络助手</Product><Description>Windows 网络检测、配置修复与恢复</Description>
+    <Product>Rose in my wake</Product><Description>Windows 网络检测、配置修复与恢复</Description>
     <Version Condition="'$(ReleaseVersion)' != ''">$(ReleaseVersion)</Version>
   </PropertyGroup>
   <ItemGroup>

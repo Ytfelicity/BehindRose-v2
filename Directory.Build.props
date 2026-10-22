@@ -9,8 +9,8 @@
     <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.5</ReleaseVersion>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
-    <Company>身后红玫瑰</Company>
-    <Authors>身后红玫瑰</Authors>
+    <Company>Rose in my wake</Company>
+    <Authors>Rose in my wake</Authors>
     <UpdateRepository Condition="'$(UpdateRepository)' == ''">https://github.com/Ytfelicity/BehindRose-v2</UpdateRepository>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <NuGetLockFilePath Condition="'$(RuntimeIdentifier)' != ''">$(MSBuildProjectDirectory)/packages.$(RuntimeIdentifier).lock.json</NuGetLockFilePath>

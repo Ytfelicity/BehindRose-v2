@@ -1,8 +1,8 @@
-<Window x:Class="BehindRose.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="身后红玫瑰 · 网络助手" Width="1040" Height="760" MinWidth="760" MinHeight="600" Background="{DynamicResource BackgroundBrush}" Foreground="{DynamicResource TextBrush}" FontFamily="Microsoft YaHei UI, Segoe UI" FontSize="14" WindowStartupLocation="CenterScreen" Icon="Assets/avatar.ico">
+<Window x:Class="BehindRose.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Rose in my wake · 网络助手" Width="1040" Height="760" MinWidth="760" MinHeight="600" Background="{DynamicResource BackgroundBrush}" Foreground="{DynamicResource TextBrush}" FontFamily="Microsoft YaHei UI, Segoe UI" FontSize="14" WindowStartupLocation="CenterScreen" Icon="Assets/avatar.ico">
  <Grid>
   <Grid.RowDefinitions><RowDefinition Height="58"/><RowDefinition Height="*"/><RowDefinition Height="38"/></Grid.RowDefinitions>
   <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="22,0">
-   <DockPanel VerticalAlignment="Center"><TextBlock x:Name="VersionLabel" DockPanel.Dock="Right" Text="2.0.0 预览版" Style="{StaticResource Muted}" VerticalAlignment="Center"/><StackPanel Orientation="Horizontal"><TextBlock Text="❀" FontSize="26" Foreground="{DynamicResource AccentBrush}" Margin="0,0,12,0"/><TextBlock Text="身后红玫瑰" FontSize="17" VerticalAlignment="Center"/><TextBlock Text="网络助手" Margin="12,0,0,0" Style="{StaticResource Muted}" VerticalAlignment="Center"/></StackPanel></DockPanel>
+   <DockPanel VerticalAlignment="Center"><TextBlock x:Name="VersionLabel" DockPanel.Dock="Right" Text="2.0.0 预览版" Style="{StaticResource Muted}" VerticalAlignment="Center"/><StackPanel Orientation="Horizontal"><TextBlock Text="❀" FontSize="26" Foreground="{DynamicResource AccentBrush}" Margin="0,0,12,0"/><TextBlock Text="Rose in my wake" FontSize="17" VerticalAlignment="Center"/><TextBlock Text="网络助手" Margin="12,0,0,0" Style="{StaticResource Muted}" VerticalAlignment="Center"/></StackPanel></DockPanel>
   </Border>
   <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="172"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
    <Border Background="{DynamicResource SidebarBrush}" Padding="12,24,12,20"><DockPanel><TextBlock DockPanel.Dock="Bottom" Text="先看清问题&#10;再放心修改" Style="{StaticResource Muted}" Margin="14,10"/><StackPanel x:Name="Navigation"><Button x:Name="OverviewNav" Style="{StaticResource Nav}" Content="网络体检" Tag="overview" Click="Navigate_Click"/><Button x:Name="NetworkNav" Style="{StaticResource Nav}" Content="网络出口检测" Tag="network" Click="Navigate_Click"/><Button x:Name="BackupNav" Style="{StaticResource Nav}" Content="备份与恢复" Tag="backups" Click="Navigate_Click"/><Button x:Name="SettingsNav" Style="{StaticResource Nav}" Content="设置与关于" Tag="settings" Click="Navigate_Click"/></StackPanel></DockPanel></Border>
@@ -31,7 +31,7 @@
      <TextBlock Text="v1.9 的备份与此版本分开保存。旧备份请使用原 v1.9 程序恢复。" Style="{StaticResource Muted}" Margin="0,10,0,0"/>
     </StackPanel></ScrollViewer>
     <ScrollViewer x:Name="SettingsPage" Visibility="Collapsed" VerticalScrollBarVisibility="Auto"><StackPanel>
-     <TextBlock Text="设置与关于" Style="{StaticResource Heading}"/><TextBlock x:Name="AboutVersion" Text="身后红玫瑰 · 网络助手" Margin="0,0,0,20"/>
+     <TextBlock Text="设置与关于" Style="{StaticResource Heading}"/><TextBlock x:Name="AboutVersion" Text="Rose in my wake · 网络助手" Margin="0,0,0,20"/>
      <Border Style="{StaticResource PanelBorder}"><StackPanel>
       <TextBlock Text="程序更新"/><TextBlock x:Name="UpdateStatus" Text="启动时检查更新" Style="{StaticResource Muted}" Margin="0,6,0,10"/><Button x:Name="CheckUpdatesButton" Content="检查更新" HorizontalAlignment="Left" Click="CheckUpdates_Click" Margin="0,0,0,20"/>
       <TextBlock Text="外观"/><ComboBox x:Name="ThemePicker" Margin="0,10,0,20" Width="180" HorizontalAlignment="Left" SelectionChanged="Theme_Changed"><ComboBoxItem Content="跟随系统"/><ComboBoxItem Content="浅色"/><ComboBoxItem Content="深色"/></ComboBox>
@@ -39,7 +39,7 @@
       <TextBlock Text="开启后，会在修复成功且重新打开 Clash 后调用 ipify、bash.ws 和公开 STUN 服务。服务方会收到必要请求和来源 IP；默认不查询地区。" Style="{StaticResource Muted}" Margin="21,0,0,16"/>
       <TextBlock Text="数据与权限"/><TextBlock Text="没有账户、遥测或作者服务器代测。日常使用普通权限，配置操作单独请求管理员权限。网络结果只在当前会话保留。" Style="{StaticResource Muted}" Margin="0,6,0,16"/>
       <TextBlock Text="配置识别范围"/><TextBlock Text="Windows x64，Clash Verge Rev 标准配置目录。按实际文件结构与目标字段生成预览；无法识别时说明原因。版本号仅作参考。浏览器策略统一纳入一键配置。" Style="{StaticResource Muted}" Margin="0,6,0,16"/>
-      <TextBlock Text="支持作者"/><TextBlock Text="感谢使用身后红玫瑰的工具。支持作者完全自愿，不影响功能。" Style="{StaticResource Muted}" Margin="0,6,0,0"/>
+      <TextBlock Text="支持作者"/><TextBlock Text="感谢使用 Rose in my wake。支持作者完全自愿，不影响功能。" Style="{StaticResource Muted}" Margin="0,6,0,0"/>
      </StackPanel></Border>
      <WrapPanel Margin="0,20,0,0"><Button Content="查看官方 Clash 发布页" Click="OpenClashPage_Click"/><Button Content="预览诊断报告" Click="Report_Click"/><Button Content="查看第三方许可" Click="Licenses_Click"/></WrapPanel>
      <TextBlock Text="此预览版尚未数字签名。具体测试通过项和实机验收范围见发布包内说明。" Style="{StaticResource Muted}" Margin="0,10,0,0"/>

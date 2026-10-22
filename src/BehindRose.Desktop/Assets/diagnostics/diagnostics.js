@@ -446,7 +446,7 @@
 
   function report() {
     const environment = window.chrome && window.chrome.webview ? '桌面版 WebView2' : '当前浏览器（本地开发页面）';
-    const lines = ['身后红玫瑰 · 网络检测报告', '开始时间：' + lastTime, '本次范围：' + lastScope + (lastScope === '所选检测项目' ? '' : '；其他项目保留各自的已有结果，请参考各项采样时间。'), '环境：' + environment + '；不代表所有外部浏览器。', $('overall').textContent, ''];
+    const lines = ['Rose in my wake · 网络检测报告', '开始时间：' + lastTime, '本次范围：' + lastScope + (lastScope === '所选检测项目' ? '' : '；其他项目保留各自的已有结果，请参考各项采样时间。'), '环境：' + environment + '；不代表所有外部浏览器。', $('overall').textContent, ''];
     [['IPv4', ip4], ['IPv6', ip6]].forEach(([name, data]) => lines.push(name + '：' + (data.address || labels[data.status]) + '；' + data.note, '采样时间：' + (data.sampledAt || '未采样'), '地区：' + data.geo, '来源：ipify' + (data.geo.includes('IPPure') ? ' / IPPure' : '')));
     lines.push('', 'DNS：' + labels[dns.status] + '；' + dns.note, '采样时间：' + (dns.sampledAt || '未采样'), '来源：https://ipleak.net/ · 浏览器以同一会话顺序采样，最多 300 次；归属来自 IPLeak 公开 JSON 接口。');
     dns.sources.forEach(source => lines.push(source.sourceName + '：' + labels[source.status] + ' | ' + (source.completedQueries || 0) + ' / ' + (source.totalQueries || 300) + ' 次请求 | ' + (source.failedQueries || 0) + ' 次失败' + (typeof source.serverCount === 'number' ? ' | 服务器数 ' + source.serverCount : '') + ' | ' + source.note));

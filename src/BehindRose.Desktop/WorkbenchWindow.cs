@@ -28,7 +28,7 @@ internal sealed partial class WorkbenchWindow : Window
     {
         this.smoke = smoke; liveConnectivitySmoke = smoke && Environment.GetCommandLineArgs().Contains("--connectivity-check");
         local = new LocalApp(demo); server = new WorkbenchServer(local);
-        Title = "身后红玫瑰 · 网络助手 " + MainWindow.AppVersion + (updateTest ? " · 更新测试" : demo ? " · 演示模式" : "");
+        Title = "Rose in my wake · 网络助手 " + MainWindow.AppVersion + (updateTest ? " · 更新测试" : demo ? " · 演示模式" : "");
         Width = 1280; Height = 850; MinWidth = 760; MinHeight = 600;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = new SolidColorBrush(Color.FromRgb(10, 10, 10));

@@ -2,12 +2,12 @@
 #define Root SourcePath + ".."
 [Setup]
 AppId={{9DB4DB49-383F-49B4-A119-F451BDAD3A39}
-AppName=身后红玫瑰 · 网络助手
+AppName=Rose in my wake
 AppVersion={#AppVersion}
-AppVerName=身后红玫瑰 · 网络助手 2.0.0 预览版
-AppPublisher=身后红玫瑰
+AppVerName=Rose in my wake 2.0.0 预览版
+AppPublisher=Rose in my wake
 DefaultDirName={localappdata}\Programs\BehindRose
-DefaultGroupName=身后红玫瑰
+DefaultGroupName=Rose in my wake
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -34,11 +34,11 @@ Source: "{#Root}\artifacts\portable\*"; DestDir: "{app}"; Flags: ignoreversion r
 Name: "desktopicon"; Description: "创建桌面快捷方式"; Flags: unchecked
 
 [Icons]
-Name: "{group}\身后红玫瑰 · 网络助手"; Filename: "{app}\BehindRose.exe"
-Name: "{autodesktop}\身后红玫瑰 · 网络助手"; Filename: "{app}\BehindRose.exe"; Tasks: desktopicon
+Name: "{group}\Rose in my wake"; Filename: "{app}\BehindRose.exe"
+Name: "{autodesktop}\Rose in my wake"; Filename: "{app}\BehindRose.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\BehindRose.exe"; Description: "启动网络助手"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\BehindRose.exe"; Description: "启动 Rose in my wake"; Flags: nowait postinstall skipifsilent
 
 [Code]
 function InitializeUninstall(): Boolean;

@@ -1,4 +1,4 @@
-# 身后红玫瑰 · 网络助手
+# Rose in my wake
 
 一款 Windows 网络工具，帮你查看网络出口、检查网站连通性，并调整 Clash 与浏览器的 DNS 配置。
 
@@ -37,7 +37,7 @@
 | 你想怎么用 | 下载哪个文件 | 打开方式 |
 | --- | --- | --- |
 | 安装后使用 | [下载安装版（EXE）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Setup.exe) | 双击安装，完成后打开程序 |
-| 解压即用 | [下载便携版（ZIP）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Portable.zip) | 完整解压，双击根目录的「身后红玫瑰 · 网络助手.exe」 |
+| 解压即用 | [下载便携版（ZIP）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.5/BehindRose.NetworkAssistant-win-Portable.zip) | 完整解压，运行 `current/BehindRose.exe` |
 
 便携版也可运行 `current/BehindRose.exe`。请保留完整目录，不要只取出一个 EXE。`Source code` 是源码，`.nupkg` 等附件供程序更新使用，首次使用下载上表中的文件即可。
 

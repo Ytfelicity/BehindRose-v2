@@ -36,7 +36,7 @@ export async function proxyNetworkApi(command: 'proxy-network-status' | 'proxy-n
 
 export function proxyNetworkText(state: ProxyNetworkState): string {
   const report = state.report;
-  return ['身后红玫瑰 · 代理网络质量', `状态：${state.state} · ${state.stage}`, `代理：http://127.0.0.1:${state.proxyPort}`, `开始：${state.startedAt || '未知'} · 结束：${state.finishedAt || '尚未结束'}`,
+  return ['Rose in my wake · 代理网络质量', `状态：${state.state} · ${state.stage}`, `代理：http://127.0.0.1:${state.proxyPort}`, `开始：${state.startedAt || '未知'} · 结束：${state.finishedAt || '尚未结束'}`,
     `范围：${report?.scope || '尚未采样'}`, `出口：${report?.identity?.ip || '未知'} · 前缀：${report?.identity?.prefix || '未知'}`,
     `ASN：${report?.identity?.asns.map(value => 'AS' + value).join(', ') || '未知'} · ${report?.identity?.holder || '机构未知'}`,
     `结束出口：${report?.finalIp || '未知'} · 出口变化：${report?.exitChanged === true ? '是' : report?.exitChanged === false ? '未观察到' : '未知'}`, '',
