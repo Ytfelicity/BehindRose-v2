@@ -207,6 +207,7 @@ ProxyNetworkTests.Register(Test);
 UpdateTests.Register(Test);
 VelopackTests.Register(Test);
 SafeFilesTests.Register(Test);
+ReleaseMetadataTests.Register(Test);
 int failures=0;
 foreach(var test in tests)
 {
