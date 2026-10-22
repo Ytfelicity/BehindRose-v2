@@ -1,7 +1,8 @@
 {
-  "capturedAt": "2026-10-22T08:56:26.828Z",
-  "channel": "current development checkout",
-  "version": "2.0.0-preview.1",
+  "capturedAt": "2026-10-22T10:42:05.760Z",
+  "channel": "checked-out application source",
+  "sourceCommit": "e595a85117e075314efeb1e78420e3847795a61c",
+  "version": "2.0.0-preview.6",
   "interface": "Unmodified current application assets rendered by Chromium",
   "configuration": "Real DevHost --demo; in-memory example configuration and backup",
   "network": "Not started; non-local HTTP requests blocked",
@@ -22,13 +23,13 @@
     "inMemoryApplications": 1,
     "restorableExampleBackups": 1
   },
+  "sourceHashNormalization": "UTF-8 text with LF line endings",
   "sourceSha256": {
     "workbench/index.html": "ef6dfaf9dd31cd641c77bb8678054c5c40014e5d38546af544bd6344e2bc2478",
-    "workbench/beui.js": "716710a256279efca91da95880ac7ea92e38a68edff5c80f8ed15bfaa6b26eae",
+    "workbench/beui.js": "2c07c7832eb96996c3d94a614579ff2967a22f0c48aa7f1b39dfdd951a0e8791",
     "workbench/workbench.js": "6b3ce1189ebf7ff7d2ef5a18921195a1d91f546b76d885eb768c2c8e43d81c31",
     "diagnostics/index.html": "1aa678034265f882abeae50089e68d1ecdb7dab269472289cb9208b17bd43de1",
     "diagnostics/network-ui.js": "747dbd508f3bb1e7f5f0c6115a201ff0282efae6f4c8d7060acb7626333745de",
     "diagnostics/diagnostics.js": "0a19f84c034f41bbc2837063fc6a87eceab2bcbe4bc41fee910017785d6bc8c9"
-  },
-  "sourceHashNormalization": "UTF-8 text with LF line endings"
+  }
 }

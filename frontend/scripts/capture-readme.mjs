@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -202,8 +202,9 @@ try {
     sources[name] = createHash('sha256').update((await readFile(path.join(assets, name), 'utf8')).replaceAll('\r\n', '\n')).digest('hex');
   const props = await readFile(path.join(root, 'Directory.Build.props'), 'utf8');
   const provenance = {
-    capturedAt: new Date().toISOString(), channel: 'current development checkout',
-    version: /<Version>([^<]+)<\/Version>/.exec(props)?.[1],
+    capturedAt: new Date().toISOString(), channel: 'checked-out application source',
+    sourceCommit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', windowsHide: true }).trim(),
+    version: /<ReleaseVersion\b[^>]*>([^<]+)<\/ReleaseVersion>/.exec(props)?.[1] ?? /<Version>([^<]+)<\/Version>/.exec(props)?.[1],
     interface: 'Unmodified current application assets rendered by Chromium',
     configuration: 'Real DevHost --demo; in-memory example configuration and backup',
     network: 'Not started; non-local HTTP requests blocked',

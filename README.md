@@ -17,9 +17,9 @@
 
 [更新说明](https://github.com/Ytfelicity/BehindRose-v2/releases/tag/v2.0.0-preview.6) · [全部版本](https://github.com/Ytfelicity/BehindRose-v2/releases) · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
 
-![网络检测界面：查看浏览器网络、网站连通性和 IP 质量](docs/images/screenshots/network.png)
+![网络检测界面：查看浏览器网络、网站连通性和 IP 质量](docs/images/screenshots/network.png?v=2.0.0-preview.6)
 
-*当前开发版实际界面。网络检测尚未开始；下方配置和恢复截图使用程序自带的演示数据。已发布版本的布局可能略有不同。*
+*2.0.0-preview.6 的实际界面，保留原有手写 Logo。网络检测尚未开始；下方配置和恢复截图使用程序自带的演示数据。*
 
 ## 能做什么
 
@@ -85,11 +85,11 @@ IP 质量可选择已有的 **本机 HTTP 代理**，或 **本机默认网络**�
 
 **一键配置：先查看当前状态。**
 
-![一键配置页面，展示系统接管、浏览器 DNS 与配置恢复入口](docs/images/screenshots/configuration.png)
+![一键配置页面，展示系统接管、浏览器 DNS 与配置恢复入口](docs/images/screenshots/configuration.png?v=2.0.0-preview.6)
 
 **确认预览：逐项查看改动，再决定是否应用。**
 
-![确认配置方案，展示修改前后内容及确认按钮](docs/images/screenshots/configuration-preview.png)
+![确认配置方案，展示修改前后内容及确认按钮](docs/images/screenshots/configuration-preview.png?v=2.0.0-preview.6)
 
 </details>
 
@@ -102,7 +102,7 @@ IP 质量可选择已有的 **本机 HTTP 代理**，或 **本机默认网络**�
 <details>
 <summary>查看恢复记录界面</summary>
 
-![恢复记录页面，展示配置备份与恢复设置按钮](docs/images/screenshots/restore.png)
+![恢复记录页面，展示配置备份与恢复设置按钮](docs/images/screenshots/restore.png?v=2.0.0-preview.6)
 
 </details>
 
