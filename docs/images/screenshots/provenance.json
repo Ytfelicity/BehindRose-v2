@@ -1,0 +1,33 @@
+{
+  "capturedAt": "2026-10-22T07:46:57.550Z",
+  "channel": "current development checkout",
+  "version": "2.0.0-preview.1",
+  "interface": "Unmodified current application assets rendered by Chromium",
+  "configuration": "Real DevHost --demo; in-memory example configuration and backup",
+  "network": "Not started; non-local HTTP requests blocked",
+  "viewport": {
+    "width": 1440,
+    "height": 1280
+  },
+  "screenshots": [
+    "network.png",
+    "configuration.png",
+    "configuration-preview.png",
+    "restore.png"
+  ],
+  "checks": {
+    "pageErrors": 0,
+    "externalRequests": 0,
+    "failedLocalResponses": 0,
+    "inMemoryApplications": 1,
+    "restorableExampleBackups": 1
+  },
+  "sourceSha256": {
+    "workbench/index.html": "0e2d787dc917d5793e67e580268db23f9e9acd01df28d355e8fb58d84514c2b8",
+    "workbench/beui.js": "dd339668cdb7a5a6026d74cb03c0dcbd82bef356275bed199df6d060a1e85c7e",
+    "workbench/workbench.js": "4740f6f197a48a9560a36505ad31d496f0d6123578be11b04bbb8a3e543bb7df",
+    "diagnostics/index.html": "743f0d4cf4ffbd3803c6f003f3273620cc0395e4d30b7777b30941450ad2f816",
+    "diagnostics/network-ui.js": "f174cd41aa29cc57afb007883903ca6e59e8b8f7f848e2e05c7c11707c594758",
+    "diagnostics/diagnostics.js": "1ee3b2d756f25c12272548317d0be8c9bc85321eb4213d8d59d0d7399ae0b56a"
+  }
+}
