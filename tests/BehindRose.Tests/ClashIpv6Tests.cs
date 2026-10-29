@@ -58,14 +58,14 @@ internal static class ClashIpv6Tests
                 Reject(() => RepairPlanner.Build(state, RepairOptions.DisableClashIpv6));
                 Assert(state.Writes == 0, "Do not overwrite an unrecognized value");
             }
-            var unknown = Enabled(); Reject(() => RepairPlanner.Build(unknown, (RepairOptions)64));
+            var unknown = Enabled(); Reject(() => RepairPlanner.Build(unknown, (RepairOptions)128));
         });
         test("IPv6 can combine with the built-in plan without duplicate file targets", () =>
         {
             var state = Enabled(); var originalDns = state.Read(Targets.Dns); var journals = new MemoryJournals(); var engine = new RepairEngine(state, journals);
             var basic = RepairPlanner.Build(state, (RepairOptions)15);
             Assert(RepairPlanner.IsTrue(RepairPlanner.Parse(basic.Changes.Single(x => x.Key == Targets.Config).After.Bytes(), "basic"), "ipv6"), "The legacy explicit mask preserves IPv6");
-            var combined = RepairPlanner.Build(state, RepairPlanner.OneClickOptions);
+            var combined = RepairPlanner.Build(state, (RepairOptions)47);
             Assert(combined.Changes.Count(x => x.Key == Targets.Config) == 1 && combined.Fingerprint != basic.Fingerprint, "One file needs one combined snapshot, bound to the chosen flags");
             Assert(engine.Apply(combined).Success && RepairPlanner.InspectClashIpv6(state).State == "已关闭", "The combined in-memory plan should apply");
             Assert(state.Read(Targets.Dns) == originalDns && RepairPlanner.Build(state, (RepairOptions)47).Changes.Count == 0, "Do not replace upstream DNS; combined plan must be idempotent");

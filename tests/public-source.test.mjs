@@ -5,6 +5,8 @@ import { copyFile, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'nod
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { crc32, deflateRawSync } from 'node:zlib';
+import { publicHandbookArchive, handbookEntries, readPublicHandbookArchive } from '../scripts/public-handbook-archive.mjs';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const temporaryRoot = await realpath(tmpdir());
@@ -41,6 +43,30 @@ function scan(expected, ...args) {
   checks++;
   return JSON.parse(result.stdout);
 }
+function handbookZip(overrides = {}) {
+  let offset = 0;
+  const locals = [], directory = [];
+  for (const entry of handbookEntries) {
+    const name = Buffer.from(overrides.rename === entry ? '../snapshot.brclash' : entry);
+    const data = Buffer.from(overrides[entry] ?? 'Public fixture.\n');
+    const packed = deflateRawSync(data);
+    const local = Buffer.alloc(30), central = Buffer.alloc(46);
+    local.writeUInt32LE(0x04034b50); central.writeUInt32LE(0x02014b50);
+    local.writeUInt16LE(20, 4); central.writeUInt16LE(20, 6);
+    local.writeUInt16LE(8, 8); central.writeUInt16LE(8, 10);
+    for (const [buffer, at] of [[local, 14], [central, 16]]) {
+      buffer.writeUInt32LE(crc32(data), at); buffer.writeUInt32LE(packed.length, at + 4); buffer.writeUInt32LE(data.length, at + 8);
+    }
+    local.writeUInt16LE(name.length, 26); central.writeUInt16LE(name.length, 28);
+    central.writeUInt32LE(offset, 42);
+    locals.push(local, name, packed); directory.push(central, name);
+    offset += local.length + name.length + packed.length;
+  }
+  const central = Buffer.concat(directory), end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50); end.writeUInt16LE(handbookEntries.length, 8); end.writeUInt16LE(handbookEntries.length, 10);
+  end.writeUInt32LE(central.length, 12); end.writeUInt32LE(offset, 16);
+  return Buffer.concat([...locals, central, end]);
+}
 try {
   const scope = JSON.parse(await readFile(path.join(project, 'licenses/scope.json'), 'utf8'));
   const copies = new Set(['scripts/check-public-source.mjs', 'scripts/install-git-hooks.mjs', '.gitignore', '.gitattributes', '.githooks/pre-commit', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'docs/许可证说明.md', 'licenses/scope.json', 'licenses/react-bits-LICENSE.md', ...scope.restrictedDependencies.map(entry => entry.notice)]);
@@ -48,7 +74,8 @@ try {
     await mkdir(path.dirname(path.join(fixture, file)), { recursive: true });
     await copyFile(path.join(project, file), path.join(fixture, file));
   }
-  const privateFiles = ['private/invite.txt', '.env', '.env.local', '.ssh/id_ed25519', 'server/simple-auth/deployment.md', 'frontend/reactbits-registry/source.json', 'docs/ui-refero-2026-10-02/evidence/report.json', 'credentials.json', 'cookies.txt', 'test.key', 'export.zip', 'first-invite.txt'];
+  await copyFile(path.join(project, 'scripts/public-handbook-archive.mjs'), path.join(fixture, 'scripts/public-handbook-archive.mjs'));
+  const privateFiles = ['private/invite.txt', '.env', '.env.local', '.ssh/id_ed25519', 'server/simple-auth/deployment.md', 'frontend/reactbits-registry/source.json', 'docs/ui-refero-2026-10-02/evidence/report.json', 'credentials.json', 'cookies.txt', 'test.key', 'export.zip', 'first-invite.txt', 'snapshot.brclash', 'ClashBackups/summary.json'];
   for (const file of privateFiles) await put(file, 'Private fixture material.\n');
   assert.equal(scan(0).gitRepository, false, 'Source export without Git still supports inspection.');
 
@@ -104,6 +131,32 @@ try {
   await put('licenses/scope.json', scopeBytes);
   git('add', 'licenses/scope.json');
 
+  const safeArchive = handbookZip();
+  assert.equal(readPublicHandbookArchive(safeArchive).length, handbookEntries.length);
+  assert.equal(readPublicHandbookArchive(await readFile(path.join(project, publicHandbookArchive))).length, handbookEntries.length, 'The shipped deflated archive must be fully readable.');
+  await put(publicHandbookArchive, safeArchive);
+  git('add', publicHandbookArchive);
+  scan(0, '--staged');
+  const secretArchive = handbookZip({ 'scripts/Launch-Claude.ps1': syntheticKey });
+  await put(publicHandbookArchive, secretArchive);
+  git('add', publicHandbookArchive);
+  await put(publicHandbookArchive, safeArchive);
+  assert.ok(scan(1, '--staged').findings.some(finding => finding.kind === 'github-token' && finding.path.endsWith('!/scripts/Launch-Claude.ps1')), 'Clean worktree ZIP must not hide an indexed compressed credential.');
+  for (const invalid of [
+    handbookZip({ rename: 'claude-guide.md' }),
+    Buffer.concat([safeArchive, Buffer.from('hidden data')]),
+    Buffer.from(safeArchive),
+    Buffer.from(safeArchive),
+  ].map((data, i) => {
+    if (i === 2) data[30 + Buffer.byteLength(handbookEntries[0])] ^= 1; // CRC mismatch.
+    if (i === 3) data.writeUInt32LE(5 * 1024 * 1024, data.readUInt32LE(data.length - 6) + 24); // Output bound.
+    return data;
+  })) {
+    await put(publicHandbookArchive, invalid); git('add', publicHandbookArchive);
+    assert.ok(scan(1, '--staged').findings.some(finding => finding.kind === 'invalid-public-archive'), 'Traversal, trailing data, corruption and oversized entries must be blocked.');
+  }
+  await put(publicHandbookArchive, safeArchive); git('add', publicHandbookArchive);
+
   assert.equal(run(process.execPath, ['scripts/install-git-hooks.mjs']).status, 0, 'Hook installation must succeed.');
   assert.equal(run('git', ['hook', 'run', 'pre-commit']).status, 0, 'Installed hook must accept the safe index.');
   git('add', '--force', '.env');
@@ -122,14 +175,17 @@ try {
   }
   await put('retired.csv', syntheticKey + '\n');
   git('add', 'retired.csv');
+  await put(publicHandbookArchive, secretArchive); git('add', publicHandbookArchive);
   // Deliberately bypass the fixture hook to simulate an old accidental commit.
   git('-c', 'core.hooksPath=unused-hooks', '-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@example.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Historical fixture');
   git('rm', '--quiet', 'retired.csv');
+  await put(publicHandbookArchive, safeArchive); git('add', publicHandbookArchive);
   git('-c', 'user.name=Source Safety Test', '-c', 'user.email=source-safety@example.invalid', '-c', 'commit.gpgSign=false', 'commit', '-m', 'Remove historical fixture');
   scan(0);
   const historical = scan(1, '--history');
   assert.equal(historical.historicalCommits, 3);
   assert.ok(historical.findings.some(finding => finding.kind === 'github-token' && finding.source === 'history' && finding.path.startsWith('retired.csv@')), 'Deleting a credential must not hide it from historical inspection.');
+  assert.ok(historical.findings.some(finding => finding.kind === 'github-token' && finding.source === 'history' && finding.path.includes('!/scripts/Launch-Claude.ps1')), 'Replacing a ZIP must not hide historical archive credentials.');
   await put('nodes.conf', ['vless', '://', syntheticValue, '@example.invalid:443'].join(''));
   git('add', 'nodes.conf');
   assert.ok(scan(1, '--staged').findings.some(finding => finding.kind === 'proxy-subscription'));

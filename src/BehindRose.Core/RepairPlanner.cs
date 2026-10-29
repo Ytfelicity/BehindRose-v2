@@ -8,19 +8,20 @@ namespace BehindRose.Core;
 
 public static class RepairPlanner
 {
-    public const RepairOptions OneClickOptions = RepairOptions.Tun | RepairOptions.ChromeDns | RepairOptions.EdgeDns | RepairOptions.FirefoxDns | RepairOptions.DisableClashIpv6;
-    public const RepairOptions AllowedOptions = RepairOptions.Tun | RepairOptions.ChromeDns | RepairOptions.EdgeDns | RepairOptions.FirefoxDns | RepairOptions.ReplaceDns | RepairOptions.DisableClashIpv6;
+    public const RepairOptions OneClickOptions = RepairOptions.Tun | RepairOptions.ChromeDns | RepairOptions.EdgeDns | RepairOptions.FirefoxDns | RepairOptions.DisableClashIpv6 | RepairOptions.SingMix;
+    public const RepairOptions AllowedOptions = OneClickOptions | RepairOptions.ReplaceDns;
 
     public static RepairPlan Build(IStateStore store, RepairOptions options)
     {
         if ((options & ~AllowedOptions) != 0 || options == RepairOptions.None) throw new InvalidDataException("请至少选择一项修改。");
+        if (options.HasFlag(RepairOptions.SingMix) && options.HasFlag(RepairOptions.ReplaceDns)) throw new InvalidDataException("sing-mix 统一管理 DNS，不能同时启用旧版默认 DNS 替换。");
         var expected = new Dictionary<string, StoredValue>(StringComparer.Ordinal);
         var changes = new List<Change>();
         StoredValue Read(string key)
         {
             var value = store.Read(key); Targets.ValidateValue(key, value); expected[key] = value; return value;
         }
-        if ((options & (RepairOptions.Tun | RepairOptions.ReplaceDns | RepairOptions.DisableClashIpv6)) != 0)
+        if ((options & (RepairOptions.Tun | RepairOptions.ReplaceDns | RepairOptions.DisableClashIpv6 | RepairOptions.SingMix)) != 0)
         {
             var vergeValue = Read(Targets.Verge);
             var configValue = Read(Targets.Config);
@@ -28,11 +29,12 @@ public static class RepairPlanner
             var verge = Parse(vergeValue.Bytes(), "verge.yaml");
             var config = Parse(configValue.Bytes(), "config.yaml");
             ValidateClashShape(verge, config);
-            if (options.HasFlag(RepairOptions.Tun))
+            if ((options & (RepairOptions.Tun | RepairOptions.SingMix)) != 0)
             {
                 var changedVerge = Set(verge, "enable_tun_mode", "true");
                 var tun = Mapping(config, "tun", true, out bool changedConfig);
-                foreach (var key in new[] { "enable", "auto-route", "strict-route", "auto-detect-interface" }) changedConfig |= Set(tun, key, "true");
+                foreach (var key in new[] { "enable", "auto-route", "strict-route" }) changedConfig |= Set(tun, key, "true");
+                changedConfig |= Set(tun, "auto-detect-interface", HasManualInterface(config) ? "false" : "true");
                 if (Get(tun, "stack") is null) changedConfig |= Set(tun, "stack", "mixed");
                 var existing = Get(tun, "dns-hijack");
                 if (existing is not null and not YamlSequenceNode) throw new InvalidDataException("DNS 接管配置不是列表，暂不自动修改。");
@@ -42,9 +44,9 @@ public static class RepairPlanner
                     if (!hijacks.Children.OfType<YamlScalarNode>().Any(x => x.Value == value)) { hijacks.Add(value); changedConfig = true; }
                 tun.Children[new YamlScalarNode("dns-hijack")] = hijacks;
                 if (changedVerge) changes.Add(FileChange(Targets.Verge, "Clash 的 TUN 开关", "当前配置", "开启 TUN", vergeValue, verge));
-                if (changedConfig) changes.Add(FileChange(Targets.Config, "系统路由与 DNS 接管", "当前配置", "自动路由、严格路由与 DNS 接管", configValue, config));
+                if (changedConfig) changes.Add(FileChange(Targets.Config, "系统路由与 DNS 接管", "当前配置", "开启虚拟网卡、自动路由、严格路由与 DNS 接管；保留协议栈、网卡名、MTU、排除网段与手动出口", configValue, config));
             }
-            if (options.HasFlag(RepairOptions.DisableClashIpv6))
+            if ((options & (RepairOptions.DisableClashIpv6 | RepairOptions.SingMix)) != 0)
             {
                 ValidateBoolean(config, "ipv6", "config.yaml", false);
                 string before = Get(config, "ipv6") is null ? "未设置（沿用客户端默认值）" : IsTrue(config, "ipv6") ? "已开启（ipv6: true）" : "已关闭（ipv6: false）";
@@ -72,6 +74,20 @@ public static class RepairPlanner
                 { dns.Children[new YamlScalarNode("proxy-server-nameserver")] = new YamlSequenceNode(new YamlScalarNode("119.29.29.29"), new YamlScalarNode("223.5.5.5")); changed = true; }
                 if (changed) changes.Add(FileChange(Targets.Dns, "默认 DNS 服务器", "当前服务器", "Cloudflare / Google DoH（遵循原分流）", dnsValue, dnsRoot));
             }
+            if (options.HasFlag(RepairOptions.SingMix))
+            {
+                bool changedVerge = SingMixProfile.Configure(Read, verge, changes);
+                bool changedConfig = false;
+                void FinalFile(string key, bool changed, string title, string afterText, StoredValue before, YamlMappingNode root)
+                {
+                    int index = changes.FindIndex(x => x.Key == key);
+                    if (!changed && index < 0) return;
+                    var final = FileChange(key, title, "当前配置", afterText, before, root);
+                    if (index < 0) changes.Add(final); else changes[index] = final;
+                }
+                FinalFile(Targets.Verge, changedVerge, "Clash TUN 与 DNS 覆写", "开启 TUN；关闭默认和当前订阅的客户端 DNS 覆写，由当前订阅的增量脚本管理", vergeValue, verge);
+                FinalFile(Targets.Config, changedConfig, "虚拟网卡、DNS 接管与 Clash IPv6", "开启 TUN；保留协议栈、网卡名、MTU、排除网段和手动出口；开启 DNS 接管；ipv6: false", configValue, config);
+            }
         }
         void Policy(string key, string title, StoredValue after)
         {
@@ -88,6 +104,31 @@ public static class RepairPlanner
         return new RepairPlan(options, expected, changes);
     }
 
+    // Derive the user-visible TUN targets from this exact preview, including
+    // retained values. Never read a newer configuration or expose subscriptions.
+    public static IReadOnlyList<Finding> DescribeTun(RepairPlan plan)
+    {
+        if ((plan.Options & (RepairOptions.Tun | RepairOptions.SingMix)) == 0 || !plan.Expected.TryGetValue(Targets.Config, out var before)) return [];
+        var after = plan.Changes.FirstOrDefault(x => x.Key == Targets.Config)?.After ?? before;
+        var root = Parse(after.Bytes(), "TUN 配置预览");
+        var tun = Mapping(root, "tun", false, out _);
+        var original = Mapping(Parse(before.Bytes(), "原 TUN 配置"), "tun", false, out _);
+        string? Text(string key) => (Get(tun, key) as YamlScalarNode)?.Value;
+        int Count(string key) => (Get(tun, key) as YamlSequenceNode)?.Children.Count ?? 0;
+        string stack = Text("stack")?.ToLowerInvariant() switch { "mips" => "Mips", "mixed" => "Mixed", "gvisor" => "GVisor", "system" => "System", _ => "客户端默认" };
+        return [
+            new("虚拟网卡模式", "开启 Clash TUN 与核心 TUN", "自动配置"),
+            new("TUN 模式堆栈", stack, Get(original, "stack") is null ? "补充默认值" : "沿用当前"),
+            new("虚拟网卡名称", Text("device") is { Length: > 0 } name ? name : "客户端默认", "保留"),
+            new("自动设置全局路由", "开启", "自动配置"),
+            new("严格路由", "开启", "自动配置"),
+            new("流量出口接口", HasManualInterface(root) ? "沿用手动指定的出口网卡" : "自动选择流量出口接口", HasManualInterface(root) ? "保留手动设置" : "自动配置"),
+            new("DNS 劫持", "any:53、tcp://any:53；保留已有条目", "自动配置"),
+            new("最大传输单元（MTU）", Text("mtu") ?? "客户端默认", "保留"),
+            new("排除自定义网段", $"保留现有 {Count("route-exclude-address")} 条网段与 {Count("exclude-interface")} 项接口排除", "保留")
+        ];
+    }
+
     public static IReadOnlyList<Finding> Inspect(IStateStore store)
     {
         var findings = new List<Finding>();
@@ -100,10 +141,11 @@ public static class RepairPlanner
                 var v = Parse(verge.Bytes(), "verge.yaml"); var c = Parse(config.Bytes(), "config.yaml");
                 ValidateClashShape(v, c);
                 var tun = Get(c, "tun") as YamlMappingNode;
-                bool ready = IsTrue(v, "enable_tun_mode") && tun != null && new[] { "enable", "auto-route", "strict-route", "auto-detect-interface" }.All(x => IsTrue(tun, x));
+                bool ready = IsTrue(v, "enable_tun_mode") && tun != null && new[] { "enable", "auto-route", "strict-route" }.All(x => IsTrue(tun, x))
+                    && IsTrue(tun, "auto-detect-interface") == !HasManualInterface(c);
                 var hijacks = tun is null ? null : Get(tun, "dns-hijack") as YamlSequenceNode;
                 ready &= hijacks != null && new[] { "any:53", "tcp://any:53" }.All(x => hijacks.Children.OfType<YamlScalarNode>().Any(y => y.Value == x));
-                findings.Add(new("系统流量接管", ready ? "配置已包含 TUN 与 DNS 接管；运行效果还需网络采样。" : "若希望系统请求由 Clash 接管，可查看建议。此状态本身不代表泄漏。", ready ? "已配置" : "建议核对"));
+                findings.Add(new("系统流量接管", ready ? "配置已开启 TUN、路由与 DNS 接管，保留现有协议栈和网卡设置；运行效果还需核对。" : "一键配置会开启 Clash 虚拟网卡并保留现有协议栈、网卡名及路由排除；此状态本身不代表泄漏。", ready ? "已配置" : "建议核对"));
             }
         }
         catch (Exception ex) when (ex is InvalidDataException or YamlException or IOException)
@@ -155,12 +197,17 @@ public static class RepairPlanner
         // absent flag is supported; an existing flag with the wrong type is not.
         ValidateBoolean(tun, "enable", "config.yaml / tun", false);
         foreach (var key in new[] { "auto-route", "strict-route", "auto-detect-interface" }) ValidateBoolean(tun, key, "config.yaml / tun", false);
-        if (Get(tun, "stack") is { } stack && (stack is not YamlScalarNode scalar || scalar.Value is null || !new[] { "system", "gvisor", "mixed" }.Contains(scalar.Value, StringComparer.OrdinalIgnoreCase)))
+        if (Get(tun, "stack") is { } stack && (stack is not YamlScalarNode scalar || scalar.Value is null || !new[] { "system", "gvisor", "mixed", "mips" }.Contains(scalar.Value, StringComparer.OrdinalIgnoreCase)))
             throw new InvalidDataException("config.yaml / tun 的 stack 无法识别，未生成自动修改方案。");
+        foreach (var (mapping, key) in new[] { (config, "interface-name"), (tun, "device") })
+            if (Get(mapping, key) is { } item && item is not YamlScalarNode)
+                throw new InvalidDataException("Clash 的网卡名称必须是文本或留空。");
         ValidateStringList(tun, "dns-hijack", "config.yaml / tun");
     }
 
-    private static void ValidateBoolean(YamlMappingNode mapping, string key, string scope, bool required)
+    private static bool HasManualInterface(YamlMappingNode config) => Get(config, "interface-name") is YamlScalarNode text && !string.IsNullOrWhiteSpace(text.Value);
+
+    internal static void ValidateBoolean(YamlMappingNode mapping, string key, string scope, bool required)
     {
         var value = Get(mapping, key);
         if (value is null && !required) return;
@@ -177,7 +224,7 @@ public static class RepairPlanner
             throw new InvalidDataException(scope + " 的 " + key + " 必须是字符串列表。");
     }
 
-    private static Change FileChange(string key, string title, string beforeText, string afterText, StoredValue before, YamlMappingNode root)
+    internal static Change FileChange(string key, string title, string beforeText, string afterText, StoredValue before, YamlMappingNode root)
         => new(key, title, beforeText, afterText, before, StoredValue.File(Serialize(root)));
     public static YamlMappingNode Parse(byte[] bytes, string name)
     {
@@ -220,12 +267,12 @@ public static class RepairPlanner
     }
     public static YamlNode? Get(YamlMappingNode node, string key) => node.Children.TryGetValue(new YamlScalarNode(key), out var value) ? value : null;
     public static bool IsTrue(YamlMappingNode node, string key) => Get(node, key) is YamlScalarNode s && string.Equals(s.Value, "true", StringComparison.OrdinalIgnoreCase);
-    private static bool Set(YamlMappingNode node, string key, string value)
+    internal static bool Set(YamlMappingNode node, string key, string value)
     {
         if (Get(node, key) is YamlScalarNode current && string.Equals(current.Value, value, StringComparison.OrdinalIgnoreCase)) return false;
         node.Children[new YamlScalarNode(key)] = new YamlScalarNode(value); return true;
     }
-    private static YamlMappingNode Mapping(YamlMappingNode parent, string key, bool create, out bool created)
+    internal static YamlMappingNode Mapping(YamlMappingNode parent, string key, bool create, out bool created)
     {
         created = false; var value = Get(parent, key);
         if (value == null && create) { var map = new YamlMappingNode(); parent.Children[new YamlScalarNode(key)] = map; created = true; return map; }

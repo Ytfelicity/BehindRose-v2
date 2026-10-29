@@ -40,17 +40,17 @@ function abortable<T>(task: () => Promise<T>, signal: AbortSignal): Promise<T> {
 }
 
 async function readJson(response: Response, signal: AbortSignal): Promise<unknown> {
-  if (!response.ok) throw Error('IPLeak 返回 HTTP ' + response.status);
-  if (Number(response.headers.get('Content-Length')) > MAX_BYTES) throw Error('IPLeak 响应过大');
+  if (!response.ok) throw Error('DNS 检测服务返回 HTTP ' + response.status);
+  if (Number(response.headers.get('Content-Length')) > MAX_BYTES) throw Error('DNS 响应过大');
   const reader = response.body?.getReader();
-  if (!reader) throw Error('IPLeak 响应为空');
+  if (!reader) throw Error('DNS 响应为空');
   try {
     const chunks: Uint8Array[] = []; let length = 0;
     while (true) {
       const part = await abortable(() => reader.read(), signal);
       if (part.done) break;
       length += part.value.byteLength;
-      if (length > MAX_BYTES) throw Error('IPLeak 响应过大');
+      if (length > MAX_BYTES) throw Error('DNS 响应过大');
       chunks.push(part.value);
     }
     const bytes = new Uint8Array(length); let offset = 0;
@@ -79,7 +79,7 @@ export function createIpLeakDnsRunner(dependencies: Dependencies = {}) {
     const fetcher = dependencies.fetch ?? globalThis.fetch.bind(globalThis);
     const current: SourceResult = {
       slot: 0, sourceId: 'ipleak', sourceName: 'IPLeak.net', status: 'running',
-      note: '正在开始 IPLeak 连续采样，可随时停止', completedQueries: 0,
+      note: '正在开始 DNS 连续采样，可随时停止', completedQueries: 0,
       totalQueries: IPLEAK_DNS_QUERY_COUNT, failedQueries: 0, serverCount: 0, rows: [],
     };
     const snapshot = (): SourceResult => ({ ...current, rows: current.rows.map(row => ({ ...row, ...(row.details ? { details: { ...row.details } } : {}) })) });
@@ -102,11 +102,11 @@ export function createIpLeakDnsRunner(dependencies: Dependencies = {}) {
       if (detailsStop.signal.aborted) abort();
       try {
         const value = await json('https://ipleak.net/json/' + encodeURIComponent(row.address), controller.signal);
-        if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('IPLeak 归属格式无效');
+        if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('DNS 归属格式无效');
         const data = value as Record<string, unknown>;
-        if (data.ip !== row.address) throw Error('IPLeak 归属与解析器地址不匹配');
+        if (data.ip !== row.address) throw Error('DNS 归属与解析器地址不匹配');
         for (const key of ['reverse', 'isp_name', 'country_name', 'country_code', 'region_name', 'city_name']) {
-          if (data[key] != null && (typeof data[key] !== 'string' || (data[key] as string).length > 2048)) throw Error('IPLeak 归属格式无效');
+          if (data[key] != null && (typeof data[key] !== 'string' || (data[key] as string).length > 2048)) throw Error('DNS 归属格式无效');
         }
         if (ended || detailsStop.signal.aborted) return;
         Object.assign(row, { hostname: data.reverse ?? '', isp: data.isp_name ?? '', country: data.country_name ?? '', country_code: data.country_code ?? '', region: data.region_name ?? '', city: data.city_name ?? '', metadataStatus: 'ready', details: { ...data } });
@@ -127,24 +127,24 @@ export function createIpLeakDnsRunner(dependencies: Dependencies = {}) {
     try {
       if (signal.aborted) throw stopped();
       const session = (dependencies.session ?? newSession)();
-      if (!/^[a-z0-9]{40}$/.test(session)) throw Error('无法生成 IPLeak 会话标识');
+      if (!/^[a-z0-9]{40}$/.test(session)) throw Error('无法生成 DNS 会话标识');
       publish();
       for (let step = 1; step <= IPLEAK_DNS_QUERY_COUNT; step++) {
         if (signal.aborted) throw stopped();
         try {
           const value = await json(`https://${session}-${step}.ipleak.net/dnsdetection/`, signal);
-          if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('IPLeak 采样格式无效');
+          if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error('DNS 采样格式无效');
           const data = value as { session?: unknown; ip?: unknown };
-          if (data.session !== session || !data.ip || typeof data.ip !== 'object' || Array.isArray(data.ip)) throw Error('IPLeak 采样会话或结果格式不匹配');
+          if (data.session !== session || !data.ip || typeof data.ip !== 'object' || Array.isArray(data.ip)) throw Error('DNS 采样会话或结果格式不匹配');
           const entries = Object.entries(data.ip);
-          if (entries.length > MAX_RESOLVERS) throw Error('IPLeak 解析器记录过多');
-          if (entries.some(([address, hits]) => !ipFamily(address) || !Number.isSafeInteger(hits) || (hits as number) < 0)) throw Error('IPLeak 解析器地址或命中次数无效');
+          if (entries.length > MAX_RESOLVERS) throw Error('DNS 解析器记录过多');
+          if (entries.some(([address, hits]) => !ipFamily(address) || !Number.isSafeInteger(hits) || (hits as number) < 0)) throw Error('DNS 解析器地址或命中次数无效');
           // Official results are a cumulative map, not per-request increments.
           // Preserve first-seen card order; update hits from the latest response.
           for (const [address, hits] of entries) {
             let row = metadata.get(address);
             if (!row) {
-              if (metadata.size >= MAX_RESOLVERS) throw Error('IPLeak 解析器记录过多');
+              if (metadata.size >= MAX_RESOLVERS) throw Error('DNS 解析器记录过多');
               row = { address, ip_address: address, hits: hits as number, hostname: '', isp: '', country: '', country_code: '', region: '', city: '', metadataStatus: 'loading' };
               metadata.set(address, row); current.rows.push(row); queue.push(row);
             }
@@ -155,10 +155,10 @@ export function createIpLeakDnsRunner(dependencies: Dependencies = {}) {
         } catch (error) {
           if (signal.aborted) throw stopped();
           current.failedQueries++;
-          lastFailure = error instanceof Error ? error.message : 'IPLeak 请求失败';
+          lastFailure = error instanceof Error ? error.message : 'DNS 请求失败';
         }
         current.completedQueries = step;
-        current.note = 'IPLeak 连续采样，可随时停止' + (current.failedQueries ? '；已有 ' + current.failedQueries + ' 次请求失败' : '');
+        current.note = 'DNS 连续采样，可随时停止' + (current.failedQueries ? '；已有 ' + current.failedQueries + ' 次请求失败' : '');
         publish();
         // Match the site's serial schedule: 1 ms before step 100, then 1 s;
         // the final (300th) request never schedules a further lookup.
@@ -166,10 +166,10 @@ export function createIpLeakDnsRunner(dependencies: Dependencies = {}) {
       }
       while (workers.size) await abortable(() => Promise.all([...workers]), signal);
       current.status = current.rows.length && !current.failedQueries ? 'ready' : 'unavailable';
-      current.note = current.failedQueries ? `采样结束，${current.failedQueries} 次请求失败；${lastFailure}。已有记录仅代表成功的采样` : current.rows.length ? 'IPLeak 连续采样完成（300 次请求）' : 'IPLeak 未返回解析器记录，无法确认 DNS 解析来源';
+      current.note = current.failedQueries ? `采样结束，${current.failedQueries} 次请求失败；${lastFailure}。已有记录仅代表成功的采样` : current.rows.length ? 'DNS 连续采样完成（300 次请求）' : '未返回解析器记录，无法确认 DNS 解析来源';
     } catch (error) {
       current.status = signal.aborted ? 'cancelled' : 'unavailable';
-      current.note = signal.aborted ? '已停止 IPLeak 采样，保留已取得的解析器和命中次数' : error instanceof Error ? error.message : 'IPLeak 检测失败';
+      current.note = signal.aborted ? '已停止 DNS 采样，保留已取得的解析器和命中次数' : error instanceof Error ? error.message : 'DNS 检测失败';
     } finally {
       ended = true; detailsStop.abort(); signal.removeEventListener('abort', abortDetails);
       for (const row of current.rows) if (row.metadataStatus === 'loading') row.metadataStatus = 'unavailable';

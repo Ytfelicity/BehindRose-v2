@@ -18,6 +18,7 @@ internal sealed partial class WorkbenchWindow : Window
     private readonly WorkbenchServer server;
     private readonly WorkbenchUpdater updater;
     private readonly bool smoke;
+    private readonly bool demo;
     private readonly bool liveConnectivitySmoke;
     private bool allowLiveConnectivity;
     private readonly List<string> liveRequests = [];
@@ -26,9 +27,9 @@ internal sealed partial class WorkbenchWindow : Window
     private bool disposed;
     public WorkbenchWindow(bool demo, bool smoke, bool updateTest)
     {
-        this.smoke = smoke; liveConnectivitySmoke = smoke && Environment.GetCommandLineArgs().Contains("--connectivity-check");
+        this.demo = demo; this.smoke = smoke; liveConnectivitySmoke = smoke && Environment.GetCommandLineArgs().Contains("--connectivity-check");
         local = new LocalApp(demo); server = new WorkbenchServer(local);
-        Title = "Rose in my wake · 网络助手 " + MainWindow.AppVersion + (updateTest ? " · 更新测试" : demo ? " · 演示模式" : "");
+        Title = "Rose in my wake · 网络助手 " + MainWindow.AppVersion + (DevelopmentMode.Enabled ? " · 本机备份与 TUN 预览" : "") + (updateTest ? " · 更新测试" : demo ? " · 演示模式" : "");
         Width = 1280; Height = 850; MinWidth = 760; MinHeight = 600;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = new SolidColorBrush(Color.FromRgb(10, 10, 10));
@@ -47,7 +48,11 @@ internal sealed partial class WorkbenchWindow : Window
         {
             await server.StartAsync();
             var profile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BehindRose", "NetworkAssistant-v2", smoke ? "WorkbenchWebView-Smoke" : "WorkbenchWebView");
-            var environment = await CoreWebView2Environment.CreateAsync(null, profile);
+            var proxyPort = demo || smoke ? null : BehindRose.Windows.DetectionProxy.ReadPort();
+            var options = new CoreWebView2EnvironmentOptions();
+            if (proxyPort is int port) options.AdditionalBrowserArguments = BehindRose.Windows.DetectionProxy.Arguments(port);
+            profile += proxyPort is int selected ? "-Proxy-" + selected : "-System";
+            var environment = await CoreWebView2Environment.CreateAsync(null, profile, options);
             if (disposed) return;
             await browser.EnsureCoreWebView2Async(environment);
             var core = browser.CoreWebView2;
@@ -55,7 +60,7 @@ internal sealed partial class WorkbenchWindow : Window
             core.Settings.AreDevToolsEnabled = DevelopmentMode.Enabled; core.Settings.IsStatusBarEnabled = false;
             core.Settings.AreDefaultContextMenusEnabled = DevelopmentMode.Enabled;
             core.PermissionRequested += (_, e) => { e.State = CoreWebView2PermissionState.Deny; e.Handled = true; };
-            core.DownloadStarting += (_, e) => e.Cancel = true;
+            core.DownloadStarting += (_, e) => e.Cancel = !ClaudeHandbookResources.IsLocalResource(e.DownloadOperation.Uri, server.Url, true);
             if (smoke)
             {
                 core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
@@ -78,6 +83,7 @@ internal sealed partial class WorkbenchWindow : Window
             core.NavigationStarting += (_, e) =>
             {
                 if (IsLocal(e.Uri) && new Uri(e.Uri).AbsolutePath is "/" or "/index.html") return;
+                if (ClaudeHandbookResources.IsLocalResource(e.Uri, server.Url, true)) return;
                 e.Cancel = true; if (e.IsUserInitiated) OpenLink(e.Uri);
             };
             core.FrameNavigationStarting += (_, e) => e.Cancel = !IsLocal(e.Uri) || new Uri(e.Uri).AbsolutePath != "/network";
@@ -101,9 +107,11 @@ internal sealed partial class WorkbenchWindow : Window
     }
     private bool IsLocal(string address) => Uri.TryCreate(address, UriKind.Absolute, out var uri)
         && uri.GetLeftPart(UriPartial.Authority) == server.Url && uri.UserInfo.Length == 0;
-    private static void OpenLink(string address)
+    private void OpenLink(string address)
     {
-        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) || uri.Scheme != "https" || !uri.IsDefaultPort || uri.UserInfo.Length != 0) return;
+        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri)) return;
+        bool handbook = ClaudeHandbookResources.IsLocalResource(address, server.Url, false);
+        if (!handbook && (uri.Scheme != "https" || !uri.IsDefaultPort || uri.UserInfo.Length != 0)) return;
         try { Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true }); } catch { }
     }
     private Task StopSamplingAsync() => browser.CoreWebView2 == null ? Task.CompletedTask : browser.CoreWebView2.ExecuteScriptAsync(

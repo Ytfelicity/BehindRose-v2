@@ -71,7 +71,7 @@ export class LocalBridge {
   }
 }
 
-const commands = new Set(['health', 'status', 'plan', 'backups', 'restore-plan', 'execute', 'open-clash', 'quality-status', 'quality-proxies', 'quality-start', 'quality-stop', 'proxy-network-status', 'proxy-network-start', 'proxy-network-stop']);
+const commands = new Set(['health', 'status', 'plan', 'backups', 'restore-plan', 'execute', 'open-clash', 'quality-status', 'quality-proxies', 'quality-start', 'quality-stop', 'proxy-network-status', 'proxy-network-start', 'proxy-network-stop', 'clash-full-backups', 'clash-full-backup', 'clash-full-restore-plan', 'clash-full-restore']);
 export function createLocalApi(bridge, port) {
   const token = randomBytes(32).toString('hex');
   const hosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
@@ -93,11 +93,13 @@ export function createLocalApi(bridge, port) {
         return send(400, { error: '不支持的操作。' });
       const network = request.command.startsWith('proxy-network-');
       const quality = request.command.startsWith('quality-');
-      const fields = network ? (request.command === 'proxy-network-start' ? ['command', 'proxyPort', 'profile', 'includeSpeed'] : ['command']) : quality ? (request.command === 'quality-start' ? ['command', 'proxyPort'] : ['command']) : ['command', 'options', 'planId', 'backupId'];
+      const fullBackupFields = { 'clash-full-backups': ['command'], 'clash-full-backup': ['command'], 'clash-full-restore-plan': ['command', 'backupId'], 'clash-full-restore': ['command', 'planId'] };
+      const fields = fullBackupFields[request.command] || (network ? (request.command === 'proxy-network-start' ? ['command', 'proxyPort', 'profile', 'includeSpeed'] : ['command']) : quality ? (request.command === 'quality-start' ? ['command', 'proxyPort'] : ['command']) : ['command', 'options', 'planId', 'backupId']);
       if (Object.keys(request).some(key => !fields.includes(key))) return send(400, { error: '操作参数无效。' });
+      if (request.command === 'clash-full-restore-plan' && !request.backupId || request.command === 'clash-full-restore' && !request.planId) return send(400, { error: '缺少完整备份或预览编号。' });
       if (request.command === 'quality-start' && (!Number.isInteger(request.proxyPort) || request.proxyPort < 0 || request.proxyPort > 65535)) return send(400, { error: '请选择有效的本机 HTTP / 混合端口。' });
       if (request.command === 'proxy-network-start' && (!Number.isInteger(request.proxyPort) || request.proxyPort < 1 || request.proxyPort > 65535 || !['quick', 'all'].includes(request.profile) || typeof request.includeSpeed !== 'boolean')) return send(400, { error: '代理网络检测参数无效。' });
-      if (request.options !== undefined && (!Number.isInteger(request.options) || request.options < 1 || request.options > 63)) return send(400, { error: '修改选项无效。' });
+      if (request.options !== undefined && (!Number.isInteger(request.options) || request.options < 1 || request.options > 127)) return send(400, { error: '修改选项无效。' });
       if (request.proxyPort !== undefined && (!Number.isInteger(request.proxyPort) || request.proxyPort < 0 || request.proxyPort > 65535)) return send(400, { error: '代理端口无效。' });
       if (!quality && !network && request.proxyPort !== undefined) return send(400, { error: '操作参数无效。' });
       for (const key of ['planId', 'backupId']) if (request[key] !== undefined && !/^[a-f0-9]{32}$/.test(request[key])) return send(400, { error: '操作编号无效。' });

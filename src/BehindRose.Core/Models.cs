@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace BehindRose.Core;
 
 [Flags]
-public enum RepairOptions { None = 0, Tun = 1, ChromeDns = 2, EdgeDns = 4, FirefoxDns = 8, ReplaceDns = 16, DisableClashIpv6 = 32 }
+public enum RepairOptions { None = 0, Tun = 1, ChromeDns = 2, EdgeDns = 4, FirefoxDns = 8, ReplaceDns = 16, DisableClashIpv6 = 32, SingMix = 64 }
 
 public sealed record StoredValue(bool Exists, string Kind, string Data)
 {
@@ -37,20 +37,34 @@ public static class Fingerprints
 
 public static class Targets
 {
-    public const string Verge = "file:verge.yaml", Config = "file:config.yaml", Dns = "file:dns_config.yaml";
+    public const string Verge = "file:verge.yaml", Config = "file:config.yaml", Dns = "file:dns_config.yaml", Profiles = "file:profiles.yaml";
+    public const string RuntimeSource = "source:clash-verge.yaml";
     public const string ChromeDns = "policy:chrome-dns", EdgeDns = "policy:edge-dns", FirefoxDns = "policy:firefox-dns", FirefoxLock = "policy:firefox-lock";
-    public static readonly string[] Files = [Verge, Config, Dns];
+    public static readonly string[] Files = [Verge, Config, Dns, Profiles];
     public static readonly string[] Policies = [ChromeDns, EdgeDns, FirefoxDns, FirefoxLock];
     public static readonly string[] All = [.. Files, .. Policies];
-    public static bool IsFile(string key) => Files.Contains(key, StringComparer.Ordinal);
-    public static void Validate(string key) { if (!All.Contains(key, StringComparer.Ordinal)) throw new InvalidDataException("未知修改目标。"); }
+    public static string SingMixScript(string uid)
+    {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(uid, "\\A[A-Za-z0-9_-]{1,64}\\z")) throw new InvalidDataException("当前订阅编号无法安全识别。");
+        return "file:profiles/behindrose-singmix-" + uid + ".js";
+    }
+    public static bool IsFile(string key) => Files.Contains(key, StringComparer.Ordinal) || IsSingMixScript(key);
+    private static bool IsSingMixScript(string key) => System.Text.RegularExpressions.Regex.IsMatch(key, "\\Afile:profiles/behindrose-singmix-[A-Za-z0-9_-]{1,64}\\.js\\z");
+    public static bool IsSource(string key) => key == RuntimeSource || System.Text.RegularExpressions.Regex.IsMatch(key, "\\Asource:profiles/[A-Za-z0-9_-]{1,96}\\.js\\z");
+    public static string ScriptSource(string file)
+    {
+        var key = "source:profiles/" + file;
+        if (!IsSource(key)) throw new InvalidDataException("原订阅脚本路径无法安全识别。");
+        return key;
+    }
+    public static void Validate(string key) { if (!All.Contains(key, StringComparer.Ordinal) && !IsSingMixScript(key) && !IsSource(key)) throw new InvalidDataException("未知修改目标。"); }
     public static void ValidateValue(string key, StoredValue value)
     {
         Validate(key);
         if (value is null || value.Data is null || value.Data.Length > 12 * 1024 * 1024) throw new InvalidDataException("备份内容无效或过大。");
         if (!value.Exists) { if (value.Kind != "missing" || value.Data != "") throw new InvalidDataException("缺失记录无效。"); return; }
         var bytes = value.Bytes();
-        if (IsFile(key)) { if (value.Kind != "file" || bytes.Length > 8 * 1024 * 1024) throw new InvalidDataException("文件快照无效。"); }
+        if (IsFile(key) || IsSource(key)) { if (value.Kind != "file" || bytes.Length > 8 * 1024 * 1024) throw new InvalidDataException("文件快照无效。"); }
         else
         {
             if (!new[] { "String", "ExpandString", "MultiString", "DWord", "QWord", "Binary", "None" }.Contains(value.Kind)) throw new InvalidDataException("注册表快照类型无效。");
@@ -105,10 +119,10 @@ public static class JournalValidation
     {
         if (j.Version != 2 || j.Owner != owner || !Guid.TryParseExact(j.Id, "N", out _)
             || j.Kind is not ("apply" or "restore") || j.State is not ("prepared" or "applying" or "applied" or "restored" or "rolled-back" or "rollback-failed")
-            || j.Changes is null || j.Changes.Count is < 1 or > 7) throw new InvalidDataException("备份清单无效。");
+            || j.Changes is null || j.Changes.Count is < 1 or > 8) throw new InvalidDataException("备份清单无效。");
         if (j.ParentId != null && !Guid.TryParseExact(j.ParentId, "N", out _)) throw new InvalidDataException("备份关联无效。");
         if (j.Changes.Any(change => change is null || string.IsNullOrWhiteSpace(change.Key) || string.IsNullOrWhiteSpace(change.Title)
-            || change.BeforeText is null || change.AfterText is null)) throw new InvalidDataException("备份项目无效。");
+            || change.BeforeText is null || change.AfterText is null || Targets.IsSource(change.Key))) throw new InvalidDataException("备份项目无效。");
         if (j.Changes.Select(x => x.Key).Distinct(StringComparer.Ordinal).Count() != j.Changes.Count) throw new InvalidDataException("备份目标重复。");
         foreach (var change in j.Changes) { Targets.ValidateValue(change.Key, change.Before); Targets.ValidateValue(change.Key, change.After); }
     }

@@ -8,6 +8,8 @@
     "watch": "node build.mjs --watch",
     "check": "tsc --noEmit",
     "test": "node tests/console.test.mjs",
+    "test:configuration": "node tests/configuration.test.mjs",
+    "test:sing-mix": "node ../tests/sing-mix.test.mjs",
     "test:connectivity": "node tests/connectivity.test.mjs",
     "test:connectivity-ui": "node tests/connectivity-ui.test.mjs",
     "test:quality": "node tests/quality-ui.test.mjs",

@@ -276,10 +276,10 @@ const natTypeCodeOf = (candidate) => {
         candidateType,
         natTypeCode: stun.natTypeCode,
         note: candidateType
-          ? '已取得 IPCheck.ing / MyIP 的首个 STUN 映射候选（5 秒窗口）'
+          ? '已取得首个 STUN 映射候选（5 秒窗口）'
           : stun.natTypeCode === 'unavailable'
             ? '当前浏览器的 WebRTC 不可用或被禁用'
-            : '本次 MyIP STUN 采样未取得映射候选，可能是 UDP 受限、服务不可达或浏览器策略',
+            : '本次 STUN 采样未取得映射候选，可能是 UDP 受限、服务不可达或浏览器策略',
         sdpLogs: [...stun.sdpLog],
       };
     });

@@ -17,6 +17,20 @@ internal static class HostCompatibilityTests
 
     internal static void Register(Action<string, Action> test)
     {
+        test("Saved configuration remains configurable after a portable client exits", () =>
+        {
+            var state = new MemoryState();
+            var running = Discover(state);
+            var closed = HostDiscovery.AssessConfiguration(null, "未识别", false, state, () => { });
+            Assert(running.Compatible && closed.Compatible && !closed.Running && closed.Executable == null, "Executable discovery must not gate saved settings");
+            var engine = new RepairEngine(state, new MemoryJournals());
+            Assert(engine.Apply(RepairPlanner.Build(state, OneClick)).Success, "Closed-client configuration can be applied");
+            Assert(HostDiscovery.AssessConfiguration(null, "未识别", false, state, () => { }).Compatible, "It must remain configurable after applying");
+            Assert(RepairPlanner.Build(state, OneClick).Changes.Count == 0, "No repeated configuration loop");
+            Assert(state.ReadyCalls == 1, "Only execution checks process readiness");
+            state.Values.Remove(Targets.Config);
+            Assert(!HostDiscovery.AssessConfiguration(null, "未识别", false, state, () => { }).Compatible, "Missing settings still fail validation");
+        });
         test("Clash compatibility follows configuration capability across versions without writes", () =>
         {
             foreach (var version in new[] { "2.5.2", "2.5.7", "2.6.0", "未识别" })
@@ -105,20 +119,45 @@ internal static class HostCompatibilityTests
         });
         test("Recognized optional fields and unrelated data survive the preview round trip", () =>
         {
-            foreach (var stack in new[] { "system", "gvisor", "mixed" })
+            foreach (var stack in new[] { "system", "gvisor", "mixed", "mips" })
             {
                 var state = new MemoryState(); var dns = state.Read(Targets.Dns);
-                state.Values[Targets.Config] = MemoryState.File($"tun:\n  stack: {stack}\n  mtu: 1400\n  dns-hijack: ['custom:53']\nrules: [MATCH,DIRECT]\n");
+                state.Values[Targets.Config] = MemoryState.File($"tun:\n  stack: {stack}\n  device: UserChosenTun\n  mtu: 1400\n  route-exclude-address: [192.168.0.0/16]\n  exclude-interface: [OtherVpn]\n  dns-hijack: ['custom:53']\nrules: [MATCH,DIRECT]\n");
                 Assert(Discover(state).Compatible, "Known optional structures are supported");
                 var plan = RepairPlanner.Build(state, OneClick);
+                var details = RepairPlanner.DescribeTun(plan);
+                Assert(details.Single(x => x.Title == "TUN 模式堆栈").Detail.Equals(stack, StringComparison.OrdinalIgnoreCase) && details.Single(x => x.Title == "TUN 模式堆栈").State == "沿用当前", "Preview must disclose the retained stack, including Mips");
+                Assert(details.Single(x => x.Title == "虚拟网卡名称").Detail == "UserChosenTun" && details.Single(x => x.Title == "最大传输单元（MTU）").Detail == "1400", "Preview must show the exact preserved device and MTU");
                 foreach (var change in plan.Changes) state.Values[change.Key] = change.After; // In-memory only; never WindowsState.Write.
                 RepairPlanner.ValidateClashConfiguration(state);
                 Assert(RepairPlanner.Build(state, OneClick).Changes.Count == 0, "A generated configuration must pass the same guard and be idempotent");
                 var root = RepairPlanner.Parse(state.Read(Targets.Config).Bytes(), "roundtrip"); var tun = (YamlMappingNode)RepairPlanner.Get(root, "tun")!;
-                Assert(((YamlScalarNode)RepairPlanner.Get(tun, "stack")!).Value == stack && RepairPlanner.Get(tun, "mtu") != null && RepairPlanner.Get(root, "rules") != null, "Preserve unrelated settings");
+                Assert(((YamlScalarNode)RepairPlanner.Get(tun, "stack")!).Value == stack && RepairPlanner.Get(tun, "mtu") != null && RepairPlanner.Get(root, "rules") != null, "DNS protection preserves the user-selected TUN stack and unrelated settings");
                 Assert(((YamlSequenceNode)RepairPlanner.Get(tun, "dns-hijack")!).Children.OfType<YamlScalarNode>().Any(x => x.Value == "custom:53"), "Preserve existing DNS hijacks");
+                Assert(((YamlScalarNode)RepairPlanner.Get(tun, "device")!).Value == "UserChosenTun" && RepairPlanner.Get(tun, "route-exclude-address") is not null && RepairPlanner.Get(tun, "exclude-interface") is not null, "Preserve adapter name and exclusions across all four stacks");
+                Assert(RepairPlanner.IsTrue(RepairPlanner.Parse(state.Read(Targets.Verge).Bytes(), "verge"), "enable_tun_mode") && RepairPlanner.IsTrue(tun, "enable") && RepairPlanner.IsTrue(tun, "auto-detect-interface"), "Enable client and core TUN with automatic outbound detection");
                 Assert(state.Read(Targets.Dns) == dns && state.Writes == 0, "Preserve original DNS bytes and perform no writes");
             }
+        });
+        test("TUN configuration preserves a manually selected outbound interface on a multi-adapter host", () =>
+        {
+            var state = new MemoryState();
+            state.Values[Targets.Config] = MemoryState.File("interface-name: UserEthernet\ntun: {enable: false, stack: mips, device: PrivateTun, mtu: 1500, auto-detect-interface: false}\n");
+            var plan = RepairPlanner.Build(state, OneClick);
+            Assert(RepairPlanner.DescribeTun(plan).Single(x => x.Title == "流量出口接口").State == "保留手动设置", "Preview must distinguish manually selected outbound interfaces");
+            foreach (var change in plan.Changes) state.Values[change.Key] = change.After;
+            var root = RepairPlanner.Parse(state.Read(Targets.Config).Bytes(), "manual"); var tun = (YamlMappingNode)RepairPlanner.Get(root, "tun")!;
+            Assert(!RepairPlanner.IsTrue(tun, "auto-detect-interface") && ((YamlScalarNode)RepairPlanner.Get(root, "interface-name")!).Value == "UserEthernet", "Explicit outbound interface must remain authoritative");
+            Assert(RepairPlanner.IsTrue(tun, "enable") && RepairPlanner.Inspect(state)[0].State == "已配置", "TUN must be enabled even with a manual outbound interface");
+            Assert(RepairPlanner.Build(state, OneClick).Changes.Count == 0, "Manual interface configuration must be idempotent");
+        });
+        test("TUN preview supplies a missing stack default and omits metadata for browser-only plans", () =>
+        {
+            var state = new MemoryState(); state.Values[Targets.Config] = MemoryState.File("tun: {enable: false}\n");
+            var tun = RepairPlanner.DescribeTun(RepairPlanner.Build(state, RepairOptions.Tun));
+            Assert(tun.Single(x => x.Title == "TUN 模式堆栈").Detail == "Mixed" && tun.Single(x => x.Title == "TUN 模式堆栈").State == "补充默认值", "Missing stack gets an explicit compatible default");
+            Assert(RepairPlanner.DescribeTun(RepairPlanner.Build(state, RepairOptions.ChromeDns)).Count == 0, "Browser-only previews must not claim a TUN change");
+            Assert(state.Writes == 0, "Describing the TUN configuration must remain read-only");
         });
         test("Optional DNS replacement refuses conflicting field types before a write", () =>
         {

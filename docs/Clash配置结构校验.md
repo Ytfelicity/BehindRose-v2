@@ -14,13 +14,13 @@
 
 ## 一键范围
 
-网页与原生 EXE 均使用 `RepairPlanner.OneClickOptions` 对应的组合：`Tun | ChromeDns | EdgeDns | FirefoxDns | DisableClashIpv6`，掩码 47。
+网页与原生 EXE 均使用 `RepairPlanner.OneClickOptions`：`Tun | ChromeDns | EdgeDns | FirefoxDns | DisableClashIpv6 | SingMix`，掩码 111。旧 47 组合只保留底层兼容能力。
 
-统一开启 TUN、自动路由、严格路由、网卡识别和 DNS 接管；配置 Chrome/Edge 关闭独立安全 DNS，Firefox 关闭并锁定；将 Clash 根 `ipv6` 设为 `false`。Firefox 就绪检查同时核对 Enabled=0 与 Locked=1。只有系统、浏览器和 IPv6 关闭全部就绪时，网页主按钮才转到检测入口。
+统一开启 TUN、自动路由、严格路由、网卡识别和 DNS 接管；配置浏览器跟随系统 DNS；将 Clash 根 `ipv6` 设为 `false`。当前订阅在原脚本之后叠加增量 DNS 防护，关闭相冲突的客户端 DNS 覆写。只有系统、浏览器、IPv6 和增量防护脚本全部就绪时，网页主按钮才转到检测入口。
 
 没有单独关闭 IPv6 的界面按钮。系统卡片显示保存的 IPv6 状态，预览明确列出需改动的项目。TUN 与 IPv6 同时修改 `config.yaml` 时仅生成一个最终文件快照。根 IPv6 开关与 [Mihomo 全局定义](https://wiki.metacubex.one/config/general/#ipv6) 对应；Verge 将其作为 [应用控制字段](https://github.com/clash-verge-rev/clash-verge-rev/blob/v2.5.7/src-tauri/src/enhance/mod.rs) 合入运行配置。
 
-方案不包含 ReplaceDns，不替换上游 DNS；保留节点、订阅、端口和原有分流字段，不改 Windows 网卡 IPv6 或 `dns.ipv6`。YAML 保存可能规范化排版和注释，备份保留原始字节。
+方案不包含旧 ReplaceDns：DNS 绑定本机已有的默认代理组。原节点、策略组、分流、TUN 协议栈与原脚本行为保留，只叠加 DNS 与缺失防护规则。运行配置和原脚本仅作为只读预览依赖，不能作为备份恢复写入目标。Windows 网卡 IPv6 不改动。YAML 保存可能规范化排版和注释，备份保留原始字节。[逐项对照、恢复与验证](sing-mix配置对照.md)。
 
 应用仍需预览确认、退出 Clash 和管理员授权；保留预览指纹、并发修改检查、受保护备份、失败回滚及恢复冲突保护。本次开发只运行内存测试和演示，没有应用本机配置。
 

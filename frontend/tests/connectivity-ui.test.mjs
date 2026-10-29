@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { expect as baseExpect } from '@playwright/test';
 import { build } from 'esbuild';
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
 import { launchCaptureBrowser } from '../scripts/browser-runtime.mjs';
 const expect = baseExpect.configure({ timeout: 20000 });
 const testBaseURL = new URL(process.env.BEHINDROSE_TEST_URL || 'http://127.0.0.1:4317/');
@@ -9,7 +11,7 @@ const { IMPORT_LISTS } = await import('data:text/javascript;base64,' + Buffer.fr
 const officialAIUrls = IMPORT_LISTS.find(list => list.id === 'ai').members.map(target => target.url);
 const browser = await launchCaptureBrowser();
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
-const requests = [], errors = []; let delayed = false;
+const requests = [], errors = []; let delayed = false, slowSamples = false;
 await page.addInitScript(() => {
   window.__nativeMessages = []; window.chrome ||= {};
   window.chrome.webview = { postMessage: message => window.__nativeMessages.push(message), addEventListener: () => {} };
@@ -28,6 +30,12 @@ cdp.on('Fetch.requestPaused', async ({ requestId, request }) => {
   requests.push({ url: request.url, method: request.method, headers });
   assert.equal(request.method, 'GET', 'Connectivity must use the IPCheck.ing / MyIP GET probe');
   if (delayed) await new Promise(resolve => setTimeout(resolve, 300));
+  // One slow sample must not downgrade the best-of-ten result, but its bar
+  // must still expose the real delay independently of the summary's color.
+  if (slowSamples && requests.filter(entry => entry.url === request.url).length === 1) {
+    if (request.url.includes('chatgpt')) await new Promise(resolve => setTimeout(resolve, 1100));
+    if (request.url.includes('claude')) await new Promise(resolve => setTimeout(resolve, 260));
+  }
   if (request.url.includes('midjourney')) return cdp.send('Fetch.failRequest', { requestId, errorReason: 'Failed' }).catch(() => {});
   // A 403 opaque response is still a response, never evidence of account access.
   await cdp.send('Fetch.fulfillRequest', {
@@ -58,9 +66,10 @@ try {
   await expect(section.getByRole('combobox', { name: '采样方式' }).locator('option[value="3"]')).toHaveCount(0);
   await expect(section.getByText('指定代理分段诊断', { exact: true })).toHaveCount(0);
   await expect(section.locator('.connectivity-description').first()).toContainText('不等于代理节点延迟');
-  await expect(section).toContainText(/IPCheck\.ing|MyIP/);
+  await expect(section).toContainText('固定探测地址和浏览器 GET 请求');
   await expect(section.getByRole('combobox', { name: '网站分组' })).toHaveValue('reference');
   await expect(section.locator('.connectivity-row')).toHaveCount(7);
+  await expect(section.locator('.connectivity-rounds')).toHaveCount(0);
   await section.getByRole('combobox', { name: '网站分组' }).selectOption('ai');
   await section.getByRole('combobox', { name: '采样方式' }).selectOption('1');
   await expect(section.locator('.connectivity-row')).toHaveCount(15);
@@ -75,10 +84,12 @@ try {
   await expect(section).toHaveAttribute('data-running', 'false');
   assert.equal(requests.length, 15, 'Default quick mode must send only 15 requests');
   await expect(section.locator('tr[aria-label="ChatGPT"]')).toContainText('单次');
+  await expect(section.locator('.connectivity-rounds')).toHaveCount(0);
   await browserAction('clear'); requests.length = 0;
   const browserProgress = async () => page.locator('#overall, #elapsed, #progress-text, #run-time, #start-label').allTextContents();
   const initialBrowserProgress = await browserProgress();
   await section.getByRole('combobox', { name: '采样方式' }).selectOption('10');
+  slowSamples = true;
   // Dispatch competing starts in the same JavaScript turn. Even callbacks
   // delivered before React renders disabled controls must respect the shared
   // website/core guard; all HTTPS traffic below stays intercepted by CDP.
@@ -87,11 +98,14 @@ try {
     for (const id of ['start', 'dns-run', 'rtc-run']) document.getElementById(id).dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
   await expect(section).toHaveAttribute('data-running', 'true');
+  await expect(section.locator('.connectivity-rounds')).toHaveCount(15);
+  await expect(section.locator('.connectivity-round-hit[data-tone="pending"]').first()).toBeVisible();
   for (const id of ['start', 'dns-run', 'rtc-run', 'clear', 'copy']) await expect(page.locator('#' + id)).toBeDisabled();
   await expect(page.locator('#stop')).toBeEnabled();
   assert.deepEqual(await browserProgress(), initialBrowserProgress, 'Website progress must stay in the website section');
   assert.equal(await page.evaluate(() => window.__rtcAttempts), 0, 'Rapid competing starts must not construct RTC connections');
   await expect(section).toHaveAttribute('data-running', 'false');
+  slowSamples = false;
   for (const id of ['start', 'dns-run', 'rtc-run', 'clear']) await expect(page.locator('#' + id)).toBeEnabled();
   await expect(page.locator('#copy')).toBeDisabled();
   await expect(page.locator('#stop')).toBeDisabled();
@@ -100,6 +114,29 @@ try {
   await expect(section.locator('tr[aria-label="ChatGPT"]')).toHaveAttribute('data-state', 'reachable');
   await expect(section.locator('tr[aria-label="Midjourney"]')).toHaveAttribute('data-state', 'failed');
   await expect(section.locator('tr[aria-label="ChatGPT"]')).toContainText('最低');
+  const chatgpt = section.locator('tr[aria-label="ChatGPT"]'), claude = section.locator('tr[aria-label="Claude"]');
+  await expect(chatgpt.locator('.connectivity-round-hit')).toHaveCount(10);
+  await expect(chatgpt.locator('.connectivity-round-hit[data-round="1"]')).toHaveAttribute('data-tone', 'long');
+  await expect(claude.locator('.connectivity-round-hit[data-round="1"]')).toHaveAttribute('data-tone', 'slow');
+  await expect(chatgpt.locator('.connectivity-round-hit[data-tone="fast"]')).toHaveCount(9);
+  await expect(section.locator('tr[aria-label="Midjourney"] .connectivity-round-hit[data-tone="failed"]')).toHaveCount(10);
+  const firstBar = chatgpt.locator('.connectivity-round-hit').first();
+  await firstBar.focus();
+  await expect(page.getByRole('tooltip')).toHaveText(await firstBar.getAttribute('aria-label'));
+  await page.keyboard.press('Escape');
+  const captureDir = process.env.BEHINDROSE_SAMPLE_CAPTURE_DIR;
+  if (captureDir) {
+    await mkdir(captureDir, { recursive: true });
+    await section.screenshot({ path: path.join(captureDir, 'samples-desktop.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Sampling bars must not overflow mobile');
+    await section.screenshot({ path: path.join(captureDir, 'samples-mobile.png') });
+    const originalTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
+    await section.screenshot({ path: path.join(captureDir, 'samples-mobile-light.png') });
+    await page.evaluate(theme => { document.documentElement.dataset.theme = theme; }, originalTheme);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+  }
   assert.equal(requests.length, 150);
   assert.deepEqual([...new Set(requests.map(request => request.url))].sort(), [...officialAIUrls].sort(), 'The actual browser requests must target the exact upstream favicon URLs');
   assert.ok(officialAIUrls.every(url => requests.filter(request => request.url === url).length === 10), 'Each AI site must be tested exactly 10 times');
@@ -113,7 +150,8 @@ try {
   await section.getByRole('button', { name: '重测 Claude', exact: true }).click();
   await expect(section).toHaveAttribute('data-running', 'false'); assert.equal(requests.length, 151, 'A per-site retest must issue one request');
   await expect(section.locator('tr[aria-label="Claude"]')).toContainText('单次');
-  await section.getByRole('combobox', { name: '网站分组' }).selectOption({ label: 'IPCheck.ing 默认' });
+  await expect(claude.locator('.connectivity-rounds')).toHaveCount(0);
+  await section.getByRole('combobox', { name: '网站分组' }).selectOption({ label: '默认网站' });
   await expect(section.locator('.connectivity-row')).toHaveCount(7); assert.equal(requests.length, 151);
   await section.getByRole('button', { name: '添加 / 管理网站' }).click();
   const dialog = page.getByRole('dialog', { name: '我的网站' });
@@ -169,6 +207,7 @@ try {
   const requestsAfterStop = requests.length; await page.waitForTimeout(800);
   assert.equal(requests.length, requestsAfterStop, 'Top Stop must cancel queued site and round timers');
   await expect(page.locator('.connectivity-row[data-state="cancelled"]')).toHaveCount(15);
+  await expect(section.locator('.connectivity-round-hit[data-tone="pending"]')).toHaveCount(0);
   const stoppedWebsiteSummary = await page.evaluate(() => window.__nativeMessages.findLast(message => message.kind === 'completed'));
   assert.deepEqual(stoppedWebsiteSummary.statuses, [...Array(7).fill('skipped'), 'cancelled']);
   for (const id of ['start', 'dns-run', 'rtc-run', 'clear']) await expect(page.locator('#' + id)).toBeEnabled();

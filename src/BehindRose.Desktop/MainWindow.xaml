@@ -16,8 +16,8 @@
     </StackPanel></ScrollViewer></DockPanel>
     <DockPanel x:Name="PlanPage" Visibility="Collapsed"><StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0"><CheckBox x:Name="ConfirmOption" Content="我已了解本次改动和生效要求" Click="Confirm_Click"/><WrapPanel Margin="0,6,0,0"><Button x:Name="ApplyButton" Content="备份并应用修改" Style="{StaticResource Primary}" IsEnabled="False" Click="Apply_Click"/><Button Content="返回体检" Tag="overview" Click="Navigate_Click"/></WrapPanel></StackPanel><ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
      <TextBlock Text="修改预览" Style="{StaticResource Muted}"/><TextBlock Text="先看清这次会改什么" Style="{StaticResource Heading}"/>
-     <TextBlock Text="统一开启 TUN、自动路由与 DNS 接管，配置浏览器 DNS，并关闭 Clash IPv6。修改前保存原始文件和策略，失败时尝试回滚。" Style="{StaticResource Muted}" Margin="0,0,0,12"/>
-     <Border Style="{StaticResource PanelBorder}"><StackPanel><TextBlock Text="一键配置范围"/><TextBlock Text="系统 TUN 与严格路由 · DNS 接管 · Chrome / Edge / Firefox DNS · 关闭 Clash IPv6" Style="{StaticResource Muted}" Margin="0,8,0,0"/><TextBlock Text="保留上游 DNS、节点和订阅。需退出 Clash 后确认应用，Windows 网卡 IPv6 保持不变。" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel></Border>
+     <TextBlock Text="按 sing-mix 配置 DNS 与 AI 分流，开启 TUN 和 DNS 接管，配置浏览器 DNS。修改前保存原始文件和策略，失败时尝试回滚。" Style="{StaticResource Muted}" Margin="0,0,0,12"/>
+     <Border Style="{StaticResource PanelBorder}"><StackPanel><TextBlock Text="一键配置范围"/><TextBlock Text="sing-mix DNS 与 AI 策略组 · 系统 TUN 与严格路由 · 浏览器 DNS · 关闭 Clash IPv6" Style="{StaticResource Muted}" Margin="0,8,0,0"/><TextBlock Text="保留节点和订阅来源；替换当前订阅的规则、策略组与 DNS。退出 Clash 后可直接应用，完成后再打开。" Style="{StaticResource Muted}" Margin="0,8,0,0"/></StackPanel></Border>
      <TextBlock x:Name="PlanSummary" Style="{StaticResource Muted}" Margin="0,15,0,12"/>
      <ItemsControl x:Name="ChangesList"><ItemsControl.ItemTemplate><DataTemplate><StackPanel Margin="0,0,0,12"><TextBlock Text="{Binding Title}"/><TextBlock Text="{Binding AfterText}" Style="{StaticResource Muted}"/></StackPanel></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
      <TextBlock Text="配置文件使用 YAML 解析器保存，排版和注释可能被规范化；备份保留原始字节。" Style="{StaticResource Muted}" Margin="0,0,0,14"/>

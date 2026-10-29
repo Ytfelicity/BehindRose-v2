@@ -16,15 +16,31 @@ internal static class WorkbenchRequest
         if (requireId && !Guid.TryParseExact(request.Id, "N", out _)) throw new InvalidDataException("请求编号无效。");
         string[] fields = request.Command switch
         {
+            "clash-full-backups" or "clash-full-backup" => [],
+            "clash-full-restore-plan" => ["backupId"],
+            "clash-full-restore" => ["planId"],
+            "claude-inspect" or "claude-backups" => [],
+            "claude-plan" => ["mode", "proxyPort"],
+            "claude-apply" or "claude-restore" => ["planId"],
+            "claude-restore-plan" => ["backupId"],
+            "claude-timezone-inspect" or "claude-timezone-plan" or "claude-timezone-backups" => [],
+            "claude-timezone-apply" or "claude-timezone-restore" => ["planId"],
+            "claude-timezone-restore-plan" => ["backupId"],
             "quality-start" => ["proxyPort"], "quality-status" or "quality-stop" or "quality-proxies" => [],
             "proxy-network-start" => ["proxyPort", "profile", "includeSpeed"], "proxy-network-status" or "proxy-network-stop" => [],
             "health" or "status" or "plan" or "backups" or "restore-plan" or "execute" or "open-clash" => ["options", "planId", "backupId"],
             _ => throw new InvalidDataException("不支持的操作。")
         };
         if (root.EnumerateObject().Any(p => p.Name != "command" && !(requireId && p.Name == "id") && !fields.Contains(p.Name))) throw new InvalidDataException("操作参数无效。");
+        if (request.Command == "clash-full-restore-plan" && !root.TryGetProperty("backupId", out _) || request.Command == "clash-full-restore" && !root.TryGetProperty("planId", out _)) throw new InvalidDataException("缺少完整备份或预览编号。");
+        if (request.Command == "claude-plan" && (!root.TryGetProperty("mode", out _) || request.Mode is not ("preserve" or "official") || !root.TryGetProperty("proxyPort", out _) || request.ProxyPort is < 1 or > 65535)) throw new InvalidDataException("Claude 配置方式或代理端口无效。");
+        if (request.Command is "claude-apply" or "claude-restore" && !root.TryGetProperty("planId", out _)) throw new InvalidDataException("缺少 Claude 配置预览编号。");
+        if (request.Command == "claude-restore-plan" && !root.TryGetProperty("backupId", out _)) throw new InvalidDataException("缺少 Claude 配置备份编号。");
+        if (request.Command is "claude-timezone-apply" or "claude-timezone-restore" && !root.TryGetProperty("planId", out _)) throw new InvalidDataException("缺少时区预览编号。");
+        if (request.Command == "claude-timezone-restore-plan" && !root.TryGetProperty("backupId", out _)) throw new InvalidDataException("缺少时区备份编号。");
         if (request.Command == "quality-start" && (!root.TryGetProperty("proxyPort", out _) || request.ProxyPort is < 0 or > 65535)) throw new InvalidDataException("代理端口无效。");
         if (request.Command == "proxy-network-start" && (!root.TryGetProperty("proxyPort", out _) || !root.TryGetProperty("profile", out _) || !root.TryGetProperty("includeSpeed", out _) || request.ProxyPort is < 1 or > 65535 || request.Profile is not ("quick" or "all"))) throw new InvalidDataException("代理检测参数无效。");
-        if (root.TryGetProperty("options", out _) && request.Options is < 1 or > 63) throw new InvalidDataException("修改选项无效。");
+        if (root.TryGetProperty("options", out _) && request.Options is < 1 or > 127) throw new InvalidDataException("修改选项无效。");
         if (root.TryGetProperty("planId", out _) && !Guid.TryParseExact(request.PlanId, "N", out _) || root.TryGetProperty("backupId", out _) && !Guid.TryParseExact(request.BackupId, "N", out _)) throw new InvalidDataException("操作编号无效。");
         return requireId ? request : request with { Id = Guid.NewGuid().ToString("N") };
     }

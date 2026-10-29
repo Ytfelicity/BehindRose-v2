@@ -25,9 +25,9 @@ public sealed class WindowsState : IStateStore
     public StoredValue Read(string key)
     {
         Targets.Validate(key);
-        if (Targets.IsFile(key))
+        if (Targets.IsFile(key) || Targets.IsSource(key))
         {
-            string path = Path.Combine(ConfigRoot, key[5..]); SafeFiles.CheckPath(path);
+            string path = Path.Combine(ConfigRoot, key[(Targets.IsSource(key) ? 7 : 5)..]); SafeFiles.CheckPath(path);
             return File.Exists(path) ? StoredValue.File(SafeFiles.Read(path)) : StoredValue.Missing;
         }
         var target = PolicyTargets[key];
@@ -50,6 +50,7 @@ public sealed class WindowsState : IStateStore
     {
         if (!IsAdministrator) throw new UnauthorizedAccessException("只允许独立配置进程执行修改。");
         Targets.ValidateValue(key, value);
+        if (Targets.IsSource(key)) throw new InvalidDataException("配置来源只允许读取，不能覆盖。");
         if (Targets.IsFile(key))
         {
             string path = Path.Combine(ConfigRoot, key[5..]); SafeFiles.CheckPath(path);
@@ -134,28 +135,54 @@ public static class HostDiscovery
                         {
                             using var entry = uninstall!.OpenSubKey(name);
                             if (entry?.GetValue("DisplayName") is not string display || !display.StartsWith("Clash Verge", StringComparison.OrdinalIgnoreCase)) continue;
-                            if (entry.GetValue("InstallLocation") is string location)
-                            {
-                                var path = Path.Combine(location, "clash-verge.exe"); if (File.Exists(path)) exe ??= path;
-                            }
+                            foreach (var path in InstallerPaths(entry)) if (exe is null && File.Exists(path)) exe = path;
                         }
                     }
                     catch (Exception e) when (e is UnauthorizedAccessException or System.Security.SecurityException or IOException) { }
         }
-        if (exe == null) return new(null, "未识别", running, false, "未找到客户端。便携版可先启动 Clash，再刷新本地体检。");
+        if (exe == null) return AssessConfiguration(null, "未识别", running, new WindowsState(), WindowsState.EnsureStandardConfigDirectory);
         SafeFiles.CheckPath(exe);
         var info = FileVersionInfo.GetVersionInfo(exe);
         var version = $"{info.FileMajorPart}.{info.FileMinorPart}.{info.FileBuildPart}";
         return AssessConfiguration(exe, version, running, new WindowsState(), WindowsState.EnsureStandardConfigDirectory);
     }
 
-    internal static HostInfo AssessConfiguration(string executable, string version, bool running, IStateStore state, Action checkDirectory)
+    // Uninstall values are installer-authored hints, not trusted paths. The
+    // Clash Verge installer quotes them ("D:\VPN"), and Path.Combine on a quoted
+    // value yields a path File.Exists always rejects, which hid a portable
+    // install once the client was closed. Each hint is unquoted, reduced to its
+    // directory and verified by the caller.
+    private static IEnumerable<string> InstallerPaths(RegistryKey entry)
+    {
+        var paths = new List<string>();
+        Add(entry.GetValue("InstallLocation") as string);
+        Add(entry.GetValue("DisplayIcon") as string);
+        Add(entry.GetValue("UninstallString") as string);
+        return paths;
+
+        void Add(string? raw)
+        {
+            if (raw is null) return;
+            var text = raw.Trim();
+            if (text.StartsWith('"') && text.LastIndexOf('"') > 0) text = text[1..text.LastIndexOf('"')];
+            int comma = text.LastIndexOf(',');
+            if (comma > 0 && int.TryParse(text[(comma + 1)..].Trim(), out _)) text = text[..comma];
+            text = text.Trim();
+            if (text.Length == 0) return;
+            var directory = text.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) ? Path.GetDirectoryName(text) : text;
+            if (!string.IsNullOrEmpty(directory)) paths.Add(Path.Combine(directory, "clash-verge.exe"));
+        }
+    }
+
+    internal static HostInfo AssessConfiguration(string? executable, string version, bool running, IStateStore state, Action checkDirectory)
     {
         try
         {
             checkDirectory();
             RepairPlanner.ValidateClashConfiguration(state);
-            return new(executable, version, running, true, "当前配置目录与 TUN 字段结构可识别，可以生成配置预览。");
+            return new(executable, version, running, true, executable is null
+                ? "已识别保存的 Clash 配置，可以在客户端退出后预览和应用；完成后请手动打开 Clash。"
+                : "当前配置目录与 TUN 字段结构可识别，可以生成配置预览。");
         }
         catch (InvalidDataException ex) { return new(executable, version, running, false, ex.Message); }
         // Parser/decoder errors may contain source snippets. Never put raw

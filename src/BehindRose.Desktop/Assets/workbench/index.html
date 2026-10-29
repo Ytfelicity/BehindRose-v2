@@ -9,14 +9,14 @@
     <section id="operation" class="operation" aria-live="polite" hidden><svg class="icon"><use href="/icons.svg#shield"/></svg><div><strong id="operation-title"></strong><p id="operation-message"></p></div><div id="operation-actions" class="row-actions" hidden><button class="secondary" id="open-clash">打开 Clash</button><a class="secondary" href="#network">检测防护效果</a></div></section>
 
     <section id="page-overview" class="page" hidden>
-      <div class="page-heading"><div><h1>一键配置</h1><p class="intro">统一配置系统接管与浏览器 DNS，并关闭 Clash IPv6。</p></div><button id="health-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新状态</button></div>
+      <div class="page-heading"><div><h1>一键配置</h1><p class="intro">沿用本机代理与分流，增量配置 DNS 防护，支持预览和恢复。</p></div><button id="health-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新状态</button></div>
       <section class="protection-hero" id="protection-hero" data-state="pending" aria-labelledby="health-title">
         <div class="protection-copy">
           <span class="protection-status"><span class="status-dot"></span><span id="health-kicker">正在读取防护状态</span></span>
           <h2 id="health-title">系统接管<br>与 DNS 配置</h2>
           <p id="health-note">正在读取本机设置，稍后即可开启防护。</p>
-          <div class="protection-cta"><button id="protect-now" class="primary protect-button" disabled><svg class="icon"><use href="/icons.svg#power"/></svg><span id="protect-label">一键配置</span></button></div>
-          <div class="assurance"><span><svg class="icon"><use href="/icons.svg#backup"/></svg>开启前自动备份</span><span><svg class="icon"><use href="/icons.svg#reset"/></svg>支持恢复原设置</span></div>
+          <div class="protection-cta"><button id="protect-now" class="primary protect-button" disabled><svg class="icon"><use href="/icons.svg#power"/></svg><span id="protect-label">一键配置</span></button><button id="reconfigure-now" class="secondary reconfigure-button" type="button" hidden disabled><svg class="icon"><use href="/icons.svg#reset"/></svg><span id="reconfigure-label">再次配置</span></button></div>
+          <div class="assurance"><span><svg class="icon"><use href="/icons.svg#backup"/></svg>配置前完整备份</span><a href="#backups"><svg class="icon"><use href="/icons.svg#reset"/></svg>本机备份与恢复</a></div>
         </div>
         <div class="protection-art" aria-hidden="true">
           <div class="shield-orbit orbit-outer"></div><div class="shield-orbit orbit-inner"></div><div class="orbit-dot dot-one"></div><div class="orbit-dot dot-two"></div>
@@ -46,7 +46,18 @@
 
     <section id="page-network" class="page network-page" hidden><iframe id="network-frame" title="DNS 防护检测" hidden></iframe></section>
 
-    <section id="page-backups" class="page" hidden><div class="page-heading"><div><h1>恢复记录</h1><p class="intro">每次开启或调整防护，都为原设置留一份备份。</p></div><button id="backups-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新记录</button></div><div class="backup-summary"><svg class="icon"><use href="/icons.svg#backup"/></svg><span id="backup-count">正在读取记录…</span><small>此设备 · 当前用户</small></div><div id="backup-list"></div><details class="recovery-help"><summary>关于配置恢复</summary><p>恢复前会检查配置是否有后续改动；如有冲突，会保留你的新设置并停止恢复。v1.9 的备份请通过原版本恢复。</p></details></section>
+    <section id="page-claude" class="page" hidden><div id="claude-ui"></div></section>
+
+    <section id="page-backups" class="page" hidden>
+      <div class="page-heading"><div><h1>恢复记录</h1><p class="intro">完整配置丢失可从本机备份恢复，也可撤销工具箱的单次防护调整。</p></div><button id="backups-refresh" class="text-button"><svg class="icon"><use href="/icons.svg#reset"/></svg>刷新记录</button></div>
+      <section class="card full-backup-panel" aria-labelledby="full-backup-title">
+        <div class="full-backup-heading"><div><h2 id="full-backup-title">本机完整备份</h2><p>保存订阅、节点、脚本、分流、DNS、TUN 与配置所需资源。</p></div><button id="full-backup-create" class="primary" disabled><svg class="icon"><use href="/icons.svg#backup"/></svg>立即完整备份</button></div>
+        <p class="full-backup-privacy">备份在本机加密保存，仅当前 Windows 用户可解密；私人配置不上传、不进入源码和安装包。重装系统或更换账号前，请另行保管可迁移备份。</p>
+        <p class="full-backup-location">保存位置：%LOCALAPPDATA%\BehindRose\ClashBackups · 不包含程序、日志和历史备份压缩包</p>
+        <p id="full-backup-count" role="status">正在读取完整备份…</p><div id="full-backup-list"></div>
+      </section>
+      <h2 class="backup-history-title">防护调整记录</h2><div class="backup-summary"><svg class="icon"><use href="/icons.svg#backup"/></svg><span id="backup-count">正在读取记录…</span><small>此设备 · 当前用户</small></div><div id="backup-list"></div><details class="recovery-help"><summary>关于配置恢复</summary><p>完整恢复会还原到所选时间点，覆盖当前配置，并先加密保存恢复前快照。即使原订阅登记或整个配置目录已丢失，仍可恢复。防护调整记录只撤销对应修改；若有后续改动冲突则停止。v1.9 的记录请通过原版本恢复。</p></details>
+    </section>
 
     <section id="page-settings" class="page" hidden><div class="page-heading"><div><h1>帮助与关于</h1><p class="intro">查看工具说明、隐私范围与问题反馈信息。</p></div></div><div class="card settings-card"><h2>帮助与反馈</h2><div class="setting-row"><div><strong>复制配置摘要</strong><p>便于反馈问题，不含订阅、配置原文或公网 IP。</p></div><button class="secondary" id="copy-report"><svg class="icon"><use href="/icons.svg#copy"/></svg>复制摘要</button></div></div><div class="card settings-card about-card"><img src="/avatar.png" width="48" height="48" alt=""><div><h2>Rose in my wake</h2><p>一键 DNS 防护 · v2.0</p><p>让 DNS 请求跟随你的代理连接。按实际配置结构识别 Clash Verge Rev，版本号仅作参考。</p><details><summary>隐私与许可说明</summary><p>配置在本机处理。防护检测由当前浏览器执行，点击开始后才连接第三方服务。数据来源与检测范围可在检测页底部查看；项目自有代码公开，仅限非商业用途；正式 LICENSE 随项目提供，第三方组件保留各自许可。</p></details></div></div><details class="development-details"><summary>开发信息</summary><p>源码预览 · 保存界面文件后自动刷新</p><div class="dev-status"><span id="dev-state">连接开发服务…</span><button id="dev-reload" type="button">刷新页面</button></div></details></section>
     <section id="desktop-updates" class="card settings-card" hidden><h2>程序更新</h2><div class="setting-row"><div><strong id="app-version"></strong><p id="desktop-update-status">启动时检查更新</p></div><button id="desktop-update-check" class="secondary" type="button">检查更新</button></div></section>

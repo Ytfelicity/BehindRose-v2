@@ -1,0 +1,58 @@
+[
+  {
+    "id": "windows-port",
+    "file": "07-windows-proxy.png",
+    "caption": "Windows：在手动代理窗口读取地址与端口",
+    "note": "Clash Verge 官方 FAQ 真实截图。图中 7897 只是示例，填写你自己窗口里的端口。",
+    "source": "https://www.clashverge.dev/faq/windows.html"
+  },
+  {
+    "id": "clash-proxy",
+    "file": "05-clash-proxy.png",
+    "caption": "Clash Verge：代理页面与模式选择的位置",
+    "note": "官方快速入门截图，界面为旧版 macOS 示例；Windows 同类入口名称相近。图中节点品牌不是推荐。",
+    "source": "https://www.clashverge.dev/guide/quickstart.html"
+  },
+  {
+    "id": "clash-settings",
+    "file": "06-clash-settings.png",
+    "caption": "Clash Verge：设置中的系统代理与 TUN",
+    "note": "官方旧版 macOS 界面示例，用来定位两个不同的开关；不要照抄图里的 TUN 状态。",
+    "source": "https://www.clashverge.dev/guide/quickstart.html"
+  },
+  {
+    "id": "payment",
+    "file": "03-google-play-reply.jpg",
+    "caption": "X 原帖：用户补充 Google Play 订阅经历",
+    "note": "真实回复节选，属于个人付款经历，不能推导为所有卡或账号均可使用。",
+    "source": "https://x.com/Khazix0918/status/2105327306730521054"
+  },
+  {
+    "id": "evidence",
+    "file": "02-x-six-days.jpg",
+    "caption": "X 原帖：当时的观察期只有六天",
+    "note": "原文短句节选；完整语境请打开来源。短期可用不等于长期稳定。",
+    "source": "https://x.com/Khazix0918/status/2105299706549096697"
+  },
+  {
+    "id": "ccbaga",
+    "file": "04-ccbaga-post.jpg",
+    "caption": "X 原帖：CCBaga 作者介绍工具",
+    "note": "真实截图；作者宣传语不代表防封效果已证实。",
+    "source": "https://x.com/chunxiangai/status/2109317576123904386"
+  },
+  {
+    "id": "windows-recovery",
+    "file": "08-windows-proxy-off.png",
+    "caption": "Windows：代理客户端退出后，检查残留的手动代理",
+    "note": "官方 FAQ 真实截图，红框标出开关及保存位置。故障恢复步骤是关闭该开关；图片显示的是原先开启的状态。",
+    "source": "https://www.clashverge.dev/faq/windows.html"
+  },
+  {
+    "id": "official",
+    "file": "01-official-reasons.jpg",
+    "caption": "官方帮助中心：列出的账号封禁原因",
+    "note": "真实页面短段落节选。账号限制应按官方流程复核。",
+    "source": "https://support.claude.com/en/articles/8241253-safeguards-warnings-and-appeals"
+  }
+]

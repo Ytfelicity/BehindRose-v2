@@ -13,11 +13,11 @@
     <PackageReference Include="Velopack" Version="1.2.161" />
     <ProjectReference Include="../BehindRose.Windows/BehindRose.Windows.csproj" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
-    <EmbeddedResource Include="Assets/diagnostics/**/*" Watch="false" LogicalName="Assets/diagnostics/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Assets/diagnostics/**/*" Exclude="Assets/diagnostics/**/*.brclash;Assets/diagnostics/**/ClashBackups/**/*" Watch="false" LogicalName="Assets/diagnostics/%(RecursiveDir)%(Filename)%(Extension)" />
     <EmbeddedResource Include="Assets/avatar-source.png" LogicalName="Assets/avatar-source.png" />
     <Watch Include="**/*.xaml" Exclude="**/bin/**;**/obj/**" />
     <Resource Include="Assets/avatar.ico" />
-    <EmbeddedResource Include="Assets/workbench/**/*" LogicalName="Assets/workbench/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Assets/workbench/**/*" Exclude="Assets/workbench/**/*.brclash;Assets/workbench/**/ClashBackups/**/*" LogicalName="Assets/workbench/%(RecursiveDir)%(Filename)%(Extension)" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@ import { readFile, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { publicHandbookArchive, readPublicHandbookArchive } from './public-handbook-archive.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const staged = process.argv.includes('--staged');
@@ -54,7 +55,7 @@ const placeholder = /^(?:removed|example|sample|dummy|fixture|test|placeholder|r
 const binaryExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.woff', '.woff2', '.ttf', '.otf', '.bin']);
 const isText = file => !binaryExtensions.has(path.extname(file).toLowerCase());
 const privatePath = /(?:^|\/)(?:private|artifacts|test-files|ui-smoke|node_modules|bin|obj|\.packages|\.vs|test-results|playwright-report|secrets|local|\.ssh|\.aws|\.azure|\.kube)(?:\/|$)|^server\/simple-auth(?:\/|$)|^docs\/(?:ui-refero-2026-10-02|ui-reactbits-2026-10-02|connectivity-check|proxy-network-check|netquality-check)(?:\/|$)|^docs\/邀请码与设备绑定方案\.md$/i;
-const privateFile = /(?:^|\/)(?:\.git-credentials|\.netrc|_netrc|\.npmrc|\.pypirc|id_(?:rsa|dsa|ecdsa|ed25519)|credentials\.json|service-account[^/]*\.json|cookies\.txt|auth-connection\.json|[^/]*-invite\.txt|[^/]*邀请码[^/]*\.txt)$|\.(?:pem|key|pfx|p12|ppk|p8|pkcs12|jks|keystore|sqlite3?|db(?:-shm|-wal)?|log|user|bak|backup|old|zip|7z|rar|tar|tgz|exe|dll|pdb)$|\.tar\.gz$|\.credentials\.json$|~$/i;
+const privateFile = /(?:^|\/)(?:\.git-credentials|\.netrc|_netrc|\.npmrc|\.pypirc|id_(?:rsa|dsa|ecdsa|ed25519)|credentials\.json|service-account[^/]*\.json|cookies\.txt|auth-connection\.json|[^/]*-invite\.txt|[^/]*邀请码[^/]*\.txt)$|\.(?:pem|key|pfx|p12|ppk|p8|pkcs12|jks|keystore|sqlite3?|db(?:-shm|-wal)?|log|user|bak|backup|brclash|old|zip|7z|rar|tar|tgz|exe|dll|pdb)$|\.tar\.gz$|\.credentials\.json$|~$/i;
 const privateEnv = file => /(?:^|\/)\.env(?:\..*)?$/i.test(file) && path.posix.basename(file) !== '.env.example';
 const findings = []; let scannedTextFiles = 0, skippedFiles = 0;
 const indexedIgnored = new Set();
@@ -95,6 +96,16 @@ function decodeText(data) {
   return data.toString('utf8');
 }
 function scanText(file, data, source) {
+  if (!file.includes('!/') && (file === publicHandbookArchive || file.startsWith(publicHandbookArchive + '@'))) {
+    let entries;
+    try { entries = readPublicHandbookArchive(data); }
+    catch { findings.push({ kind: 'invalid-public-archive', path: file, source }); return; }
+    for (const entry of entries) {
+      if (isText(entry.name)) scanText(file + '!/' + entry.name, entry.data, source);
+      else skippedFiles++;
+    }
+    return;
+  }
   const text = decodeText(data); scannedTextFiles++;
   if (text.includes('\0')) findings.push({ kind: 'binary-content-in-text-file', path: file, source });
   if (/\.(?:cs|ts|tsx|js|mjs|cjs|sh|css|go|py|txt)$/.test(file) && /GNU\s+AFFERO\s+GENERAL\s+PUBLIC\s+LICENSE|SPDX-License-Identifier:\s*AGPL[-\w.]*/i.test(text))
@@ -110,7 +121,7 @@ function scanText(file, data, source) {
   });
 }
 function checkPath(file, source, commit) {
-  if (privatePath.test(file) || privateFile.test(file) || privateEnv(file) || (source !== 'history' && indexedIgnored.has(file)))
+  if (privatePath.test(file) || /(?:^|\/)ClashBackups(?:\/|$)/i.test(file) || (file !== publicHandbookArchive && privateFile.test(file)) || privateEnv(file) || (source !== 'history' && indexedIgnored.has(file)))
     findings.push({ kind: 'excluded-data-visible', path: file, source, ...(commit ? { commit } : {}) });
   if (/^(?:vendor\/(?:NetQuality|IPQuality)(?:\/|$)|licenses\/(?:NetQuality|IPQuality)-AGPL-|src\/BehindRose\.Windows\/NetQualityRunner\.cs$|frontend\/src\/netquality(?:-|\.)|frontend\/tests\/netquality-|tests\/BehindRose\.Tests\/NetQualityTests\.cs$)/i.test(file))
     findings.push({ kind: 'retired-agpl-module', path: file, source, ...(commit ? { commit } : {}) });

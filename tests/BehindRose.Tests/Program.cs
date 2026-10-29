@@ -5,6 +5,36 @@ using BehindRose.Windows;
 using YamlDotNet.RepresentationModel;
 
 if (args.Contains("--github-update-check")) return LiveUpdateCheck.RunAsync().GetAwaiter().GetResult();
+if (args.Contains("--tun-live-preview-check")) return TunLivePreviewCheck.Run();
+
+if (args.Contains("--clash-full-backup-local"))
+{
+    try
+    {
+        var saved = new ClashFullBackupService().Create();
+        Console.WriteLine(JsonSerializer.Serialize(new { saved.Id, saved.CreatedAt, saved.FileCount, saved.TotalBytes, saved.Complete, Encrypted = true })); return 0;
+    }
+    catch (Exception error) { Console.Error.WriteLine("Local full backup failed: " + error.GetType().Name); return 1; }
+}
+
+if (args.Contains("--claude-timezone-offline"))
+{
+    try { ClaudeTimeZoneTests.Run(); return 0; }
+    catch (Exception error) { Console.Error.WriteLine("Claude time zone fixture tests failed: " + error.Message); return 1; }
+}
+if (args.Contains("--claude-handbook-offline"))
+{
+    try { ClaudeHandbookResourceTests.Run(); return 0; }
+    catch (Exception error) { Console.Error.WriteLine(error); return 1; }
+}
+
+// This selector executes only temporary-file Claude tests. In particular it
+// never registers/runs the proxy, socket, update or live-machine checks below.
+if (args.Contains("--claude-offline"))
+{
+    try { ClaudeConfigurationTests.Run(); return 0; }
+    catch (Exception error) { Console.Error.WriteLine("Claude offline tests failed: " + error.Message); return 1; }
+}
 
 if (args.Contains("--local-read-check"))
 {
@@ -200,9 +230,32 @@ Test("One-click readiness requires both Firefox DNS policy and its lock",()=>
     Assert(RepairPlanner.Inspect(s).Single(x=>x.Title=="Firefox DNS").State=="已配置");
 });
 
+Test("Desktop browser proxy follows a unique listening Clash port without guessing", () =>
+{
+    var candidates = new BehindRose.Windows.LocalProxyPorts([
+        new(8080, ["系统代理"], true), new(7897, ["Clash · 混合端口"], true)
+    ], []);
+    Assert(BehindRose.Windows.DetectionProxy.Select(candidates) == 7897);
+    Assert(BehindRose.Windows.DetectionProxy.Arguments(7897).Contains("--proxy-server=http://127.0.0.1:7897"));
+    Assert(BehindRose.Windows.DetectionProxy.Arguments(7897).Contains("--proxy-bypass-list=localhost;127.0.0.1;[::1]"));
+    Assert(BehindRose.Windows.DetectionProxy.Select(new([], [])) == null);
+    Assert(BehindRose.Windows.DetectionProxy.Select(new([new(7897, ["Clash · 混合端口"], true), new(7890, ["Clash · 混合端口"], true)], [])) == null);
+    Throws(() => BehindRose.Windows.DetectionProxy.Arguments(0));
+});
+Test("Read-only configuration sources cannot be used as restore write targets", () =>
+{
+    var source = Targets.ScriptSource("original.js");
+    Assert(Targets.IsSource(source) && !Targets.IsFile(source));
+    Throws(() => Targets.ScriptSource("../../escape.js"));
+    var journal = new Journal { Owner = "test", Changes = [new(source, "source", "before", "after", StoredValue.Missing, MemoryState.File("x"))] };
+    Throws(() => JournalValidation.Validate(journal, "test"));
+});
+
 IpPureTests.Register(Test);
 HostCompatibilityTests.Register(Test);
 ClashIpv6Tests.Register(Test);
+SingMixTests.Register(Test);
+ClashFullBackupTests.Register(Test);
 ProxyNetworkTests.Register(Test);
 UpdateTests.Register(Test);
 VelopackTests.Register(Test);
@@ -222,7 +275,10 @@ sealed class MemoryState : IStateStore
     {
         [Targets.Verge]=File("enable_tun_mode: false\nenable_dns_settings: true\ncustom: preserve\n"),
         [Targets.Config]=File("mixed-port: 7897\ntun:\n  enable: false\n  stack: gvisor\n  mtu: 1400\n  route-exclude-address: [192.168.0.0/16]\nhosts:\n  example.test: 192.0.2.1\nrules: [MATCH,DIRECT]\n"),
-        [Targets.Dns]=File("# existing\nenable: true\nnameserver: [223.5.5.5]\nhosts: {example.test: 192.0.2.1}\nfallback: [1.0.0.1]\nnameserver-policy: {'+.test': 9.9.9.9}\nfake-ip-filter: [example.test]\nproxy-server-nameserver: [9.9.9.9]\n")
+        [Targets.Dns]=File("# existing\nenable: true\nnameserver: [223.5.5.5]\nhosts: {example.test: 192.0.2.1}\nfallback: [1.0.0.1]\nnameserver-policy: {'+.test': 9.9.9.9}\nfake-ip-filter: [example.test]\nproxy-server-nameserver: [9.9.9.9]\n"),
+        [Targets.RuntimeSource] = File("proxies: [{name: user-node, type: vless}]\nproxy-groups: [{name: Existing, type: select, proxies: [user-node]}]\nrules: [\"MATCH,Existing\"]\n"),
+        [Targets.ScriptSource("old-script.js")] = File("function main(config) { config.originalScriptRan = true; return config; }"),
+        [Targets.Profiles]=File("current: fixture\nitems:\n- uid: fixture\n  type: remote\n  file: fixture.yaml\n  option: {script: old-script}\n- uid: old-script\n  type: script\n  file: old-script.js\n")
     };
     public int Writes,FailAfterWrite,ReadyCalls;
     public bool ReadyFailure;

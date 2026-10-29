@@ -12,7 +12,7 @@ const adaptTargets = (targets: ReadonlyArray<{ id: string; name: string; url: st
 export const siteGroups = {
   ai: { label: 'AI 服务', sites: adaptTargets(MYIP_AI_TARGETS) },
   common: { label: '常用网站', sites: adaptTargets(MYIP_DEFAULT_TARGETS.filter(site => ['google', 'github', 'cloudflare'].includes(site.id))) },
-  reference: { label: 'IPCheck.ing 默认', sites: adaptTargets(MYIP_DEFAULT_TARGETS) },
+  reference: { label: '默认网站', sites: adaptTargets(MYIP_DEFAULT_TARGETS) },
 };
 export const idleResult = (): ProbeResult => ({ state: 'idle', note: '点击检测后发起 HTTPS 请求' });
 
@@ -58,7 +58,7 @@ export async function probeWebsite(site: Website, signal: AbortSignal, timeout =
   if (signal.aborted) return { state: 'cancelled', note: '已停止', time };
   if (result.reachable) return {
     state: result.ms! < MYIP_FAST_MS ? 'reachable' : 'slow', ms: result.ms,
-    note: result.responseType === 'opaque' ? 'IPCheck.ing 检测：已收到响应；跨域 HTTP 状态不可见' : 'IPCheck.ing 检测：已收到响应 · HTTP ' + result.status,
+    note: result.responseType === 'opaque' ? '已收到响应；跨域 HTTP 状态不可见' : '已收到响应 · HTTP ' + result.status,
     time,
   };
   return {

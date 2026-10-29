@@ -19,6 +19,8 @@
 @import "./dashboard4-workbench.css";
 @import "./dashboard4-network.css";
 @import "./network-views.css";
+@import "./claude-setup.css";
+@import "./claude-handbook.css";
 @source "./";
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 @layer base {

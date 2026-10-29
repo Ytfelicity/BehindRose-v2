@@ -30,6 +30,14 @@ internal sealed class WorkbenchServer(LocalApp local) : IAsyncDisposable
         ["/"] = "workbench/index.html", ["/index.html"] = "workbench/index.html",
         ["/workbench.js"] = "workbench/workbench.js", ["/workbench.css"] = "workbench/workbench.css",
         ["/beui.js"] = "workbench/beui.js", ["/console.css"] = "workbench/console.css",
+        ["/claude-handbook.html"] = "workbench/claude-handbook.html",
+        ["/claude-handbook.css"] = "workbench/claude-handbook.css",
+        ["/claude-handbook-ui.js"] = "workbench/claude-handbook-ui.js",
+        ["/claude-windows-handbook.zip"] = "workbench/claude-windows-handbook.zip",
+        ["/claude-guide.md"] = "workbench/claude-guide.md",
+        ["/claude-handbook-scripts/Launch-Claude.ps1"] = "workbench/claude-handbook-scripts/Launch-Claude.ps1",
+        ["/claude-handbook-scripts/Backup-ClaudeLocal.ps1"] = "workbench/claude-handbook-scripts/Backup-ClaudeLocal.ps1",
+        ["/claude-handbook-scripts/Test-ClaudeNetwork.ps1"] = "workbench/claude-handbook-scripts/Test-ClaudeNetwork.ps1",
         ["/support-qr.png"] = "workbench/support-qr.png", ["/brand-logo.png"] = "workbench/brand-logo.png",
         ["/network"] = "diagnostics/index.html", ["/network-ui.js"] = "diagnostics/network-ui.js",
         ["/beui.css"] = "diagnostics/beui.css", ["/diagnostics.css"] = "diagnostics/diagnostics.css",
@@ -72,18 +80,23 @@ internal sealed class WorkbenchServer(LocalApp local) : IAsyncDisposable
         if (!HttpMethods.IsGet(request.Method) && !HttpMethods.IsHead(request.Method)) { response.StatusCode = 405; return; }
         Assets.TryGetValue(path, out var asset);
         if (Regex.IsMatch(path, @"^/flags/[a-z]{2}\.svg$|^/service-icons/[a-z-]+\.svg$|^/fonts/(figtree-latin-(400|500|600|700)-normal|eb-garamond-latin-400-normal)\.woff2$")) asset = "diagnostics" + path;
+        if (Regex.IsMatch(path, @"^/claude-handbook-images/[0-9]{2}-[a-z0-9-]+\.(jpg|png)$")) asset = "workbench" + path;
         if (asset == null) { response.StatusCode = 404; return; }
         byte[] bytes;
         try { bytes = AppAssets.Read(asset); }
         catch (IOException) { response.StatusCode = 404; return; }
         response.Headers.ContentSecurityPolicy = path == "/network"
-            ? Csp.Replace("connect-src 'self';", "connect-src 'self' https: stun:;").Replace("frame-src 'self'", "frame-src 'none'").Replace("frame-ancestors 'none'", "frame-ancestors 'self'") : Csp;
+            ? Csp.Replace("connect-src 'self';", "connect-src 'self' https: stun:;").Replace("frame-src 'self'", "frame-src 'none'").Replace("frame-ancestors 'none'", "frame-ancestors 'self'")
+            : path == "/claude-handbook.html" ? Csp.Replace("img-src 'self';", "img-src 'self' data:;") : Csp;
         response.ContentType = Path.GetExtension(asset) switch
         {
             ".html" => "text/html; charset=utf-8", ".js" => "text/javascript; charset=utf-8",
             ".css" => "text/css; charset=utf-8", ".svg" => "image/svg+xml", ".woff2" => "font/woff2",
-            ".bin" => "application/octet-stream", _ => "image/png"
+            ".bin" => "application/octet-stream", ".zip" => "application/zip", ".md" => "text/markdown; charset=utf-8",
+            ".ps1" => "text/plain; charset=utf-8",
+            ".jpg" => "image/jpeg", _ => "image/png"
         };
+        if (ClaudeHandbookResources.IsDownloadPath(path)) response.Headers.ContentDisposition = "attachment; filename=\"" + Path.GetFileName(path) + "\"";
         response.ContentLength = bytes.Length;
         if (!HttpMethods.IsHead(request.Method)) await response.Body.WriteAsync(bytes, context.RequestAborted);
     }

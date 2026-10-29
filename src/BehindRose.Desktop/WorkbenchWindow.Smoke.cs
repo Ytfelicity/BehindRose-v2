@@ -124,13 +124,28 @@ internal sealed partial class WorkbenchWindow
         await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#overview'");
         await WaitFor("!document.getElementById('page-overview').hidden && !document.getElementById('protect-now').disabled");
         await Capture("workbench-configuration.png");
-        var plan = await Call("plan", new { options = 47 });
-        if (plan.GetProperty("changes").GetArrayLength() != 6) throw new IOException("Shared one-click plan is incomplete");
+        await browser.CoreWebView2.ExecuteScriptAsync("document.getElementById('protect-now').click()");
+        await WaitFor("document.getElementById('protection-dialog').open && document.querySelector('.tun-preview')?.textContent.includes('Mixed')");
+        await Capture("workbench-tun-preview.png");
+        await browser.CoreWebView2.ExecuteScriptAsync("document.getElementById('close-protection').click()");
+        var plan = await Call("plan", new { options = (int)BehindRose.Core.RepairPlanner.OneClickOptions });
+        if (plan.GetProperty("changes").GetArrayLength() != 8) throw new IOException("Shared one-click plan is incomplete");
         await Call("execute", new { planId = plan.GetProperty("id").GetString() }); await Completed();
         var backups = await Call("backups");
         if (backups.GetArrayLength() != 1) throw new IOException("Demo backup missing");
         var restore = await Call("restore-plan", new { backupId = backups[0].GetProperty("id").GetString() });
         await Call("execute", new { planId = restore.GetProperty("id").GetString() }); await Completed();
+        await browser.CoreWebView2.ExecuteScriptAsync("location.hash='#backups'");
+        await WaitFor("document.getElementById('full-backup-create') && !document.getElementById('full-backup-create').disabled");
+        await browser.CoreWebView2.ExecuteScriptAsync("document.getElementById('full-backup-create').click()");
+        await WaitFor("document.getElementById('operation-title').textContent === '完整备份已保存在本机'");
+        await WaitFor("document.querySelector('[data-full-restore]') && !document.querySelector('[data-full-restore]').disabled");
+        await Capture("workbench-full-backups.png");
+        await browser.CoreWebView2.ExecuteScriptAsync("document.querySelector('[data-full-restore]').click()");
+        await WaitFor("document.getElementById('restore-dialog').open && document.getElementById('restore-review').textContent.includes('恢复到所选备份时间点')");
+        await browser.CoreWebView2.ExecuteScriptAsync("(() => { const check=document.querySelector('#restore-review .review-confirm'); check.checked=true; check.dispatchEvent(new Event('change',{bubbles:true})); })()");
+        await browser.CoreWebView2.ExecuteScriptAsync("document.querySelector('#restore-review .execute-plan').click()");
+        await WaitFor("!document.getElementById('restore-dialog').open && document.getElementById('operation-title').textContent === '无需修改配置'");
         async Task Reject(string path, HttpStatusCode expected, Action<HttpRequestMessage> change, string body = "{\"command\":\"health\"}")
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = new StringContent(body) };
@@ -157,11 +172,11 @@ internal sealed partial class WorkbenchWindow
         {
             Passed = true, Interface = "Current React workbench embedded in WebView2; same assets as development mode",
             WindowChrome = "Integrated dark caption; native white frame removed; maximize and restore passed",
-            Configuration = "In-memory plan, apply, backup and restore passed through packaged loopback API",
+            Configuration = "In-memory repair plus encrypted demo full backup, consented full restore and no-op verification passed through packaged loopback API",
             Boundaries = "Host, Origin, CSRF, content type, body size, command fields and update reservation passed",
             LocalAssets = new { serviceIcons = iconCount, fonts = 5, countryDatabases = 2, groupsDecoded = "reference, ai, common", externalRequests = externalSmokeRequests },
             LiveConnectivity = liveCheck,
-            Scope = liveConnectivitySmoke ? "Explicit real website GET test; no real configuration writes or update installation" : "No real network probes, configuration writes or update installation"
+            Scope = liveConnectivitySmoke ? "Explicit real website GET test; no live configuration writes or update installation" : "No real network probes, live configuration writes or update installation"
         }));
         Close();
     }

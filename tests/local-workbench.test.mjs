@@ -34,7 +34,7 @@ async function complete() {
 try {
   const initial = await data('health'); assert.equal(initial.demo, true); assert.equal(initial.findings.length, 4);
   assert.deepEqual(await data('backups'), []);
-  assert.equal((await call('plan', { options: 64 })).ok, false);
+  assert.equal((await call('plan', { options: 128 })).ok, false);
   const ipv6Plan = await data('plan', { options: 32 });
   assert.equal(ipv6Plan.options, 32); assert.equal(ipv6Plan.changes.length, 1);
   assert.equal(ipv6Plan.changes[0].title, '关闭 Clash IPv6');
@@ -50,10 +50,14 @@ try {
   assert.deepEqual((await data('health')).clashIpv6, initial.clashIpv6, 'Demo restore recovers a missing original flag');
   assert.equal((await call('execute', { planId: '0'.repeat(32) })).ok, false);
   const backupsBeforePlan = await data('backups');
-  const oneClick = await data('plan', { options: 47 });
-  assert.equal(oneClick.options, 47); assert.equal(oneClick.changes.length, 6);
-  assert.ok(oneClick.changes.some(change => change.afterText.includes('Clash IPv6')), 'The single built-in plan must include IPv6 disable');
-  const plan = await data('plan', { options: 31 }); assert.equal(plan.changes.length, 7); assert.equal(plan.needsClashExit, true);
+  const oneClick = await data('plan', { options: 111 });
+  assert.equal(oneClick.options, 111); assert.equal(oneClick.changes.length, 8);
+  assert.equal(oneClick.tun.find(item => item.title === 'TUN 模式堆栈').detail, 'Mixed', 'The preview must show the actual selected stack');
+  assert.ok(oneClick.tun.some(item => item.title === 'DNS 劫持' && item.detail.includes('tcp://any:53')), 'The virtual adapter panel settings must be covered in the one-click preview');
+  assert.ok(oneClick.changes.some(change => change.afterText.includes('ipv6: false')), 'The single built-in plan must include IPv6 disable');
+  assert.ok(oneClick.changes.some(change => change.title.includes('DNS 防护') && change.afterText.includes('6 个检测站点') && change.afterText.includes('网易／战网直连')), 'The default preview must describe the DNS protection and routing scope');
+  assert.equal(initial.singMix.state, '待配置');
+  const plan = oneClick; assert.equal(plan.changes.length, 8); assert.equal(plan.needsClashExit, true);
   assert.deepEqual(Object.keys(plan.changes[0]).sort(), ['afterText', 'beforeText', 'title']);
   assert.equal('plan' in plan || 'expected' in plan || 'fingerprint' in plan, false, 'Snapshots must stay in the local host');
   assert.deepEqual(await data('backups'), backupsBeforePlan, 'Preview cannot create backups');
@@ -61,17 +65,34 @@ try {
   await data('execute', { planId: plan.id });
   const applied = await complete(); assert.equal(applied.result.success, true); assert.equal(applied.result.state, 'applied');
   assert.equal((await data('health')).findings.filter(item => item.state === '已配置').length, 4);
+  assert.equal((await data('health')).singMix.state, '已配置');
   assert.equal((await call('execute', { planId: plan.id })).ok, false, 'Execution tokens are single use');
   assert.equal((await call('execute', { planId: oldPreview.id })).ok, false, 'Old previews are invalidated after execution');
-  const noop = await data('plan', { options: 31 }); assert.equal(noop.changes.length, 0);
+  const noop = await data('plan', { options: 111 }); assert.equal(noop.changes.length, 0);
   await data('execute', { planId: noop.id }); assert.equal((await complete()).result.state, 'unchanged');
   const backups = (await data('backups')).filter(item => item.canRestore); assert.equal(backups.length, 1);
   assert.equal('changes' in backups[0], false, 'Backup bytes must not reach the UI');
-  const restore = await data('restore-plan', { backupId: backups[0].id }); assert.equal(restore.changes.length, 7);
+  const restore = await data('restore-plan', { backupId: backups[0].id }); assert.equal(restore.changes.length, 8);
   await data('execute', { planId: restore.id }); assert.equal((await complete()).result.success, true);
   assert.deepEqual((await data('health')).findings, initial.findings, 'Restore must recover the original settings');
   assert.equal((await data('backups')).filter(item => item.canRestore).length, 0);
   assert.equal((await call('restore-plan', { backupId: backups[0].id })).ok, false);
+  assert.deepEqual(await data('clash-full-backups'), [], 'Demo full backups are isolated from machine backups');
+  await data('clash-full-backup');
+  const fullSaved = await complete(); assert.equal(fullSaved.result.state, 'backed-up');
+  const fullRecords = await data('clash-full-backups'); assert.equal(fullRecords.length, 1); assert.equal(fullRecords[0].complete, true);
+  assert.equal('files' in fullRecords[0] || 'binding' in fullRecords[0], false, 'Full backup summaries cannot disclose raw snapshots');
+  const fullPlan = await data('clash-full-restore-plan', { backupId: fullRecords[0].id });
+  assert.equal(fullPlan.action, 'full-restore'); assert.equal(fullPlan.preview.fileCount, 4);
+  assert.equal('expected' in fullPlan || 'backupHash' in fullPlan, false, 'Full restore details stay in the host');
+  await data('clash-full-restore', { planId: fullPlan.id }); assert.equal((await complete()).result.state, 'unchanged');
+  assert.equal((await call('clash-full-restore', { planId: fullPlan.id })).ok, false, 'Full restore previews are single use');
+  for (const request of [
+    { command: 'clash-full-backup', path: 'arbitrary-path' }, { command: 'clash-full-backups', options: 1 },
+    { command: 'clash-full-restore-plan' }, { command: 'clash-full-restore' },
+    { command: 'clash-full-restore-plan', backupId: '../../escape' },
+    { command: 'clash-full-restore', planId: 'a'.repeat(32), path: 'arbitrary-path' },
+  ]) { const { command, ...fields } = request; assert.equal((await call(command, fields)).ok, false, 'Full backup API accepts only opaque fixed-purpose identifiers'); }
   assert.equal((await call('run-script', { script: 'arbitrary command' })).ok, false);
   for (const command of ['website-timing-status', 'website-timing-start', 'website-timing-stop']) assert.equal((await call(command)).ok, false, 'Removed diagnostic commands must not be available');
   assert.equal((await call('auth-status')).ok, false, 'Activation commands are removed from the host');
@@ -110,8 +131,8 @@ try {
     });
   }
   assert.equal((await send({ command: 'health' })).status, 200);
-  for (const options of [32, 47, 63]) assert.equal((await send({ command: 'plan', options })).status, 200);
-  for (const options of [0, 64, -1, 32.5, '32']) assert.equal((await send({ command: 'plan', options })).status, 400);
+  for (const options of [32, 47, 63, 111]) assert.equal((await send({ command: 'plan', options })).status, 200);
+  for (const options of [0, 128, -1, 32.5, '32']) assert.equal((await send({ command: 'plan', options })).status, 400);
   for (const command of ['website-timing-status', 'website-timing-start', 'website-timing-stop']) assert.equal((await send({ command, proxyPort: 7897 })).status, 400);
   assert.equal((await send({ command: 'quality-start', proxyPort: 0 })).status, 200);
   assert.equal((await send({ command: 'quality-start', family: 4, proxyPort: 0 })).status, 400);
@@ -123,6 +144,17 @@ try {
   for (const fields of [{ proxyPort: 0, profile: 'quick', includeSpeed: false }, { proxyPort: 65536, profile: 'quick', includeSpeed: false }, { proxyPort: '7897', profile: 'quick', includeSpeed: false }, { proxyPort: 7897, profile: 'other', includeSpeed: false }, { proxyPort: 7897, profile: 'quick', includeSpeed: 'yes' }, { proxyPort: 7897, profile: 'quick' }, { proxyPort: 7897, profile: 'quick', includeSpeed: false, host: 'example.com' }, { proxyPort: 7897, profile: 'quick', includeSpeed: false, family: 6 }]) assert.equal((await send({ command: 'proxy-network-start', ...fields })).status, 400);
   assert.equal((await send({ command: 'proxy-network-status', proxyPort: 7897 })).status, 400);
   assert.equal((await send({ command: 'health', profile: 'quick' })).status, 400);
+  for (const request of [
+    { command: 'clash-full-backups' }, { command: 'clash-full-backup' },
+    { command: 'clash-full-restore-plan', backupId: 'a'.repeat(32) },
+    { command: 'clash-full-restore', planId: 'b'.repeat(32) },
+  ]) assert.equal((await send(request)).status, 200, 'Bounded full-backup commands must reach the bridge');
+  for (const request of [
+    { command: 'clash-full-backup', path: 'arbitrary-path' }, { command: 'clash-full-backups', options: 1 },
+    { command: 'clash-full-restore-plan' }, { command: 'clash-full-restore' },
+    { command: 'clash-full-restore-plan', backupId: '../../escape' },
+    { command: 'clash-full-restore', planId: 'b'.repeat(32), backupId: 'a'.repeat(32) },
+  ]) assert.equal((await send(request)).status, 400, 'Full-backup transport cannot accept paths or unexpected fields');
   const dnsId = '11111111-2222-4333-8444-555555555555';
   for (const action of ['register', 'round', 'result']) assert.equal((await send({ command: 'dnsleaktest', action, queries: [dnsId] })).status, 400, 'Retired DNS control endpoint must be rejected');
   for (const request of [
@@ -158,11 +190,11 @@ try {
   assert.equal((await send({ command: 'auth-status' })).status, 400);
   assert.equal((await send({ command: 'activate', inviteCode: 'removed' })).status, 400);
   assert.equal((await send({ command: 'health', inviteCode: 'removed' })).status, 400);
-  assert.equal((await send({ command: 'plan', options: 64 })).status, 400);
+  assert.equal((await send({ command: 'plan', options: 128 })).status, 400);
   assert.equal((await send({ command: 'execute' }, { 'Content-Type': 'text/plain' })).status, 415);
   assert.equal((await send({}, {}, 'OPTIONS')).status, 405);
   assert.equal((await send({ command: 'health', extra: 'x'.repeat(5000) })).status, 413);
   assert.equal((await fetch(origin + '/api/session', { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status, 403);
-  assert.equal(calls, 8, 'Only valid bounded commands reach the local host; retired VPS/DNS commands and unknown option bits are rejected');
+  assert.equal(calls, 13, 'Only valid bounded commands reach the local host; retired VPS/DNS commands and unknown option bits are rejected');
   console.log('PASS: loopback Host/Origin, CSRF token, preflight, content type, body size and command allowlist boundaries.');
 } finally { await new Promise(resolve => server.close(resolve)); }

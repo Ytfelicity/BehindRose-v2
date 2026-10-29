@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createPortal, flushSync } from 'react-dom';
 import { Activity, ArrowDownLeft, ArrowUpRight, ChevronRight, CircleHelp, Copy,
   Globe2, Heart, Layers3, LockKeyhole, Menu, Monitor, Network,
-  PanelLeftClose, Radar, RotateCcw, Settings2, ShieldCheck, X } from 'lucide-react';
+  PanelLeftClose, Radar, RotateCcw, Settings2, ShieldCheck, Terminal, X } from 'lucide-react';
 import { AnimatedSidebarProvider, AnimatedSidebar, AnimatedSidebarHeader,
   AnimatedSidebarContent, AnimatedSidebarFooter, AnimatedSidebarGroup,
   AnimatedSidebarMenu, AnimatedSidebarMenuItem,
@@ -14,10 +14,12 @@ import { Tooltip } from '@/components/motion/tooltip';
 import { AnimatedBadge } from '@/components/motion/animated-badge';
 import { AnimatedNumber, installReactBits } from './reactbits-integration';
 import { networkTools, networkToolFromHash } from './network-tools';
+import { ClaudeHandbook } from './claude-handbook';
 
 const destinations = [
   { id: 'network', label: '网络检测', icon: Radar, hint: '浏览器 · 网站 · IP 质量' },
   { id: 'overview', label: '一键配置', icon: ShieldCheck, hint: '自动检查并生成配置方案' },
+  { id: 'claude', label: 'Claude Code', icon: Terminal, hint: '终端代理与使用路线' },
   { id: 'backups', label: '恢复记录', icon: RotateCcw, hint: '备份与还原' },
   { id: 'settings', label: '帮助与关于', icon: Layers3, hint: '帮助与反馈' },
 ];
@@ -209,6 +211,7 @@ function App() {
       <a className="context-source" href="/network#sources" target="_blank" rel="noopener">数据来源与检测范围 <ArrowUpRight size={12}/></a>
     </>)}
     {portal('status-ui', <><span className="status-left"><span className="tiny-dot"/>本地工作台 <span className="status-separator">/</span><LockKeyhole size={11}/>配置在本机处理</span><span className="status-right"><span>{sample.activity.length ? `${sample.activity.length} 项检测进行中` : page === 'network' ? '按需检测 · 手动启动' : '配置修改前需预览确认'}</span><span className="status-separator">·</span><span>v2.0</span><ArrowDownLeft size={11}/></span></>)}
+    {portal('claude-ui', <ClaudeHandbook active={page === 'claude'}/>)}
     {contextOpen && createPortal(<button type="button" className="dashboard4-context-backdrop" tabIndex={-1} aria-label="关闭检测选项面板" onClick={() => setContextOpen(false)}/>, document.body)}
   </AnimatedSidebarProvider>;
 }

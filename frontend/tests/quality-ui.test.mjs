@@ -83,6 +83,12 @@ try {
   assert.deepEqual(errors, []);
   const nativePage = await browser.newPage();
   await nativePage.route('https://**/*', route => route.abort());
+  // Exercise the same trusted origin as the native WebView, serving only local assets.
+  await nativePage.route('https://diagnostics.behindrose.invalid/**', async route => {
+    const pathname = new URL(route.request().url()).pathname;
+    const response = await page.request.get('http://127.0.0.1:4317' + (pathname === '/' ? '/network' : pathname));
+    await route.fulfill({ response });
+  });
   await nativePage.addInitScript(({ fixture, url }) => {
     const listeners = []; window.__qualityMessages = [];
     let state = { state: 'idle', id: null, family: 4, route: 'proxy', stage: '尚未开始', total: 1, current: 0, report: null, error: null };
@@ -97,7 +103,7 @@ try {
       }
     } };
   }, { fixture: sample, url: endpoint });
-  await nativePage.goto('http://127.0.0.1:4317/network#ip-quality');
+  await nativePage.goto('https://diagnostics.behindrose.invalid/#ip-quality');
   await expect(nativePage.getByRole('combobox', { name: '检测代理端口' })).toHaveValue('10809');
   await nativePage.getByRole('button', { name: '开始质量体检', exact: true }).click();
   await expect(nativePage.locator('.ippure-score')).toHaveText('0%');

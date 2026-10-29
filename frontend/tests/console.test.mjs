@@ -76,8 +76,10 @@ const mockLocal = async route => {
     health: { demo: false, checkedAt: '2026-10-02T09:00:00+08:00',
       host: { found: true, running: false, compatible: configurationState !== 'unrecognized', version: '2.5.7', note: configurationState === 'unrecognized' ? 'config.yaml 的 tun 必须是已存在的配置映射。' : '当前配置目录与 TUN 字段结构可识别，可以生成配置预览。' },
       clashIpv6: { title: 'Clash IPv6', state: clashIpv6State, detail: clashIpv6State === '已关闭' ? '配置文件中 ipv6: false；重新打开 Clash 后核对运行效果。' : clashIpv6State === '无法自动修改' ? 'config.yaml 的 ipv6 必须是可识别的布尔值。' : '配置文件中 ipv6: true；关闭前可查看修改预览。' },
+      singMix: { title: 'sing-mix DNS 与 AI 分流', state: configurationState === 'configured' ? '已配置' : '待配置', detail: '测试中的 sing-mix 状态' },
       findings: ['系统 DNS', 'Chrome DNS', 'Edge DNS', 'Firefox DNS'].map(title => ({ title, state: configurationState === 'configured' ? '已配置' : configurationState === 'managed' && title === 'Chrome DNS' ? '由管理员管理' : '待配置', detail: '浏览器回归中的模拟配置状态' })) },
     backups: [{ id: 'mock-backup', createdAt: '2026-10-02T09:00:00+08:00', canRestore: true, titles: ['系统 DNS'], state: 'applied', kind: 'repair' }],
+    'clash-full-backups': [],
     plan: { id: 'mock-plan', action: 'repair', options: request.options, needsClashExit: true, clashRunning: false, changes: [{ title: '系统路由、DNS 接管与 Clash IPv6', beforeText: '现有配置', afterText: '开启 TUN 与 DNS 接管；关闭 Clash IPv6（ipv6: false）' }] },
     'restore-plan': { id: 'mock-restore', action: 'restore', changes: [{ title: '系统 DNS', beforeText: '防护配置', afterText: '原配置' }] },
   }[request.command];
@@ -254,7 +256,8 @@ try {
   await expect(frame.locator('#stop')).toBeDisabled();
   await expect(frame.locator('#dns-overview-count')).toContainText('3');
   await expect(frame.locator('#dns-source-list .dns-source')).toHaveCount(1);
-  await expect(frame.locator('#dns-source-list')).toContainText('IPLeak.net');
+  await expect(frame.locator('#dns-source-list .dns-source-label')).toHaveText('DNS 检测');
+  await expect(frame.locator('#dns-source-list')).toContainText('连续采样');
   await expect(frame.locator('#dns-source-list')).toContainText(/300\s*\/\s*300/);
   const firstDnsProbes = dnsRequests.slice();
   assert.equal(firstDnsProbes.length, 300, 'IPLeak completes the official 300 sequential browser requests');
@@ -603,12 +606,12 @@ try {
   await page.locator('#sidebar-ui').getByRole('link', { name: '一键配置', exact: true }).click();
   await expect(page.getByRole('heading', { name: '一键配置', exact: true })).toBeVisible();
   await expect(page.locator('a[href="#repair"], #page-repair, #build-plan, [name="repair-option"]')).toHaveCount(0);
-  await expect(page.locator('#sidebar-ui .console-sidebar-content a')).toHaveText(['网络检测', '一键配置', '恢复记录']);
+  await expect(page.locator('#sidebar-ui .console-sidebar-content a')).toHaveText(['网络检测', '一键配置', 'Claude Code', '恢复记录']);
   const beforePlan = planRequests.length;
   await page.locator('#protect-now').click();
   await expect(page.locator('#protection-dialog')).toBeVisible();
   assert.equal(planRequests.length, beforePlan + 1);
-  assert.equal(planRequests.at(-1).options, 47, 'One built-in plan covers system/Chrome/Edge/Firefox and disables Clash IPv6 while preserving upstream DNS servers');
+  assert.equal(planRequests.at(-1).options, 111, 'One built-in plan covers sing-mix DNS/AI, system/Chrome/Edge/Firefox and Clash IPv6');
   await expect(page.locator('#disable-clash-ipv6, .clash-ipv6-setting')).toHaveCount(0);
   await expect(page.locator('#quick-review')).toContainText('关闭 Clash IPv6');
   await expect(page.locator('#protection-dialog .execute-plan')).toBeDisabled();
@@ -637,7 +640,7 @@ try {
   await expect(page.locator('#protect-label')).toHaveText('一键配置');
   await page.locator('#protect-now').click();
   await expect(page.locator('#protection-dialog')).toBeVisible();
-  assert.equal(planRequests.at(-1).options, 47, 'IPv6 still enabled requires the same complete one-click plan');
+  assert.equal(planRequests.at(-1).options, 111, 'IPv6 still enabled requires the same complete one-click plan');
   await expect(page.locator('#quick-review')).toContainText('ipv6: false');
   await page.locator('#close-protection').click();
   clashIpv6State = '已关闭';

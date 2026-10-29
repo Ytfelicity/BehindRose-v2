@@ -3,13 +3,15 @@
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const icon = name => `<svg class="icon" aria-hidden="true"><use href="/icons.svg#${name}"/></svg>`;
-  const titles = { overview: '一键配置', network: '网络检测', backups: '恢复记录', settings: '帮助与关于' };
+  const titles = { overview: '一键配置', network: '网络检测', claude: 'Claude Code', backups: '恢复记录', settings: '帮助与关于' };
   // Built-in protection plan: system capture, browser DNS and Clash IPv6 off.
-  // Keep the user's upstream DNS servers (ReplaceDns = 16) outside this plan.
-  const automaticOptions = 1 | 2 | 4 | 8 | 32;
+  // Reuse existing groups and the original profile script; apply the DNS delta.
+  const automaticOptions = 1 | 2 | 4 | 8 | 32 | 64;
   const networkSections = { 'browser-network': '网络检测', connectivity: '网络检测', 'ip-quality': '网络检测' };
   let token, ready = false, busy = false, submitting = false, planning = false, health, lastOperation, page, toastTimer, statusPending = false, healthPending = false;
   let frameLoaded = false, frameObserver, desktop = false;
+  let claudeBusy = false, reportedConfigBusy = false;
+  addEventListener('claude-config-busy', event => { claudeBusy = event.detail === true; controls(); });
   async function desktopUpdateStatus() {
     if (!desktop) return;
     const response = await fetch('/api/update-status', { cache: 'no-store' });
@@ -41,12 +43,19 @@
     await desktopUpdateStatus();
   }));
   function controls() {
-    for (const id of ['health-refresh', 'backups-refresh', 'copy-report', 'open-clash']) $(id).disabled = !ready || busy;
-    $('protect-now').disabled = !ready || busy || planning || !health || protectionState().blocked;
-    document.querySelectorAll('[data-restore]').forEach(input => input.disabled = !ready || busy || planning);
-    document.querySelectorAll('.review-confirm').forEach(input => input.disabled = busy);
-    document.querySelectorAll('.execute-plan').forEach(button => button.disabled = !ready || busy || !button.closest('.review-body').querySelector('.review-confirm').checked);
-    $('network-frame').inert = busy;
+    const locked = busy || claudeBusy;
+    document.body.dataset.configBusy = String(locked);
+    for (const id of ['health-refresh', 'backups-refresh', 'copy-report', 'open-clash', 'full-backup-create']) $(id).disabled = !ready || locked || planning;
+    $('protect-now').disabled = !ready || locked || planning || !health || protectionState().blocked;
+    $('reconfigure-now').disabled = !ready || locked || planning || !health || protectionState().blocked;
+    document.querySelectorAll('[data-restore],[data-full-restore]').forEach(input => input.disabled = !ready || locked || planning);
+    document.querySelectorAll('.review-confirm').forEach(input => input.disabled = locked);
+    document.querySelectorAll('.execute-plan').forEach(button => button.disabled = !ready || locked || !button.closest('.review-body').querySelector('.review-confirm').checked);
+    $('network-frame').inert = locked;
+    if (reportedConfigBusy !== locked) {
+      reportedConfigBusy = locked;
+      dispatchEvent(new CustomEvent('workbench-config-busy', { detail: locked }));
+    }
   }
   function network() {
     const frame = $('network-frame');
@@ -107,8 +116,9 @@
   function protectionState() {
     const selected = health?.findings.slice(0, 4) || [];
     const ipv6 = health?.clashIpv6;
-    const blocked = !!health && (!health.host.compatible || selected.length !== 4 || !ipv6 || [...selected, ipv6].some(item => item && ['无法自动修改', '未找到', '由管理员管理'].includes(item.state)));
-    const configured = selected.length === 4 && selected.every(item => item.state === '已配置') && ipv6?.state === '已关闭';
+    const singMix = health?.singMix;
+    const blocked = !!health && (!health.host.compatible || selected.length !== 4 || !ipv6 || [...selected, ipv6, singMix].some(item => item && ['无法自动修改', '未找到', '由管理员管理'].includes(item.state)));
+    const configured = selected.length === 4 && selected.every(item => item.state === '已配置') && ipv6?.state === '已关闭' && singMix?.state === '已配置';
     return { blocked: blocked && !configured, configured };
   }
   function presentClashIpv6() {
@@ -119,11 +129,12 @@
     if (!health) return;
     const { configured, blocked } = protectionState();
     $('protection-hero').dataset.state = configured ? 'configured' : 'pending';
-    $('health-kicker').textContent = health.demo ? '演示状态' : configured ? '配置已完成 · 待检测' : blocked ? '当前环境需要处理' : '已完成本机检查';
-    $('health-title').innerHTML = configured ? '防护配置<br>已准备就绪' : blocked ? '暂不能<br>自动配置' : '系统接管<br>与 DNS 配置';
-    const issues = [...health.findings, health.clashIpv6].filter(item => item && ['无法自动修改', '未找到', '由管理员管理'].includes(item.state));
-    $('health-note').textContent = configured ? '系统接管与浏览器 DNS 已配置，Clash IPv6 已关闭。可以检测实际出口，确认连接是否按预期工作。' : blocked ? !health.host.compatible ? health.host.note || '当前配置结构尚未识别，请查看配置详情后刷新。' : issues.map(item => item.title + '：' + item.detail).join('；') || '暂时无法取得完整配置状态，请刷新状态后重试。' : '统一开启 TUN、自动路由与 DNS 接管，配置浏览器 DNS，并关闭 Clash IPv6。先预览改动，确认后备份并应用。';
+    $('health-kicker').textContent = health.demo ? '演示状态' : configured ? '配置已保存 · 未验证' : blocked ? '当前环境需要处理' : '已完成本机检查';
+    $('health-title').innerHTML = configured ? 'DNS 配置已保存<br>请检测实际出口' : blocked ? '暂不能<br>自动配置' : '系统接管<br>与 DNS 配置';
+    const issues = [...health.findings, health.clashIpv6, health.singMix].filter(item => item && ['无法自动修改', '未找到', '由管理员管理'].includes(item.state));
+    $('health-note').textContent = configured ? 'DNS 增量防护已保存，沿用你的代理组、节点和原有分流。重新打开 Clash 和浏览器后，请检测实际 DNS 出口。已保存不代表实测无泄漏。' : blocked ? !health.host.compatible ? health.host.note || '当前配置结构尚未识别，请查看配置详情后刷新。' : issues.map(item => item.title + '：' + item.detail).join('；') || '暂时无法取得完整配置状态，请刷新状态后重试。' : '沿用你的本机代理组和分流，补齐 6 个检测站点的 DNS 防护及网易／战网直连。保留现有节点、策略组和原规则，先预览差异，再备份应用。';
     $('protect-label').textContent = configured ? '检测配置效果' : blocked ? '暂不可自动配置' : '一键配置';
+    $('reconfigure-now').hidden = !configured;
     const system = health.findings[0];
     $('system-status').textContent = system?.state === '已配置' ? '已配置' : system?.state === '未找到' ? '未识别' : '待配置';
     $('system-status').className = 'badge ' + (system?.state === '已配置' ? 'ok' : 'neutral');
@@ -142,9 +153,14 @@
       presentProtection(); presentClashIpv6();
       $('health-meta').textContent = '最近检查 ' + new Date(data.checkedAt).toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' });
       $('host-version').textContent = data.host.version;
-      $('host-status').textContent = data.host.found ? `${data.host.running ? '正在运行' : '已退出'} · ${data.host.compatible ? '配置结构已识别' : '配置结构需检查'}` : '未识别到客户端';
+      $('host-status').textContent = data.host.found || data.host.compatible ? `${data.host.running ? '正在运行' : '已退出'} · ${data.host.compatible ? '配置结构已识别' : '配置结构需检查'}` : '未识别到客户端';
       $('checked-time').textContent = '本机配置';
-      $('findings').innerHTML = data.findings.map(item => {
+      const detection = desktop
+        ? { title: '桌面检测出口', state: data.detectionProxyPort ? '已识别代理' : '未识别代理', detail: data.detectionProxyPort
+          ? '桌面检测启动时绑定本机 Clash HTTP／混合端口 127.0.0.1:' + data.detectionProxyPort + '；端口变化后请重启工具箱。'
+          : '没有识别到正在监听的 Clash HTTP／混合端口，目前沿用系统网络，不能据此判定代理防护有效。' }
+        : { title: '开发页检测出口', state: '跟随浏览器', detail: '开发页使用当前浏览器的网络设置；桌面工具箱会读取本机 Clash HTTP／混合端口。' };
+      $('findings').innerHTML = [...data.findings, ...(data.singMix ? [data.singMix] : []), ...(data.tunRuntime ? [data.tunRuntime] : []), detection].map(item => {
         const good = item.state === '已配置', warning = ['无法自动修改', '未找到', '由管理员管理'].includes(item.state);
         return `<div class="finding"><span class="finding-mark ${good ? 'ok' : ''}">${icon(good ? 'check' : item.title.includes('DNS') ? 'globe' : 'route')}</span><div class="finding-copy"><h3>${esc(item.title)}</h3><p>${esc(item.detail)}</p></div><span class="badge ${good ? 'ok' : warning ? 'warning' : 'neutral'}">${esc(item.state)}</span></div>`;
       }).join('');
@@ -153,8 +169,11 @@
   $('health-refresh').addEventListener('click', attempt(checkHealth));
 
   function renderPreview(container, preview) {
-    const restore = preview.action === 'restore', changes = preview.changes;
-    container.innerHTML = `<div class="review-body"><div class="preview-heading"><h2>${restore ? '恢复范围' : '一键配置方案'}</h2><span class="badge ${changes.length ? 'active' : 'ok'}">${changes.length} 项调整</span></div><p class="preview-caption">${changes.length ? restore ? '确认后，将恢复以下设置。' : '开启前会自动备份当前设置，以便之后恢复。' : '配置已经就绪，无需重复调整。'}</p>${changes.map(change => `<div class="change"><strong>${esc(change.title)}</strong><div class="change-diff"><span>${esc(change.beforeText)}</span>${icon('chevron')}<span>${esc(change.afterText)}</span></div></div>`).join('')}${preview.needsClashExit ? `<p class="preview-reminder">${preview.clashRunning ? '请先从系统托盘退出 Clash，再继续开启防护。' : '开启期间请保持 Clash 关闭，完成后再打开。'}</p>` : ''}${changes.length || restore ? `<label class="confirm-row"><input type="checkbox" class="review-confirm">我已确认${restore ? '本次恢复范围' : '本次配置调整'}</label><div class="review-actions"><button class="primary execute-plan" disabled>${icon(restore ? 'reset' : 'shield')}${restore ? '恢复原设置' : '确认应用配置'}</button><span>需要 Windows 管理员授权</span></div>` : '<a href="#network" class="secondary finished-preview">检测防护效果 →</a>'}</div>`;
+    const full = preview.action === 'full-restore', restore = full || preview.action === 'restore';
+    const changes = full ? [{ title: 'Clash 完整配置', beforeText: '当前配置（将先保存加密快照）', afterText: `还原 ${preview.preview.fileCount} 个文件；写入 ${preview.preview.writeCount} 个，移除备份后新增的 ${preview.preview.removeCount} 个文件` }] : preview.changes;
+    const needsClashExit = full || preview.needsClashExit, clashRunning = full ? preview.preview.clashRunning : preview.clashRunning;
+    const tunDetails = !restore && Array.isArray(preview.tun) && preview.tun.length ? `<section class="tun-preview" aria-labelledby="tun-preview-title"><h3 id="tun-preview-title">虚拟网卡会这样配置</h3><p>支持 System、GVisor、Mixed、Mips；沿用已有协议栈，自动配置接管所需开关。</p><dl>${preview.tun.map(item => `<div><dt>${esc(item.title)}</dt><dd><span>${esc(item.detail)}</span><small>${esc(item.state)}</small></dd></div>`).join('')}</dl></section>` : '';
+    container.innerHTML = `<div class="review-body"><div class="preview-heading"><h2>${full ? '恢复到所选备份时间点' : restore ? '恢复范围' : '一键配置方案'}</h2><span class="badge ${changes.length ? 'active' : 'ok'}">${full ? '本机加密备份' : changes.length + ' 项调整'}</span></div><p class="preview-caption">${full ? (preview.preview.complete ? '将恢复订阅、节点、脚本、分流、DNS 和 TUN 设置。当前配置会被所选时间点覆盖，恢复前自动保存快照。' : '这是恢复前保存的不完整状态快照，用于撤销上次恢复；确认后将还原该状态。') : changes.length ? restore ? '确认后，将恢复以下设置。' : '应用前先在本机加密保存完整 Clash 配置，再备份本次调整涉及的设置。' : '配置已经就绪，无需重复调整。'}</p>${tunDetails}${changes.map(change => `<div class="change"><strong>${esc(change.title)}</strong><div class="change-diff"><span>${esc(change.beforeText)}</span>${icon('chevron')}<span>${esc(change.afterText)}</span></div></div>`).join('')}${needsClashExit ? `<p class="preview-reminder">${clashRunning ? '请先从系统托盘退出 Clash，再继续。' : '操作期间请保持 Clash 关闭，完成后再打开。'}</p>` : ''}${changes.length || restore ? `<label class="confirm-row"><input type="checkbox" class="review-confirm">我已确认${restore ? '本次恢复范围' : '本次配置调整'}</label><div class="review-actions"><button class="primary execute-plan" disabled>${icon(restore ? 'reset' : 'shield')}${full ? '一键恢复完整配置' : restore ? '恢复原设置' : '确认应用配置'}</button><span>${full ? '仅在本机还原' : '需要 Windows 管理员授权'}</span></div>` : '<a href="#network" class="secondary finished-preview">检测防护效果 →</a>'}</div>`;
     container.hidden = false;
     const localError = document.createElement('p'); localError.className = 'notice'; localError.hidden = true; localError.setAttribute('role', 'alert');
     container.querySelector('.review-body').append(localError);
@@ -165,7 +184,7 @@
       submitting = true; busy = true; localError.hidden = true; controls();
       if (frameLoaded) { $('network-frame').contentWindow.RoseConnectivity?.stop(); $('network-frame').contentDocument.getElementById('stop')?.click(); }
       try {
-        const result = await api('execute', { planId: preview.id });
+        const result = await api(full ? 'clash-full-restore' : 'execute', { planId: preview.id });
         submitting = false;
         $('restore-dialog').close(); $('protection-dialog').close();
         displayOperation(result.operation);
@@ -173,18 +192,19 @@
     }));
     controls();
   }
-  async function prepareProtection() {
-    if (!ready || busy || planning || !health) return;
+  async function prepareProtection(reconfigure = false) {
+    if (!ready || busy || claudeBusy || planning || !health) return;
     const { configured, blocked } = protectionState();
-    if (configured) { location.hash = 'network'; return; }
+    if (configured && !reconfigure) { location.hash = 'network'; return; }
     if (blocked) return;
-    planning = true; controls(); $('protect-label').textContent = '正在生成变更预览…';
+    planning = true; controls(); $(reconfigure ? 'reconfigure-label' : 'protect-label').textContent = '正在生成变更预览…';
     try {
       renderPreview($('quick-review'), await api('plan', { options: automaticOptions }));
       $('protection-dialog').showModal();
-    } finally { planning = false; presentProtection(); controls(); }
+    } finally { planning = false; $('reconfigure-label').textContent = '再次配置'; presentProtection(); controls(); }
   }
-  $('protect-now').addEventListener('click', attempt(prepareProtection));
+  $('protect-now').addEventListener('click', attempt(() => prepareProtection()));
+  $('reconfigure-now').addEventListener('click', attempt(() => prepareProtection(true)));
   $('close-protection').addEventListener('click', () => $('protection-dialog').close());
 
   const states = { applied: '可恢复', applying: '操作中断', 'rollback-failed': '需要恢复', restored: '已恢复', 'rolled-back': '已回滚', prepared: '未开始写入', unreadable: '无法读取' };
@@ -199,7 +219,7 @@
   async function loadBackups() {
     $('backups-refresh').disabled = true;
     try {
-      const items = await api('backups');
+      const [items] = await Promise.all([api('backups'), loadFullBackups()]);
       const unreadable = items.filter(item => item.state === 'unreadable').length;
       $('backup-count').textContent = `${items.length} 条记录 · ${items.filter(item => item.canRestore && !item.error && !item.restoreBlockedReason).length} 份设置可恢复` + (unreadable ? ` · ${unreadable} 条无法读取，配置修改与恢复已暂停` : '');
       $('backup-list').innerHTML = items.length ? items.map(backupCard).join('') : `<div class="backup-empty">${icon('backup')}<h2>开启防护后，原设置会留在这里</h2><p>每次调整前都会自动备份。需要还原时，选择对应记录即可。</p><a href="#overview" class="secondary">前往一键配置 ${icon('chevron')}</a></div>`;
@@ -210,6 +230,24 @@
       })));
     } finally { controls(); }
   }
+  const fullReasons = { manual: '手动完整备份', 'before-repair': '防护配置前自动备份', 'before-restore': '完整恢复前自动快照' };
+  async function loadFullBackups() {
+    const items = await api('clash-full-backups');
+    $('full-backup-count').textContent = `${items.filter(item => item.complete && item.canRestore).length} 份完整配置可恢复 · ${items.length} 条本机记录`;
+    $('full-backup-list').innerHTML = items.length ? items.map(item => `<article class="card backup-card"><span class="section-icon">${icon('backup')}</span><div><h3>${esc(item.createdAt ? new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false }) : '备份无法读取')}<span class="badge ${item.state === 'recovery-required' || item.error ? 'warning' : 'neutral'}">${item.state === 'recovery-required' ? '需要恢复' : item.complete ? '完整配置' : '恢复前快照'}</span></h3><p>${esc(item.error || `${item.fileCount} 个文件 · ${(item.totalBytes / 1048576).toFixed(1)} MiB · ${fullReasons[item.reason] || '本机备份'}`)}</p><small>${item.complete ? '订阅 · 节点 · 脚本 · 分流 · DNS · TUN' : '用于还原恢复前的状态'}</small></div>${item.canRestore ? `<button class="secondary" data-full-restore="${esc(item.id)}">${icon('reset')}一键恢复</button>` : ''}</article>`).join('') : '<p class="full-backup-empty">尚无完整备份。先点击“立即完整备份”，以后订阅或配置丢失时即可恢复。</p>';
+    $('full-backup-list').querySelectorAll('[data-full-restore]').forEach(button => button.addEventListener('click', attempt(async () => {
+      if (planning || busy) return;
+      planning = true; controls();
+      try { renderPreview($('restore-review'), await api('clash-full-restore-plan', { backupId: button.dataset.fullRestore })); $('restore-dialog').showModal(); }
+      finally { planning = false; controls(); }
+    })));
+  }
+  $('full-backup-create').addEventListener('click', attempt(async () => {
+    if (busy || planning) return;
+    submitting = true; busy = true; controls();
+    try { const result = await api('clash-full-backup'); submitting = false; displayOperation(result.operation); }
+    catch (error) { submitting = false; busy = false; controls(); throw error; }
+  }));
   $('backups-refresh').addEventListener('click', attempt(loadBackups));
   $('close-restore').addEventListener('click', () => $('restore-dialog').close());
 
@@ -218,9 +256,9 @@
     if (!op) { busy = false; controls(); return; }
     const newlyDone = op.done && (!lastOperation || !lastOperation.done || lastOperation.id !== op.id);
     lastOperation = op; busy = !op.done; $('operation').hidden = false;
-    $('operation-title').textContent = !op.done ? (op.phase === 'authorizing' ? '等待管理员授权' : '正在配置防护') : op.result?.success ? (op.result.state === 'unchanged' ? '无需修改配置' : op.action === 'restore' ? '原设置已恢复' : '防护配置已就绪') : op.phase === 'cancelled' ? '已取消操作' : '本次操作未完成';
+    $('operation-title').textContent = !op.done ? (op.action === 'full-backup' ? '正在完整备份' : op.action === 'full-restore' ? '正在恢复完整配置' : op.phase === 'authorizing' ? '等待管理员授权' : '正在配置防护') : op.result?.success ? (op.result.state === 'unchanged' ? '无需修改配置' : op.action === 'full-backup' ? '完整备份已保存在本机' : op.action === 'full-restore' ? '完整配置已恢复' : op.action === 'restore' ? '原设置已恢复' : '防护配置已就绪') : op.phase === 'cancelled' ? '已取消操作' : '本次操作未完成';
     $('operation-message').textContent = op.message;
-    $('operation-actions').hidden = !op.done || !op.result?.success;
+    $('operation-actions').hidden = !op.done || !op.result?.success || op.action === 'full-backup';
     controls();
     if (newlyDone) {
       checkHealth().catch(error => notice(error.message));

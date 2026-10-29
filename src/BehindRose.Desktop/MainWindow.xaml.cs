@@ -69,9 +69,10 @@ public partial class MainWindow : Window
             var browserFindings = findings.Where(x => x.Title.EndsWith(" DNS", StringComparison.Ordinal)).ToArray();
             all.Add(new("浏览器 DNS", string.Join(" · ", browserFindings.Select(x => x.Title.Replace(" DNS", "") + "：" + x.State)) + "。将与系统接管统一生成预览。", browserFindings.All(x => x.State == "已配置") ? "已配置" : "按需检查"));
             all.Add(RepairPlanner.InspectClashIpv6(state));
+            all.Add(SingMixProfile.Inspect(state));
             all.Add(new("实际网络出口", networkSummary, networkSummary == "尚未采样" ? "未检测" : "查看详情"));
             FindingsList.ItemsSource = all;
-            OverviewTitle.Text = demo ? "演示环境 · 可体验完整流程" : findings.Any(x => x.State == "无法自动修改") ? "有配置需要先处理" : host.Executable == null ? "先准备好 Clash 客户端" : "本地体检已完成";
+            OverviewTitle.Text = demo ? "演示环境 · 可体验完整流程" : findings.Any(x => x.State == "无法自动修改") ? "有配置需要先处理" : !host.Compatible ? "请检查 Clash 配置" : "本地体检已完成";
             HostSummary.Text = demo ? "下方是内存中的示例配置。应用和恢复不会改动你的电脑；演示模式不联网。" : (host.Running ? "Clash 正在运行。修改其配置前，请从托盘退出客户端。" : "可以查看建议。浏览器保持打开，相关策略稍后重启生效。");
             ReviewButton.IsEnabled = host.Compatible;
         }
@@ -104,7 +105,6 @@ public partial class MainWindow : Window
         ConfirmOption.IsChecked = false; ApplyButton.IsEnabled = false; plan = null; ChangesList.ItemsSource = null;
         try
         {
-            if (!host.Compatible) throw new InvalidOperationException(host.Note);
             var candidate = RepairPlanner.Build(state, RepairPlanner.OneClickOptions);
             if (!demo) foreach (var change in candidate.Changes) WindowsState.EnsurePolicyUnmanaged(change.Key);
             plan = candidate; ChangesList.ItemsSource = candidate.Changes;
@@ -310,14 +310,14 @@ public partial class MainWindow : Window
             await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
             Snapshot(Path.Combine(root, "01-overview.png"));
             BuildPreview(); await Navigate("plan");
-            if (plan?.Changes.Count != 6 || plan.Options != RepairPlanner.OneClickOptions) throw new InvalidOperationException("一键配置未连接到系统、浏览器与 IPv6 组合方案。");
+            if (plan?.Changes.Count != 8 || plan.Options != RepairPlanner.OneClickOptions) throw new InvalidOperationException("一键配置未连接到 sing-mix、系统、浏览器与 IPv6 组合方案。");
             await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle); Snapshot(Path.Combine(root, "02-plan.png"));
             ConfirmOption.IsChecked = true; await PerformOperation("apply");
             if (!journals.List().Any(x => x.State == "applied")) throw new InvalidOperationException("修复未完成。");
             await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle); Snapshot(Path.Combine(root, "03-result.png"));
             await Navigate("backups"); await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle); Snapshot(Path.Combine(root, "04-backups.png"));
             await PerformOperation("restore", journals.List().First(x => x.State == "applied").Id);
-            if (RepairPlanner.Build(state, RepairPlanner.OneClickOptions).Changes.Count != 6) throw new InvalidOperationException("恢复后状态不正确。");
+            if (RepairPlanner.Build(state, RepairPlanner.OneClickOptions).Changes.Count != 8) throw new InvalidOperationException("恢复后状态不正确。");
             theme = 1; SetTheme(); await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle); Snapshot(Path.Combine(root, "05-light.png"));
             Width = 760; Height = 600; await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
             if (!ReviewButton.IsVisible || ReviewButton.TranslatePoint(new Point(0, ReviewButton.ActualHeight), this).Y > ActualHeight - 30) throw new InvalidOperationException("小窗口主按钮不可见。");

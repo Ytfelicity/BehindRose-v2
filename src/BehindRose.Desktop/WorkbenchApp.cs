@@ -10,8 +10,11 @@ using BehindRose.Windows;
 
 namespace BehindRose.Desktop;
 
-sealed record Request(string Id, string Command, int Options = 0, string? PlanId = null, string? BackupId = null, int ProxyPort = 0, string? Action = null, string[]? Queries = null, string Profile = "quick", bool IncludeSpeed = false);
+sealed record Request(string Id, string Command, int Options = 0, string? PlanId = null, string? BackupId = null, int ProxyPort = 0, string? Action = null, string[]? Queries = null, string Profile = "quick", bool IncludeSpeed = false, string? Mode = null);
 sealed record Preview(string Id, string Action, RepairPlan Plan, string? BackupId, DateTimeOffset Expires);
+sealed record ClaudePreview(string Id, ClaudeConfigurationPlan Plan, DateTimeOffset Expires);
+sealed record ClaudeTimeZoneStoredPreview(string Id, ClaudeTimeZonePlan Plan, DateTimeOffset Expires);
+sealed record ClashFullStoredPreview(string Id, ClashFullRestorePlan Plan, DateTimeOffset Expires);
 sealed record Operation(string Id, string Action, bool Done, string Phase, string Message, OperationResult? Result = null);
 
 sealed class LocalApp(bool demo)
@@ -31,6 +34,12 @@ sealed class LocalApp(bool demo)
     private readonly IStateStore state = demo ? new DemoState() : new WindowsState();
     private readonly IJournalStore journals = demo ? new DemoJournals() : new ProtectedJournalStore();
     private readonly Dictionary<string, Preview> previews = [];
+    private readonly Dictionary<string, ClaudePreview> claudePreviews = [];
+    private readonly Lazy<ClaudeConfigurationService> claudeConfiguration = new(() => demo ? ClaudeConfigurationService.CreateDemo() : new ClaudeConfigurationService());
+    private readonly Dictionary<string, ClaudeTimeZoneStoredPreview> claudeTimeZonePreviews = [];
+    private readonly Lazy<ClaudeTimeZoneService> claudeTimeZone = new(() => demo ? ClaudeTimeZoneService.CreateDemo() : new ClaudeTimeZoneService());
+    private readonly Lazy<ClashFullBackupService> clashFullBackup = new(() => demo ? ClashFullBackupService.CreateDemo() : new ClashFullBackupService());
+    private readonly Dictionary<string, ClashFullStoredPreview> clashFullPreviews = [];
     private readonly object gate = new();
     private Operation? operation;
     private Task? pending;
@@ -59,11 +68,120 @@ sealed class LocalApp(bool demo)
                 "restore-plan" => RestorePlan(request.BackupId),
                 "execute" => Execute(request.PlanId),
                 "open-clash" => OpenClash(),
+                "clash-full-backups" => clashFullBackup.Value.List(),
+                "clash-full-backup" => StartFullBackup(),
+                "clash-full-restore-plan" => RememberFullRestore(request.BackupId!),
+                "clash-full-restore" => StartFullBackup(request.PlanId!),
+                "claude-inspect" => ClaudeLocal(() => claudeConfiguration.Value.Inspect()),
+                "claude-plan" => ClaudeLocal(() => RememberClaude(claudeConfiguration.Value.Preview(request.Mode!, request.ProxyPort))),
+                "claude-backups" => ClaudeLocal(() => claudeConfiguration.Value.ListBackups()),
+                "claude-restore-plan" => ClaudeLocal(() => RememberClaude(claudeConfiguration.Value.PreviewRestore(request.BackupId!))),
+                "claude-apply" => ClaudeLocal(() => ExecuteClaude(request.PlanId, "apply")),
+                "claude-restore" => ClaudeLocal(() => ExecuteClaude(request.PlanId, "restore")),
+                "claude-timezone-inspect" => ClaudeLocal(() => claudeTimeZone.Value.Inspect()),
+                "claude-timezone-plan" => ClaudeLocal(() => RememberClaudeTimeZone(claudeTimeZone.Value.PreviewTaipei())),
+                "claude-timezone-backups" => ClaudeLocal(() => claudeTimeZone.Value.ListBackups()),
+                "claude-timezone-restore-plan" => ClaudeLocal(() => RememberClaudeTimeZone(claudeTimeZone.Value.PreviewRestore(request.BackupId!))),
+                "claude-timezone-apply" => ClaudeLocal(() => ExecuteClaudeTimeZone(request.PlanId, "apply")),
+                "claude-timezone-restore" => ClaudeLocal(() => ExecuteClaudeTimeZone(request.PlanId, "restore")),
                 "quality-start" => demo ? throw new InvalidOperationException("演示环境不发起公网体检。") : quality.Start(request.ProxyPort),
                 "proxy-network-start" => demo ? throw new InvalidOperationException("演示环境不发起代理网络检测。") : proxyNetwork.Start(request.ProxyPort, request.Profile, request.IncludeSpeed),
                 _ => throw new InvalidDataException("不支持的操作。")
             };
         }
+    }
+
+    private object RememberFullRestore(string id)
+    {
+        foreach (var old in clashFullPreviews.Values.Where(x => x.Expires < DateTimeOffset.UtcNow).ToArray()) clashFullPreviews.Remove(old.Id);
+        if (clashFullPreviews.Count >= 16) clashFullPreviews.Remove(clashFullPreviews.Keys.First());
+        var saved = new ClashFullStoredPreview(Guid.NewGuid().ToString("N"), clashFullBackup.Value.PreviewRestore(id), DateTimeOffset.UtcNow.AddMinutes(10));
+        clashFullPreviews.Add(saved.Id, saved);
+        return new { saved.Id, saved.Expires, action = "full-restore", saved.Plan.Preview };
+    }
+
+    private object StartFullBackup(string? planId = null)
+    {
+        ClashFullRestorePlan? plan = null;
+        if (planId is not null)
+        {
+            if (!clashFullPreviews.TryGetValue(planId, out var stored) || stored.Expires < DateTimeOffset.UtcNow)
+                throw new InvalidOperationException("完整恢复预览已失效，请重新预览。");
+            if (!demo && HostDiscovery.IsRunning()) throw new InvalidOperationException("请先在系统托盘退出 Clash，再执行完整恢复。");
+            plan = stored.Plan;
+        }
+        clashFullPreviews.Clear(); previews.Clear(); claudePreviews.Clear(); claudeTimeZonePreviews.Clear();
+        quality.Stop(); proxyNetwork.Stop();
+        string id = Guid.NewGuid().ToString("N"), action = plan is null ? "full-backup" : "full-restore";
+        operation = new(id, action, false, "running", plan is null ? "正在加密保存本机完整配置……" : "正在保存恢复前快照并还原配置……");
+        pending = Task.Run(() =>
+        {
+            OperationResult result;
+            try
+            {
+                if (plan is null)
+                {
+                    var backup = clashFullBackup.Value.Create();
+                    result = new(true, "backed-up", $"已在本机加密保存 {backup.FileCount} 个配置文件，包含订阅、节点、脚本、分流及 TUN 设置。", backup.Id);
+                }
+                else result = clashFullBackup.Value.Restore(plan, message => { lock (gate) operation = new(id, action, false, "running", message); });
+            }
+            catch (Exception error)
+            {
+                string message = error is IOException ? "无法安全读取或写入配置。请退出 Clash 后重试，并保留现有本机备份。" : Message(error);
+                result = new(false, "failed", message);
+            }
+            lock (gate) operation = new(id, action, true, result.Success ? "complete" : "failed", result.Message, result);
+        });
+        return new { operation };
+    }
+
+    // Explicit local operations: Claude settings or the optional Windows time zone.
+    // The latter invokes the fixed system setter only after a confirmed preview.
+    // Neither path uses network runners, the Clash process or account login.
+    private static object ClaudeLocal(Func<object> action)
+    {
+        try { return action(); }
+        catch (InvalidDataException ex) { throw new InvalidOperationException(ex.Message, ex); }
+    }
+
+    private object RememberClaude(ClaudeConfigurationPlan plan)
+    {
+        foreach (var old in claudePreviews.Values.Where(item => item.Expires < DateTimeOffset.UtcNow).ToArray()) claudePreviews.Remove(old.Id);
+        if (claudePreviews.Count >= 16) claudePreviews.Remove(claudePreviews.Keys.First());
+        var saved = new ClaudePreview(Guid.NewGuid().ToString("N"), plan, DateTimeOffset.UtcNow.AddMinutes(10));
+        claudePreviews.Add(saved.Id, saved);
+        var view = plan.Preview;
+        return new { saved.Id, saved.Expires, view.Action, view.Mode, view.ProxyPort, view.HasChanges, view.Changes, view.Warnings };
+    }
+
+    private object ExecuteClaude(string? id, string action)
+    {
+        if (id is null || !claudePreviews.TryGetValue(id, out var saved) || saved.Expires < DateTimeOffset.UtcNow)
+            throw new InvalidOperationException("Claude 配置预览已失效，请重新生成。");
+        if (saved.Plan.Preview.Action != action) throw new InvalidDataException("配置预览与执行操作不匹配。");
+        // A preview cannot be replayed, including after a stale-file rejection.
+        claudePreviews.Clear();
+        return action == "apply" ? claudeConfiguration.Value.Apply(saved.Plan) : claudeConfiguration.Value.Restore(saved.Plan);
+    }
+
+    private object RememberClaudeTimeZone(ClaudeTimeZonePlan plan)
+    {
+        foreach (var old in claudeTimeZonePreviews.Values.Where(item => item.Expires < DateTimeOffset.UtcNow).ToArray()) claudeTimeZonePreviews.Remove(old.Id);
+        if (claudeTimeZonePreviews.Count >= 16) claudeTimeZonePreviews.Remove(claudeTimeZonePreviews.Keys.First());
+        var saved = new ClaudeTimeZoneStoredPreview(Guid.NewGuid().ToString("N"), plan, DateTimeOffset.UtcNow.AddMinutes(10));
+        claudeTimeZonePreviews.Add(saved.Id, saved);
+        var view = plan.Preview;
+        return new { saved.Id, saved.Expires, view.Action, view.CurrentId, view.CurrentLabel, view.TargetId, view.TargetLabel, view.HasChanges, view.Warnings };
+    }
+
+    private object ExecuteClaudeTimeZone(string? id, string action)
+    {
+        if (id is null || !claudeTimeZonePreviews.TryGetValue(id, out var saved) || saved.Expires < DateTimeOffset.UtcNow)
+            throw new InvalidOperationException("时区预览已失效，请重新生成。");
+        if (saved.Plan.Preview.Action != action) throw new InvalidDataException("时区预览与执行操作不匹配。");
+        claudeTimeZonePreviews.Clear();
+        return action == "apply" ? claudeTimeZone.Value.Apply(saved.Plan) : claudeTimeZone.Value.Restore(saved.Plan);
     }
 
     private HostInfo Host() => demo ? new(null, "2.5.2", false, true, "内存演示环境") : HostDiscovery.Find();
@@ -79,7 +197,7 @@ sealed class LocalApp(bool demo)
                     var index = findings.FindIndex(x => x.Title == title);
                     if (index >= 0) findings[index] = new(title, "存在计算机级策略，需由设备管理员调整。", "由管理员管理");
                 }
-        return new { checkedAt = DateTimeOffset.Now, demo, host = new { host.Version, host.Running, host.Compatible, found = host.Executable != null || demo, host.Note }, findings, clashIpv6 = RepairPlanner.InspectClashIpv6(state) };
+        return new { checkedAt = DateTimeOffset.Now, demo, host = new { host.Version, host.Running, host.Compatible, found = host.Executable != null || demo, host.Note }, findings, clashIpv6 = RepairPlanner.InspectClashIpv6(state), singMix = SingMixProfile.Inspect(state), detectionProxyPort = demo ? null : DetectionProxy.ReadPort(), tunRuntime = demo ? new Finding("虚拟网卡运行状态", "演示环境不检查或启用真实网卡。", "演示") : TunAdapterInspection.Read(state) };
     }
 
     private object Plan(RepairOptions options)
@@ -94,11 +212,13 @@ sealed class LocalApp(bool demo)
     private void ValidatePlan(RepairPlan plan)
     {
         if (demo) return;
-        if (plan.NeedsClashExit)
-        {
-            var currentHost = Host();
-            if (!currentHost.Compatible) throw new InvalidOperationException(currentHost.Note);
-        }
+        // "Clash must be closed" is decided by the live process, which Execute
+        // re-checks right before writing. Requiring the executable to be
+        // discoverable here deadlocked every install the app could not locate
+        // while the client was closed (for example a portable folder): the
+        // preview demanded the client be exited, then the apply refused for
+        // "未找到客户端". Configuration validity is already enforced by
+        // RepairPlanner.Build when the plan is produced.
         foreach (var change in plan.Changes) WindowsState.EnsurePolicyUnmanaged(change.Key);
     }
 
@@ -109,7 +229,7 @@ sealed class LocalApp(bool demo)
         var preview = new Preview(Guid.NewGuid().ToString("N"), action, plan, backupId, DateTimeOffset.UtcNow.AddMinutes(10));
         previews.Add(preview.Id, preview);
         return new { preview.Id, preview.Action, preview.Expires, options = (int)plan.Options, plan.NeedsClashExit, clashRunning = Host().Running,
-            changes = plan.Changes.Select(x => new { x.Title, x.BeforeText, x.AfterText }).ToArray() };
+            changes = plan.Changes.Select(x => new { x.Title, x.BeforeText, x.AfterText }).ToArray(), tun = RepairPlanner.DescribeTun(plan) };
     }
 
     private object Backups() => journals.ListForDisplay();

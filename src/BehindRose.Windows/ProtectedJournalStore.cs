@@ -122,11 +122,15 @@ public static class Worker
                     if (!host.Compatible) throw new InvalidOperationException(host.Note);
                 }
                 foreach (var change in plan.Changes) WindowsState.EnsurePolicyUnmanaged(change.Key);
+                state.EnsureReady(plan.NeedsClashExit);
+                using var fullBackup = plan.NeedsClashExit ? new ClashFullBackupService().ProtectRepair() : null;
                 result = engine.Apply(plan, Report);
             }
             else
             {
                 if (args[6] != "restore") return 90;
+                using var fullBackup = journals.Load(args[5]).Changes.Any(x => Targets.IsFile(x.Key))
+                    ? new ClashFullBackupService().ProtectRepair(false) : null;
                 result = engine.Restore(args[5], Report);
             }
             journals.Report(args[3], new("complete", result.Message, result)); return result.Success ? 0 : 1;

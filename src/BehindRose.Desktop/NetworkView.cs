@@ -31,7 +31,11 @@ public sealed class NetworkView : IDisposable
     {
         lightTheme = light;
         var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BehindRose", "NetworkAssistant-v2", DevelopmentMode.Enabled ? "WebView2-Development" : "WebView2");
-        var environment = await CoreWebView2Environment.CreateAsync(null, data);
+        var proxyPort = BehindRose.Windows.DetectionProxy.ReadPort();
+        var options = new CoreWebView2EnvironmentOptions();
+        if (proxyPort is int port) options.AdditionalBrowserArguments = BehindRose.Windows.DetectionProxy.Arguments(port);
+        data += proxyPort is int selected ? "-Proxy-" + selected : "-System";
+        var environment = await CoreWebView2Environment.CreateAsync(null, data, options);
         if (disposed) return;
         await Browser.EnsureCoreWebView2Async(environment);
         var core = Browser.CoreWebView2;

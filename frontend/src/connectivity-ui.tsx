@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { CircleCheck, CircleHelp, Clock3, Copy, Download, Globe2, LoaderCircle, Plus, RotateCcw, Square, Trash2, X } from 'lucide-react';
+import { Clock3, Copy, Download, Frown, Globe2, LoaderCircle, Meh, Plus, RotateCcw, Smile, Square, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/motion/button';
 import { Tooltip } from '@/components/motion/tooltip';
 import { SparkActions } from './reactbits-integration';
-import { idleResult, importWebsites, WEBSITE_TIMEOUT_MS, normalizeWebsite, runWebsiteBatch, siteGroups, summarizeWebsiteResults, type ProbeResult, type Website } from './connectivity';
+import { idleResult, importWebsites, MYIP_FAST_MS, WEBSITE_TIMEOUT_MS, normalizeWebsite, runWebsiteBatch, siteGroups, summarizeWebsiteResults, type ProbeResult, type Website } from './connectivity';
 
 type Group = 'ai' | 'common' | 'reference' | 'custom';
 export interface ConnectivityBridge {
@@ -27,6 +27,29 @@ function ServiceIcon({ site }: { site: Website }) {
   const [failed, setFailed] = useState(false);
   if (site.icon && !failed) return <img src={`/service-icons/${site.icon}.svg`} alt="" width="28" height="28" onError={() => setFailed(true)}/>;
   return site.id === 'characterai' ? <span>c.ai</span> : <Globe2 size={24}/>;
+}
+
+function SampleBars({ result }: { result: ProbeResult }) {
+  const total = result.totalRounds ?? 0;
+  if (total < 2) return null;
+  // Rounds can finish out of order. Keep each bar in its original request slot.
+  const rounds = new Map(result.rounds?.map(round => [round.round, round]));
+  const times = (result.rounds ?? []).filter(round => round.ms !== undefined && ['reachable', 'slow'].includes(round.state)).map(round => Math.max(1, round.ms!));
+  const min = Math.min(...times), max = Math.max(...times);
+  return <div className="connectivity-rounds" role="group" aria-label="逐次采样结果" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
+    {Array.from({ length: total }, (_, index) => {
+      const number = index + 1, round = rounds.get(number);
+      const success = round?.ms !== undefined && ['reachable', 'slow'].includes(round.state);
+      const tone = success ? round.ms! < MYIP_FAST_MS ? 'fast' : round.ms! < 1000 ? 'slow' : 'long' : round ? 'failed' : result.finished ? 'unmeasured' : 'pending';
+      const caption = `第 ${number} 次 · ` + (success ? `${round.ms} ms` : round ? labels[round.state] : result.finished ? '未采样' : '等待采样');
+      const height = success ? max === min ? 100 : 25 + 75 * Math.log(Math.max(1, round.ms!) / min) / Math.log(max / min) : 25;
+      return <Tooltip key={number} content={caption} wrapperClassName="connectivity-round-tooltip">
+        <span className="connectivity-round-hit" role="img" tabIndex={0} aria-label={caption} data-round={number} data-tone={tone}>
+          <span className="connectivity-round-bar" aria-hidden="true" style={{ height: height + '%' }}/>
+        </span>
+      </Tooltip>;
+    })}
+  </div>;
 }
 
 export function Connectivity() {
@@ -132,25 +155,26 @@ export function Connectivity() {
   const summary = summarizeWebsiteResults(running ? batchSites.current : sites, results);
   return <section id="connectivity" className="connectivity-section" aria-labelledby="connectivity-title" data-running={running}>
     <div className="connectivity-heading"><h2 id="connectivity-title"><Globe2 size={20}/>网络连通性</h2><div className="connectivity-tools">
-      <label className="connectivity-group"><span className="sr-only">网站分组</span><select aria-label="网站分组" value={group} disabled={locked} onChange={event => { setGroup(event.target.value as Group); setNotice(''); }}><option value="ai">AI 服务</option><option value="reference">IPCheck.ing 默认</option><option value="common">常用网站</option><option value="custom">我的网站 ({custom.length})</option></select></label>
-      <label className="connectivity-group"><span className="sr-only">采样方式</span><select aria-label="采样方式" value={sampleRounds} disabled={locked} onChange={event => setSampleRounds(Number(event.target.value) as 1 | 10)}><option value="10">原版多轮 · 10 次取最低</option><option value="1">原版单次 · 请求总耗时</option></select></label>
+      <label className="connectivity-group"><span className="sr-only">网站分组</span><select aria-label="网站分组" value={group} disabled={locked} onChange={event => { setGroup(event.target.value as Group); setNotice(''); }}><option value="ai">AI 服务</option><option value="reference">默认网站</option><option value="common">常用网站</option><option value="custom">我的网站 ({custom.length})</option></select></label>
+      <label className="connectivity-group"><span className="sr-only">采样方式</span><select aria-label="采样方式" value={sampleRounds} disabled={locked} onChange={event => setSampleRounds(Number(event.target.value) as 1 | 10)}><option value="10">多轮采样 · 10 次取最低</option><option value="1">单次采样 · 请求总耗时</option></select></label>
       <Button data-beui className="detection-primary-action" size="sm" disabled={locked || !sites.length} onClick={() => void run([...sites])}><RotateCcw size={17}/>检测本组</Button>
       {running && <Button data-beui className="detection-stop-action" variant="ghost" size="sm" aria-label="停止网站检测" onClick={() => task.current?.abort()}><Square size={14}/>停止</Button>}
     </div></div>
     <p className="connectivity-description">HTTPS 响应耗时，包含建连、TLS 和网站处理，不等于代理节点延迟。</p>
-    <p className="connectivity-description">与 IPCheck.ing 对照时，请使用同一浏览器、相同网站分组和采样方式；首次建连与复用连接的耗时可能不同。</p>
+    <p className="connectivity-description">对比检测结果时，请使用同一浏览器、相同网站分组和采样方式；首次建连与复用连接的耗时可能不同。</p>
     {coreRunning && !running && <p className="connectivity-description" role="status">浏览器网络正在采样。点击“检测本组”会停止该采样、保留已有结果，再开始网站检测。</p>}
     <div className="connectivity-summary" role="status" aria-live="polite">{running ? `正在检测 · 已结束 ${summary.completed} / ${summary.planned} 次请求` : summary.finished ? `${summary.reached} 个已响应 · ${summary.finished - summary.reached} 个未获响应或未完成 · ${summary.completed} / ${summary.planned} 次采样` : `本组 ${sites.length} 个网站 · 等待检测`}<small>本组设置：{sampleRounds === 1 ? '每站 1 次 · 错峰并行' : `每站 ${sampleRounds} 次 · 最低成功值`} · 单次 {WEBSITE_TIMEOUT_MS / 1000} 秒超时 · ≥ 200 ms 响应较慢</small></div>
+    {(sampleRounds > 1 || sites.some(site => (results[site.id]?.totalRounds ?? 0) > 1)) && <p className="connectivity-legend" aria-label="逐次采样颜色说明"><span>逐次采样</span><span data-tone="fast"><i aria-hidden="true"/>＜200 ms</span><span data-tone="slow"><i aria-hidden="true"/>200–999 ms</span><span data-tone="long"><i aria-hidden="true"/>≥1000 ms</span><span data-tone="failed"><i aria-hidden="true"/>失败 / 超时</span></p>}
     <div className="connectivity-list">
     <table className="connectivity-table" aria-label="网站连通性检测结果"><thead><tr><th scope="col">网站</th><th scope="col">HTTPS 耗时</th><th scope="col">状态</th><th scope="col"><span className="sr-only">操作</span></th></tr></thead><tbody>
-      {sites.map(site => { const result = results[site.id] || idleResult(); const StateIcon = result.state === 'running' ? LoaderCircle : ['reachable', 'slow'].includes(result.state) ? CircleCheck : ['failed', 'timeout'].includes(result.state) ? CircleHelp : Clock3;
+      {sites.map(site => { const result = results[site.id] || idleResult(); const StateIcon = result.state === 'running' ? LoaderCircle : result.state === 'reachable' ? Smile : result.state === 'slow' ? Meh : ['failed', 'timeout'].includes(result.state) ? Frown : Clock3;
         return <tr key={site.id} className="connectivity-row" data-state={result.state} aria-label={site.name}>
           <td className="connectivity-service"><div className="service-title">
           <div className="service-brand" aria-hidden="true"><ServiceIcon site={site}/></div>
           <div className="service-name"><strong>{site.name}</strong><small title={site.url}>{new URL(site.url).hostname}</small></div>
           </div></td>
           <td><span className="connectivity-latency">{result.ms !== undefined ? <>{result.ms}<small> ms · {result.totalRounds === 1 ? '单次' : '最低'}</small></> : '—'}</span></td>
-          <td><Tooltip content={result.note + (result.time ? ' · ' + result.time : '')}><span className="connectivity-state"><StateIcon size={14}/>{labels[result.state]}</span></Tooltip>{result.completedRounds ? <small className="connectivity-sample-count">{result.successfulRounds}/{result.completedRounds} 成功</small> : null}</td>
+          <td><Tooltip content={result.note + (result.time ? ' · ' + result.time : '')}><span className="connectivity-state"><StateIcon size={14}/>{labels[result.state]}</span></Tooltip><SampleBars result={result}/>{result.completedRounds ? <small className="connectivity-sample-count">{result.successfulRounds}/{result.completedRounds} 成功</small> : null}</td>
           <td className="connectivity-row-action"><Button data-beui variant="ghost" size="icon" disabled={locked} aria-label={`重测 ${site.name}`} onClick={() => void run([site], undefined, 1)}><RotateCcw size={15}/></Button></td>
         </tr>;
       })}
@@ -159,7 +183,7 @@ export function Connectivity() {
     {!sites.length && <p className="connectivity-empty">添加常用网站，保存后即可在这里检测。</p>}
     <SparkActions><div className="connectivity-footer"><Button ref={opener} data-beui variant="outline" size="sm" disabled={locked} onClick={showManager}><Plus size={15}/>添加 / 管理网站</Button><Button data-beui variant="ghost" size="sm" disabled={locked || !Object.keys(results).length} onClick={copy}><Copy size={15}/>复制结果</Button><small>不会自动检测 · 自定义列表保存在本机</small></div></SparkActions>
     {sites.some(site => results[site.id]?.rounds?.length) && <details className="connectivity-method" data-sample-audit><summary>本次采样明细</summary>
-      <p className="connectivity-scope">以下保留每次请求的实际结果。首测不一定是冷连接，浏览器是否复用连接不能仅凭数值判断；没有公开分段计时的目标，其 DNS / TLS 耗时保持未知。</p>
+      <p className="connectivity-scope">每根小柱代表一次请求，可悬停、键盘聚焦或轻点查看结果。柱高用于比较同一网站各次采样的耗时，颜色按固定阈值分级；总状态仍按最低成功耗时判断。以下保留每次请求的实际结果。首测不一定是冷连接，浏览器是否复用连接不能仅凭数值判断；没有公开分段计时的目标，其 DNS / TLS 耗时保持未知。</p>
       <ul className="connectivity-samples">{sites.filter(site => results[site.id]?.rounds?.length).map(site => {
         const result = results[site.id], first = result.rounds![0];
         return <li key={site.id}><strong>{site.name}</strong><code>{site.url}</code>
@@ -168,7 +192,7 @@ export function Connectivity() {
         </li>;
       })}</ul>
     </details>}
-    <details className="connectivity-method"><summary>检测方式与范围</summary><p className="connectivity-scope">采用 <a href="https://github.com/jason5ng32/MyIP" target="_blank" rel="noopener noreferrer">IPCheck.ing / MyIP</a> 固定版本的探测地址、GET 和采样参数。默认每站 10 次，显示最低成功值；第一轮全部结束后，每 500 ms 启动下一轮，每轮各站错峰 50 ms，慢请求可能重叠。等待全部计划请求结束，不用本地整组时限截断；单次最多 {WEBSITE_TIMEOUT_MS / 1000} 秒。可选择单次，单站重测始终一次。保留原版 200 ms 快慢分界，原始耗时不加减或强制抬高。应用增加手动停止与结果明细，不自动启动检测。HTTPS 耗时包含 DNS、连接、TLS、代理、跳转与网站处理，不是节点 Ping；跨域状态码不可见，不能据此验证账号权限。</p></details>
+    <details className="connectivity-method"><summary>检测方式与范围</summary><p className="connectivity-scope">使用固定探测地址和浏览器 GET 请求。默认每站 10 次，显示最低成功值；第一轮全部结束后，每 500 ms 启动下一轮，每轮各站错峰 50 ms，慢请求可能重叠。等待全部计划请求结束，不用本地整组时限截断；单次最多 {WEBSITE_TIMEOUT_MS / 1000} 秒。可选择单次，单站重测始终一次。以 200 ms 区分快慢，原始耗时不加减或强制抬高。支持手动停止与结果明细，不自动启动检测。HTTPS 耗时包含 DNS、连接、TLS、代理、跳转与网站处理，不是节点 Ping；跨域状态码不可见，不能据此验证账号权限。</p></details>
     {!dialog.current?.open && notice && <p className="connectivity-notice" role="status">{notice}</p>}
     <dialog ref={dialog} className="connectivity-manager" aria-labelledby="connectivity-manager-title" onClose={() => opener.current?.focus()}>
       <div className="manager-heading"><h2 id="connectivity-manager-title">我的网站</h2><Button data-beui variant="ghost" size="icon" aria-label="关闭网站管理" onClick={closeManager}><X size={18}/></Button></div>

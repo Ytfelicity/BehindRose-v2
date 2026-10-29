@@ -4,5 +4,6 @@
  <ItemGroup>
   <PackageReference Include="Velopack" Version="1.2.161" />
   <Compile Include="../../src/BehindRose.Desktop/GitHubUpdates.cs" Link="GitHubUpdates.cs" />
+  <Compile Include="../../src/BehindRose.Desktop/ClaudeHandbookResources.cs" Link="ClaudeHandbookResources.cs" />
  </ItemGroup>
 </Project>

@@ -63,9 +63,12 @@ cookies.txt
 *邀请码*.txt
 *.bak
 *.backup
+*.brclash
+**/ClashBackups/
 *.old
 *~
 *.zip
+!src/BehindRose.Desktop/Assets/workbench/claude-windows-handbook.zip
 *.7z
 *.rar
 *.tar

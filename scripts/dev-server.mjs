@@ -23,6 +23,14 @@ const files = new Map([
   ['/beui.js', ['workbench/beui.js', 'text/javascript; charset=utf-8']],
   ['/beui.css', ['diagnostics/beui.css', 'text/css; charset=utf-8']],
   ['/console.css', ['workbench/console.css', 'text/css; charset=utf-8']],
+  ['/claude-handbook.html', ['workbench/claude-handbook.html', 'text/html; charset=utf-8']],
+  ['/claude-handbook.css', ['workbench/claude-handbook.css', 'text/css; charset=utf-8']],
+  ['/claude-handbook-ui.js', ['workbench/claude-handbook-ui.js', 'text/javascript; charset=utf-8']],
+  ['/claude-windows-handbook.zip', ['workbench/claude-windows-handbook.zip', 'application/zip']],
+  ['/claude-guide.md', ['workbench/claude-guide.md', 'text/markdown; charset=utf-8']],
+  ['/claude-handbook-scripts/Launch-Claude.ps1', ['workbench/claude-handbook-scripts/Launch-Claude.ps1', 'text/plain; charset=utf-8']],
+  ['/claude-handbook-scripts/Backup-ClaudeLocal.ps1', ['workbench/claude-handbook-scripts/Backup-ClaudeLocal.ps1', 'text/plain; charset=utf-8']],
+  ['/claude-handbook-scripts/Test-ClaudeNetwork.ps1', ['workbench/claude-handbook-scripts/Test-ClaudeNetwork.ps1', 'text/plain; charset=utf-8']],
   ['/network-ui.js', ['diagnostics/network-ui.js', 'text/javascript; charset=utf-8']],
   ['/support-qr.png', ['workbench/support-qr.png', 'image/png']],
   ['/brand-logo.png', ['workbench/brand-logo.png', 'image/png']],
@@ -60,7 +68,7 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Content-Security-Policy', requestUrl.pathname === '/network' ? networkCsp : csp);
+  res.setHeader('Content-Security-Policy', requestUrl.pathname === '/network' ? networkCsp : requestUrl.pathname === '/claude-handbook.html' ? csp.replace("img-src 'self';", "img-src 'self' data:;").replace(/connect-src [^;]+;/, "connect-src 'self';") : csp);
   if (requestUrl.pathname.startsWith('/api/')) {
     if (!localApi) { res.writeHead(503); res.end(); return; }
     await localApi(req, res, requestUrl.pathname); return;
@@ -83,12 +91,14 @@ const server = http.createServer(async (req, res) => {
   const flagMatch = /^\/flags\/([a-z]{2})\.svg$/.exec(requestUrl.pathname);
   const serviceIconMatch = /^\/service-icons\/([a-z-]+)\.svg$/.exec(requestUrl.pathname);
   const fontMatch = /^\/fonts\/(figtree-latin-(400|500|600|700)-normal|eb-garamond-latin-400-normal)\.woff2$/.exec(requestUrl.pathname);
-  const file = (fontMatch ? ['diagnostics' + requestUrl.pathname, 'font/woff2'] : null) || files.get(requestUrl.pathname) || (flagMatch ? ['diagnostics/flags/' + flagMatch[1] + '.svg', 'image/svg+xml'] : null) || (serviceIconMatch ? ['diagnostics/service-icons/' + serviceIconMatch[1] + '.svg', 'image/svg+xml'] : null);
+  const handbookImage = /^\/claude-handbook-images\/[0-9]{2}-[a-z0-9-]+\.(jpg|png)$/.exec(requestUrl.pathname);
+  const file = (handbookImage ? ['workbench' + requestUrl.pathname, handbookImage[1] === 'jpg' ? 'image/jpeg' : 'image/png'] : null) || (fontMatch ? ['diagnostics' + requestUrl.pathname, 'font/woff2'] : null) || files.get(requestUrl.pathname) || (flagMatch ? ['diagnostics/flags/' + flagMatch[1] + '.svg', 'image/svg+xml'] : null) || (serviceIconMatch ? ['diagnostics/service-icons/' + serviceIconMatch[1] + '.svg', 'image/svg+xml'] : null);
   if (!file) { res.writeHead(404); res.end('Not found'); return; }
   try {
     const location = path.join(assets, file[0]);
     if ((await stat(location)).size > (file[0].startsWith('diagnostics/country-db/') ? 16 : 2) * 1024 * 1024) throw Error('Asset too large');
     let data = await readFile(location);
+    if (['/claude-windows-handbook.zip', '/claude-guide.md', '/claude-handbook-scripts/Launch-Claude.ps1', '/claude-handbook-scripts/Backup-ClaudeLocal.ps1', '/claude-handbook-scripts/Test-ClaudeNetwork.ps1'].includes(requestUrl.pathname)) res.setHeader('Content-Disposition', `attachment; filename="${path.basename(file[0])}"`);
     if (file[0] === 'workbench/index.html') {
       data = Buffer.from(data.toString('utf8')
         .replace('</head>', '<script defer src="/__dev/client.js"></script></head>'));

@@ -97,7 +97,7 @@ body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics strong { color
 body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-metrics span { font-size:11px; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-sources { display:block; margin:8px 0 16px; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 14px; border:0; background:none; border-radius:0; padding:0; font-size:12px; line-height:1.6; }
-body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source-link { color:var(--text); font-weight:500; text-decoration:underline; text-underline-offset:3px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source-label { color:var(--text); font-weight:500; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 :is(.dns-source-method,.dns-source-progress) { color:var(--muted); font-size:12px; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .dns-source-progress { margin-left:auto; font-variant-numeric:tabular-nums; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 #dns-note[hidden] { display:none !important; }
@@ -180,8 +180,25 @@ body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-latency small
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-state { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:3px 6px; background:var(--surface); color:var(--muted); border-radius:5px; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-state svg { width:11px; height:11px; color:currentColor; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row[data-state=reachable] .connectivity-state { color:var(--green); background:var(--green-bg); }
-body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:is([data-state=slow],[data-state=failed],[data-state=timeout]) .connectivity-state { color:var(--amber); background:var(--amber-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row[data-state=slow] .connectivity-state { color:var(--amber); background:var(--amber-bg); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:is([data-state=failed],[data-state=timeout]) .connectivity-state { color:var(--red); background:var(--red-bg); }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row:is([data-state=slow],[data-state=failed],[data-state=timeout]) .connectivity-state svg { fill:none; color:currentColor; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-rounds { display:grid; align-items:end; gap:2px; width:80px; max-width:100%; height:22px; margin:5px 0 4px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-tooltip { display:flex; width:100%; height:100%; min-width:0; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit { display:flex; align-items:flex-end; justify-content:center; width:100%; height:100%; min-width:0; cursor:help; border-radius:2px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit:focus-visible { outline:2px solid var(--text); outline-offset:2px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-bar { display:block; width:100%; max-width:6px; min-height:4px; border-radius:2px; background:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit[data-tone=fast] .connectivity-round-bar { background:var(--green); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit[data-tone=slow] .connectivity-round-bar { background:var(--amber); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit[data-tone=long] .connectivity-round-bar { background:var(--red); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit:is([data-tone=pending],[data-tone=unmeasured]) .connectivity-round-bar { opacity:.25; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-round-hit:hover .connectivity-round-bar { filter:brightness(1.2); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin:0 0 8px; color:var(--muted); font-size:10px; line-height:1.6; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend>span { display:inline-flex; align-items:center; gap:5px; }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend i { display:inline-block; width:5px; height:8px; border-radius:2px; background:var(--muted); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend [data-tone=fast] i { background:var(--green); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend [data-tone=slow] i { background:var(--amber); }
+body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-legend [data-tone=long] i { background:var(--red); }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row-action { text-align:right; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-row button[data-beui] { color:var(--muted); background:none; width:27px; min-height:27px; padding:5px; }
 body.network-console.reactbits-ui.scan-ui.dashboard4 .connectivity-footer { gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }

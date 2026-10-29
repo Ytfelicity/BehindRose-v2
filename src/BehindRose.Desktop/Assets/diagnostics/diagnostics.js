@@ -65,7 +65,7 @@
     $(id).dataset.state = status;
   }
   function freshDns() {
-    return { status: 'idle', note: '采用 IPLeak.net 连续 DNS 采样，结果实时显示，可随时停止。', rows: [], timestamp: '', sources: dnsProviders.map((p, slot) => ({ slot, sourceId: p.id, sourceName: p.name, status: 'idle', note: '等待检测' })) };
+    return { status: 'idle', note: '采用连续 DNS 采样，结果实时显示，可随时停止。', rows: [], timestamp: '', sources: dnsProviders.map((p, slot) => ({ slot, sourceId: p.id, sourceName: p.name, status: 'idle', note: '等待检测' })) };
   }
   function freshRtc() {
     return providers.map(p => ({ ...p, status: 'idle', addresses: [], note: '等待检测' }));
@@ -100,9 +100,7 @@
       dns.sources.forEach(source => {
         const card = element('div', undefined, 'dns-source');
         card.dataset.state = source.status;
-        const link = element('a', source.sourceName, 'dns-source-link');
-        link.href = 'https://ipleak.net/'; link.target = '_blank'; link.rel = 'noopener noreferrer';
-        card.append(link, element('span', '连续采样 · 最多 300 次 · 可随时停止', 'dns-source-method'));
+        card.append(element('span', 'DNS 检测', 'dns-source-label'), element('span', '连续采样 · 最多 300 次 · 可随时停止', 'dns-source-method'));
         if (source.status !== 'idle') card.append(element('span', (source.completedQueries || 0) + ' / ' + (source.totalQueries || 300) + ' 次请求' + (typeof source.serverCount === 'number' ? ' · ' + source.serverCount + ' 个服务器' : '') + (source.failedQueries ? ' · ' + source.failedQueries + ' 次失败' : ''), 'dns-source-progress'));
         sourceRoot.append(card);
       });
@@ -180,7 +178,7 @@
       box.append(addresses, status);
       if (different) box.append(element('p', '建议核对分流、节点或多网卡设置', 'rtc-state'));
       else if (row.status !== 'ready') box.append(element('p', row.note, 'rtc-state'));
-      const detail = element('details', undefined, 'rtc-host'); detail.append(element('summary', '来源'), element('p', 'IPCheck.ing / MyIP · ' + row.host + ' · ' + row.note + (row.candidateType ? ' · 候选类型 ' + row.candidateType : ''))); box.append(detail); root.append(box);
+      const detail = element('details', undefined, 'rtc-host'); detail.append(element('summary', '连接详情'), element('p', row.host + ' · ' + row.note + (row.candidateType ? ' · 候选类型 ' + row.candidateType : ''))); box.append(detail); root.append(box);
     });
     const successes = rtc.filter(row => row.status === 'ready').length;
     const running = rtc.some(row => row.status === 'running');
@@ -275,7 +273,7 @@
     data.city=R.text(geo.city,80);
     const asn=R.text(geo.asn == null ? '' : String(geo.asn),30).replace(/^AS/i,'');
     data.network=[R.text(geo.asOrganization,160),asn?'AS'+asn:''].filter(Boolean).join(' · ');
-    data.onlineGeo='ready';data.geo=[data.country?.name,data.city,data.network].filter(Boolean).join(' / ')+'（IPPure，估计值）';
+    data.onlineGeo='ready';data.geo=[data.country?.name,data.city,data.network].filter(Boolean).join(' / ')+'（估计值）';
   }
   window.addEventListener('quality-report',event=>{
     const report=event.detail, parsed=R.ip(report?.Head?.IP);if(!parsed||report.Source!=='IPPure'||R.ip(report.Data?.ip)?.address!==parsed.address)return;
@@ -284,7 +282,7 @@
   });
 
   async function probeDns(ctx) {
-    dns.status = 'running'; dns.note = '正在开始 IPLeak DNS 连续采样…'; renderDns();
+    dns.status = 'running'; dns.note = '正在开始 DNS 连续采样…'; renderDns();
     try {
       const sources = await window.RoseMyIP.probeDns(ctx.controller.signal, source => {
         if (active !== ctx || ctx.controller.signal.aborted) return;
@@ -298,7 +296,7 @@
       dns.rows = sources.flatMap(source => (source.rows || []).map(resolver => ({ ...resolver, address: resolver.ip_address, sources: [source.sourceName] })));
       const complete = sources.length === 1 && sources[0].status === 'ready';
       dns.status = ctx.controller.signal.aborted ? 'cancelled' : complete && dns.rows.length ? 'ready' : 'unavailable';
-      dns.note = ctx.controller.signal.aborted ? '已停止 IPLeak 采样，保留已取得的解析器。' : (sources[0]?.note || 'IPLeak 未返回有效解析器').replace(/[。.!]+\s*$/, '') + (dns.status === 'ready' ? '。' : '。未取得完整数据不能视为无泄漏。');
+      dns.note = ctx.controller.signal.aborted ? '已停止 DNS 采样，保留已取得的解析器。' : (sources[0]?.note || '未返回有效解析器').replace(/[。.!]+\s*$/, '') + (dns.status === 'ready' ? '。' : '。未取得完整数据不能视为无泄漏。');
       dns.timestamp = now();
     } catch (error) {
       dns.status = ctx.controller.signal.aborted ? 'cancelled' : 'unavailable';
@@ -318,7 +316,7 @@
   }
 
   function probeRtc(row, ctx) {
-    row.status = 'running'; row.note = 'MyIP 采样：等待首个 STUN 映射候选，最长 5 秒…'; renderRtc();
+    row.status = 'running'; row.note = '等待首个 STUN 映射候选，最长 5 秒…'; renderRtc();
     return window.RoseMyIP.probeRtc(row.host, ctx.controller.signal).then(async result => {
       if (active !== ctx) return;
       row.addresses = result.addresses.map(address => R.ip(address)?.address).filter(Boolean);
@@ -447,7 +445,7 @@
   function report() {
     const environment = window.chrome && window.chrome.webview ? '桌面版 WebView2' : '当前浏览器（本地开发页面）';
     const lines = ['Rose in my wake · 网络检测报告', '开始时间：' + lastTime, '本次范围：' + lastScope + (lastScope === '所选检测项目' ? '' : '；其他项目保留各自的已有结果，请参考各项采样时间。'), '环境：' + environment + '；不代表所有外部浏览器。', $('overall').textContent, ''];
-    [['IPv4', ip4], ['IPv6', ip6]].forEach(([name, data]) => lines.push(name + '：' + (data.address || labels[data.status]) + '；' + data.note, '采样时间：' + (data.sampledAt || '未采样'), '地区：' + data.geo, '来源：ipify' + (data.geo.includes('IPPure') ? ' / IPPure' : '')));
+    [['IPv4', ip4], ['IPv6', ip6]].forEach(([name, data]) => lines.push(name + '：' + (data.address || labels[data.status]) + '；' + data.note, '采样时间：' + (data.sampledAt || '未采样'), '地区：' + data.geo, '来源：ipify' + (qualityReports.has(data.address) ? ' / IPPure' : '')));
     lines.push('', 'DNS：' + labels[dns.status] + '；' + dns.note, '采样时间：' + (dns.sampledAt || '未采样'), '来源：https://ipleak.net/ · 浏览器以同一会话顺序采样，最多 300 次；归属来自 IPLeak 公开 JSON 接口。');
     dns.sources.forEach(source => lines.push(source.sourceName + '：' + labels[source.status] + ' | ' + (source.completedQueries || 0) + ' / ' + (source.totalQueries || 300) + ' 次请求 | ' + (source.failedQueries || 0) + ' 次失败' + (typeof source.serverCount === 'number' ? ' | 服务器数 ' + source.serverCount : '') + ' | ' + source.note));
     dns.rows.forEach(row => {

@@ -66,7 +66,7 @@ try {
             $generatedDoc = Join-Path $publishDir $name
             if (Test-Path -LiteralPath $generatedDoc) { Remove-Item -LiteralPath $generatedDoc }
         }
-        Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\使用说明.md'),(Join-Path $projectRoot 'docs\验证范围.md') -Destination $publishDir -Force
+        Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\使用说明.md'),(Join-Path $projectRoot 'docs\验证范围.md'),(Join-Path $projectRoot 'docs\本机完整备份.md') -Destination $publishDir -Force
         Compress-Archive -Path (Join-Path $publishDir '*') -DestinationPath (Join-Path $artifacts "BehindRose-$packageVersion-win-x64.zip") -Force
         if ($Iscc) { & $Iscc (Join-Path $PSScriptRoot 'installer.iss'); if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' } }
         Get-ChildItem -LiteralPath $artifacts -File | Where-Object Extension -in '.zip','.exe' | Get-FileHash -Algorithm SHA256 | Format-List
