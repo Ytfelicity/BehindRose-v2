@@ -8,7 +8,7 @@
     <!-- Keep release DLL/PDB metadata independent of the author's checkout. -->
     <PathMap Condition="'$(Configuration)' == 'Release'">$(MSBuildThisFileDirectory)=/_/BehindRose/</PathMap>
     <Version>2.0.0-preview.1</Version>
-    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.6</ReleaseVersion>
+    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">2.0.0-preview.7</ReleaseVersion>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <Company>Rose in my wake</Company>

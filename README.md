@@ -2,12 +2,12 @@
 
 一款 Windows 网络工具，帮你查看网络出口、检查网站连通性，并调整 Clash 与浏览器的 DNS 配置。
 
-**Windows x64 · 2.0.0-preview.6（预览版）**
+**Windows x64 · 2.0.0-preview.7（预览版）**
 
 <!-- 发布新版本时，同步更新这里的版本号、两个按钮及下方表格的下载地址。 -->
 <p>
-  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.6/BehindRose.NetworkAssistant-win-Setup.exe"><img src="docs/images/download-installer.svg" alt="下载安装版（Windows x64，EXE）" width="240" height="64"></a>
-  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.6/BehindRose.NetworkAssistant-win-Portable.zip"><img src="docs/images/download-portable.svg" alt="下载便携版（Windows x64，ZIP）" width="240" height="64"></a>
+  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.7/BehindRose.NetworkAssistant-win-Setup.exe"><img src="docs/images/download-installer.svg" alt="下载安装版（Windows x64，EXE）" width="240" height="64"></a>
+  <a href="https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.7/BehindRose.NetworkAssistant-win-Portable.zip"><img src="docs/images/download-portable.svg" alt="下载便携版（Windows x64，ZIP）" width="240" height="64"></a>
   <a href="https://github.com/Ytfelicity/BehindRose-v2/tree/download-stats"><img src="https://raw.githubusercontent.com/Ytfelicity/BehindRose-v2/download-stats/downloads.svg" alt="所有版本安装版与便携版累计下载次数" height="40"></a>
 </p>
 
@@ -15,7 +15,7 @@
 
 累计下载合计所有已发布版本（含预览版）的安装包和便携包，不含更新文件；每小时自动更新，显示可能有缓存延迟，不代表独立用户数。
 
-[更新说明](https://github.com/Ytfelicity/BehindRose-v2/releases/tag/v2.0.0-preview.6) · [全部版本](https://github.com/Ytfelicity/BehindRose-v2/releases) · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
+[更新说明](https://github.com/Ytfelicity/BehindRose-v2/releases/tag/v2.0.0-preview.7) · [全部版本](https://github.com/Ytfelicity/BehindRose-v2/releases) · [快速上手](#快速上手) · [详细使用说明](docs/使用说明.md) · [反馈问题](https://github.com/Ytfelicity/BehindRose-v2/issues)
 
 ![网络检测界面：查看浏览器网络、网站连通性和 IP 质量](docs/images/screenshots/network.png?v=2.0.0-preview.6)
 
@@ -27,7 +27,7 @@
 - **检查网站连通性**：按分组检测常用网站，查看能否连接及响应耗时，也可以添加自己的网站。
 - **查看 IP 质量**：查询当前出口的归属、风险系数，以及住宅 / 机房等类型信息。
 - **配置与恢复**：为 Clash Verge Rev 和 Chrome、Edge、Firefox 生成配置方案，确认后应用，修改前自动备份。
-- **Claude Code 手册（当前源码）**：按原文章的 13 节步骤配置 Windows、Clash Verge 与官方 Claude 订阅，包含 8 张真实配图、可复制命令、启动和备份脚本。台北时区为需单独选择、预览和确认的可选项；打开页面不做网络测试。已发布安装包需更新后才包含此功能。
+- **Claude Code 手册**：按原文章的 13 节步骤配置 Windows、Clash Verge 与官方 Claude 订阅，包含 8 张真实配图、可复制命令、启动和备份脚本。台北时区为需单独选择、预览和确认的可选项；打开页面不做网络测试。2.0.0-preview.7 起的安装包和便携包均包含此功能。
 
 ## 下载与打开
 
@@ -37,8 +37,8 @@
 
 | 你想怎么用 | 下载哪个文件 | 打开方式 |
 | --- | --- | --- |
-| 安装后使用 | [下载安装版（EXE）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.6/BehindRose.NetworkAssistant-win-Setup.exe) | 双击安装，完成后打开程序 |
-| 解压即用 | [下载便携版（ZIP）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.6/BehindRose.NetworkAssistant-win-Portable.zip) | 完整解压，运行 `current/BehindRose.exe` |
+| 安装后使用 | [下载安装版（EXE）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.7/BehindRose.NetworkAssistant-win-Setup.exe) | 双击安装，完成后打开程序 |
+| 解压即用 | [下载便携版（ZIP）](https://github.com/Ytfelicity/BehindRose-v2/releases/download/v2.0.0-preview.7/BehindRose.NetworkAssistant-win-Portable.zip) | 完整解压，运行 `current/BehindRose.exe` |
 
 便携版也可运行 `current/BehindRose.exe`。请保留完整目录，不要只取出一个 EXE。`Source code` 是源码，`.nupkg` 等附件供程序更新使用，首次使用下载上表中的文件即可。
 
@@ -69,7 +69,7 @@ IP 质量可选择已有的 **本机 HTTP 代理**，或 **本机默认网络**�
 - 会开启 Clash 的 **TUN、自动路由、严格路由与 DNS 接管**。虚拟机、多网卡或自定义路由场景，请先核对是否适合自己的环境。
 - 会关闭 **Clash IPv6**，不关闭 Windows 网卡 IPv6。
 - 会调整 **Chrome、Edge、Firefox 的 DNS 策略**，关闭浏览器独立的安全 DNS，让它们跟随系统 DNS；已有的相关自定义设置可能受到影响。
-- 当前源码采用 **沿用本机代理的增量 DNS 防护**：保留现有节点、代理组、原有分流与原订阅脚本，DNS 绑定本机现有默认代理组；补充防护例外并关闭相冲突的 DNS 覆写。开启 TUN 时支持 System、GVisor、Mixed、Mips，保留网卡名、MTU、排除网段与手动出口；修改 Clash 前会在本机加密保存完整配置。[逐项对应与恢复范围](docs/sing-mix配置对照.md)。
+- 采用 **沿用本机代理的增量 DNS 防护**：保留现有节点、代理组、原有分流与原订阅脚本，DNS 绑定本机现有默认代理组；补充防护例外并关闭相冲突的 DNS 覆写。开启 TUN 时支持 System、GVisor、Mixed、Mips，保留网卡名、MTU、排除网段与手动出口；修改 Clash 前会在本机加密保存完整配置。[逐项对应与恢复范围](docs/sing-mix配置对照.md)。
 - 应用前会显示具体改动；无法识别配置时会说明原因，请先看完预览再确认。
 
 **操作步骤：**
